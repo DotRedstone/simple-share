@@ -1,0 +1,25 @@
+{
+  "name": "simpleshare-server",
+  "version": "1.0.0",
+  "description": "SimpleShare Backend - Cloudflare Pages Functions",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev ../dist --compatibility-date 2024-01-01",
+    "deploy": "wrangler pages deploy ../dist",
+    "db:init": "wrangler d1 execute simpleshare-db --file=./src/db/schema.sql",
+    "db:seed": "wrangler d1 execute simpleshare-db --file=./src/db/seed.sql",
+    "db:init:prod": "wrangler d1 execute simpleshare-db --env=production --file=./src/db/schema.sql",
+    "db:seed:prod": "wrangler d1 execute simpleshare-db --env=production --file=./src/db/seed.sql",
+    "db:generate": "wrangler d1 migrations list",
+    "db:migrate": "wrangler d1 migrations apply simpleshare-db"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20241106.0",
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.0.0"
+  }
+}

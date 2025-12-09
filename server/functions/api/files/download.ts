@@ -1,0 +1,102 @@
+import { Database } from '../../../src/utils/db'
+import { requireAuth } from '../../../src/middleware/auth'
+import { getR2Object } from '../../../src/utils/r2'
+import type { Env } from '../../../src/utils/db'
+
+export async function onRequestGet(context: { env: Env; request: Request }): Promise<Response> {
+  const { env, request } = context
+  const db = new Database(env.DB)
+
+  try {
+    const url = new URL(request.url)
+    const fileId = parseInt(url.searchParams.get('id')!)
+    const shareCode = url.searchParams.get('shareCode')
+    
+    // 如果有分享码，不需要认证
+    let user = null
+    if (!shareCode) {
+      user = await requireAuth(request, env)
+    }
+
+    if (!fileId) {
+      return new Response(
+        JSON.stringify({ success: false, error: '文件ID不能为空' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const file = await db.getFileById(fileId)
+    if (!file) {
+      return new Response(
+        JSON.stringify({ success: false, error: '文件不存在' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 检查权限（文件所有者、管理员或通过分享码）
+    let hasAccess = false
+    
+    if (shareCode) {
+      // 通过分享码访问
+      const share = await db.getShareByCode(shareCode)
+      if (share && share.file_id === fileId) {
+        hasAccess = true
+        // 增加分享访问计数
+        await db.incrementShareAccess(shareCode)
+      }
+    } else if (user) {
+      // 通过认证访问
+      hasAccess = file.user_id === user.userId || user.role === 'admin'
+    }
+
+    if (!hasAccess) {
+      return new Response(
+        JSON.stringify({ success: false, error: '无权访问此文件' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 从 R2 获取文件
+    const r2Object = await getR2Object(env.FILES, file.storage_key)
+    if (!r2Object) {
+      return new Response(
+        JSON.stringify({ success: false, error: '文件不存在' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 增加下载计数
+    await db.incrementDownloadCount(fileId)
+
+    // 记录日志
+    if (user || shareCode) {
+      await db.createLog({
+        action: '文件下载',
+        userId: user?.userId,
+        userName: user?.email || 'guest',
+        status: '成功',
+        fileId,
+        fileName: file.name,
+        details: shareCode ? `分享码: ${shareCode}` : undefined,
+        ip: request.headers.get('CF-Connecting-IP') || undefined
+      })
+    }
+
+    // 返回文件
+    return new Response(r2Object.body, {
+      headers: {
+        'Content-Type': file.mime_type || 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${file.name}"`,
+        'Content-Length': file.size_bytes.toString()
+      }
+    })
+  } catch (error: any) {
+    if (error instanceof Response) return error
+    
+    return new Response(
+      JSON.stringify({ success: false, error: '下载失败' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
+

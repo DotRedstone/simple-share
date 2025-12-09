@@ -1,0 +1,37 @@
+name = "simpleshare"
+compatibility_date = "2024-01-01"
+
+# Pages Functions 配置
+pages_build_output_dir = "../dist"
+
+# 本地开发配置
+[[d1_databases]]
+binding = "DB"
+database_name = "simpleshare-db"
+database_id = "fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d"
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "simpleshare-files"
+
+[vars]
+JWT_SECRET = "dev-jwt-secret-change-in-production"
+R2_PUBLIC_URL = "https://your-r2-domain.com"
+
+# 生产环境配置
+[env.production]
+name = "simpleshare"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "simpleshare-db"
+database_id = "fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d"
+
+[[env.production.r2_buckets]]
+binding = "FILES"
+bucket_name = "simpleshare-files"
+
+[env.production.vars]
+JWT_SECRET = "your-jwt-secret-key-change-in-production"
+R2_PUBLIC_URL = "https://your-r2-domain.com"
+

@@ -1,0 +1,103 @@
+import { Database } from '../../../src/utils/db'
+import { requireAuth } from '../../../src/middleware/auth'
+import { uploadToR2, generateR2Key, getFileType, formatFileSize } from '../../../src/utils/r2'
+import type { Env } from '../../../src/utils/db'
+
+export async function onRequestPost(context: { env: Env; request: Request }): Promise<Response> {
+  const { env, request } = context
+  const db = new Database(env.DB)
+
+  try {
+    const user = await requireAuth(request, env)
+
+    const formData = await request.formData()
+    const file = formData.get('file') as File
+    const parentId = formData.get('parentId') ? parseInt(formData.get('parentId') as string) : null
+
+    if (!file) {
+      return new Response(
+        JSON.stringify({ success: false, error: '请选择要上传的文件' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 检查存储配额
+    const userData = await db.getUserById(user.userId)
+    if (userData) {
+      const newSize = (userData.storage_used || 0) + file.size
+      if (userData.storage_quota && newSize > userData.storage_quota * 1024 * 1024 * 1024) {
+        return new Response(
+          JSON.stringify({ success: false, error: '存储空间不足' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // 上传到 R2
+    const storageKey = generateR2Key(user.userId, file.name)
+    const fileBuffer = await file.arrayBuffer()
+    await uploadToR2(env.FILES, storageKey, fileBuffer, file.type)
+
+    // 构建文件路径
+    let path = `/${file.name}`
+    if (parentId) {
+      const parent = await db.getFileById(parentId)
+      if (parent) {
+        path = `${parent.path}/${file.name}`
+      }
+    }
+
+    // 保存文件元数据
+    const fileId = await db.createFile({
+      name: file.name,
+      sizeBytes: file.size,
+      mimeType: file.type,
+      storageKey,
+      userId: user.userId,
+      parentId,
+      path,
+      type: getFileType(file.name, file.type)
+    })
+
+    // 更新用户存储使用量
+    if (userData) {
+      await db.updateUser(user.userId, {
+        storageUsed: ((userData.storage_used || 0) + file.size) / (1024 * 1024 * 1024)
+      })
+    }
+
+    // 记录日志
+    await db.createLog({
+      action: '文件上传',
+      userId: user.userId,
+      userName: user.email,
+      status: '成功',
+      fileId,
+      fileName: file.name,
+      ip: request.headers.get('CF-Connecting-IP') || undefined
+    })
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: {
+          id: fileId,
+          name: file.name,
+          size: formatFileSize(file.size),
+          type: getFileType(file.name, file.type),
+          date: new Date().toISOString().split('T')[0],
+          starred: false
+        }
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error: any) {
+    if (error instanceof Response) return error
+    
+    return new Response(
+      JSON.stringify({ success: false, error: '上传失败，请稍后重试' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
+
