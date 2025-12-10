@@ -145,6 +145,33 @@ export default {
         }
         
         if (handler) {
+          // 检查必要的环境变量
+          if (!env.JWT_SECRET) {
+            return new Response(
+              JSON.stringify({ success: false, error: 'JWT_SECRET not configured' }),
+              { 
+                status: 500, 
+                headers: { 
+                  'Content-Type': 'application/json',
+                  ...corsHeaders(request.headers.get('Origin') || '')
+                } 
+              }
+            )
+          }
+          
+          if (!env.DB) {
+            return new Response(
+              JSON.stringify({ success: false, error: 'Database not configured' }),
+              { 
+                status: 500, 
+                headers: { 
+                  'Content-Type': 'application/json',
+                  ...corsHeaders(request.headers.get('Origin') || '')
+                } 
+              }
+            )
+          }
+          
           const context: any = {
             request,
             env,
@@ -185,8 +212,15 @@ export default {
         )
       } catch (error) {
         console.error('API handler error:', error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        const errorStack = error instanceof Error ? error.stack : undefined
         return new Response(
-          JSON.stringify({ success: false, error: 'Internal server error' }),
+          JSON.stringify({ 
+            success: false, 
+            error: 'Internal server error',
+            details: errorMessage,
+            stack: errorStack
+          }),
           { 
             status: 500, 
             headers: { 

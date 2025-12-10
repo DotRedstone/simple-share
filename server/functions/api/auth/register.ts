@@ -84,8 +84,14 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       { headers: { 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Register error:', error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
     return new Response(
-      JSON.stringify({ success: false, error: '注册失败，请稍后重试' }),
+      JSON.stringify({ 
+        success: false, 
+        error: '注册失败，请稍后重试',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
