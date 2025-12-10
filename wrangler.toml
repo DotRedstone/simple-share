@@ -30,14 +30,15 @@ R2_PUBLIC_URL = "https://your-r2-domain.com"
 [env.production]
 name = "simple-share"
 
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "simpleshare-db"
-database_id = "fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d"
+# 注意：D1 和 R2 绑定应该在 Cloudflare Dashboard 中配置
+# [[env.production.d1_databases]]
+# binding = "DB"
+# database_name = "simpleshare-db"
+# database_id = "your-production-database-id-here"
 
-[[env.production.r2_buckets]]
-binding = "FILES"
-bucket_name = "simpleshare-files"
+# [[env.production.r2_buckets]]
+# binding = "FILES"
+# bucket_name = "simpleshare-files"
 
 [env.production.vars]
 JWT_SECRET = "your-jwt-secret-key-change-in-production"
