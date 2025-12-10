@@ -51,8 +51,14 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       storageBackend = await db.getDefaultStorageBackend()
     }
     
-    // 如果没有配置存储后端，使用默认的 R2
+    // 如果没有配置存储后端，尝试使用默认的 R2
     if (!storageBackend) {
+      if (!env.FILES) {
+        return new Response(
+          JSON.stringify({ success: false, error: '未配置存储后端，请在管理员面板或用户设置中添加存储后端' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
       storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
     } else {
       const config: StorageBackendConfig = JSON.parse(storageBackend.config)

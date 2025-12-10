@@ -2,7 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types'
 
 export interface Env {
   DB: D1Database
-  FILES: R2Bucket
+  FILES?: R2Bucket  // R2 bucket 现在是可选的
   JWT_SECRET: string
   R2_PUBLIC_URL?: string
 }

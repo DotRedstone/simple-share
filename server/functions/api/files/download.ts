@@ -70,7 +70,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       config.type = storageBackend.type as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
       storageAdapter = createStorageAdapter(config, env.FILES)
     } else {
-      // 默认使用 R2
+      // 默认使用 R2（如果可用）
+      if (!env.FILES) {
+        return new Response(
+          JSON.stringify({ success: false, error: '未配置存储后端' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
       storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
     }
     

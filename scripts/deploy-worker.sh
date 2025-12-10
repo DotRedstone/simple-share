@@ -21,6 +21,19 @@ else
   echo "✅ 数据库初始化完成"
 fi
 
+echo "🔍 检查 R2 存储桶..."
+# 检查 R2 bucket 是否存在，如果不存在则创建
+BUCKET_NAME="simpleshare-files"
+if npx wrangler r2 bucket list 2>/dev/null | grep -q "$BUCKET_NAME"; then
+  echo "✅ R2 存储桶 '$BUCKET_NAME' 已存在"
+else
+  echo "📝 R2 存储桶 '$BUCKET_NAME' 不存在，正在创建..."
+  npx wrangler r2 bucket create "$BUCKET_NAME" || {
+    echo "⚠️  无法创建 R2 存储桶（可能权限不足），继续部署..."
+    echo "💡 提示：请在 Cloudflare Dashboard 中手动创建 R2 存储桶 '$BUCKET_NAME'"
+  }
+fi
+
 echo "🚀 部署 Worker..."
 npx wrangler deploy
 

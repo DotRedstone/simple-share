@@ -97,10 +97,56 @@ export async function onRequestDelete(context: { env: Env; request: Request; par
         }
       }
       
-      // 如果没有配置存储后端，使用默认的 R2
+      // 如果没有配置存储后端，尝试使用默认的 R2
       if (!storageAdapter) {
-        storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
+        if (env.FILES) {
+          storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
+        }
       }
+      
+      // 如果有存储适配器，删除物理文件
+      if (storageAdapter) {
+        await storageAdapter.delete(file.storage_key)
+      } else {
+        // 如果没有存储适配器，仅删除数据库记录（适用于使用外部存储的情况）
+        console.warn('未找到存储适配器，仅删除数据库记录')
+      }
+    }
+    
+    // 更新用户存储使用量
+    const userData = await db.getUserById(user.userId)
+    if (userData && file.type !== 'folder') {
+      const newSize = Math.max(0, (userData.storage_used || 0) - file.size_bytes / (1024 * 1024 * 1024))
+      await db.updateUser(user.userId, { storageUsed: newSize })
+    }
+
+    // 删除数据库记录
+    await db.deleteFile(fileId)
+
+    // 记录日志
+    await db.createLog({
+      action: '删除文件',
+      userId: user.userId,
+      userName: user.email,
+      status: '成功',
+      fileId,
+      fileName: file.name,
+      ip: request.headers.get('CF-Connecting-IP') || undefined
+    })
+
+    return new Response(
+      JSON.stringify({ success: true, message: '删除成功' }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error: any) {
+    if (error instanceof Response) return error
+    
+    return new Response(
+      JSON.stringify({ success: false, error: '删除失败' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+}
       
       await storageAdapter.delete(file.storage_key)
     }
