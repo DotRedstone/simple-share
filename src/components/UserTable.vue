@@ -22,29 +22,30 @@ const getGroupName = (groupId?: string) => {
 
 <template>
   <div class="bg-white/5 border border-white/5 rounded-2xl overflow-hidden">
-    <table class="w-full text-left text-sm text-slate-400">
-      <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
-        <tr>
-          <th class="px-6 py-4">用户</th>
-          <th class="px-6 py-4 hidden md:table-cell">用户组</th>
-          <th class="px-6 py-4 hidden lg:table-cell">存储</th>
-          <th class="px-6 py-4">状态</th>
-          <th class="px-6 py-4 text-right">操作</th>
-        </tr>
-      </thead>
+    <div class="overflow-x-auto -mx-4 md:mx-0">
+      <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
+        <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
+          <tr>
+            <th class="px-3 md:px-6 py-4">用户</th>
+            <th class="px-3 md:px-6 py-4 hidden md:table-cell">用户组</th>
+            <th class="px-3 md:px-6 py-4 hidden lg:table-cell">存储</th>
+            <th class="px-3 md:px-6 py-4">状态</th>
+            <th class="px-3 md:px-6 py-4 text-right">操作</th>
+          </tr>
+        </thead>
       <tbody class="divide-y divide-white/5">
         <tr v-for="user in users" :key="user.id" class="hover:bg-white/5 transition-colors">
-          <td class="px-6 py-4 font-medium text-white">
-            <div class="font-bold">{{ user.name }}</div>
-            <div class="text-xs text-slate-500">{{ user.email }}</div>
+          <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0">
+            <div class="font-bold truncate">{{ user.name }}</div>
+            <div class="text-xs text-slate-500 truncate">{{ user.email }}</div>
           </td>
-          <td class="px-6 py-4 hidden md:table-cell text-slate-400">
+          <td class="px-3 md:px-6 py-4 hidden md:table-cell text-slate-400">
             {{ getGroupName(user.groupId) }}
           </td>
-          <td class="px-6 py-4 hidden lg:table-cell">
+          <td class="px-3 md:px-6 py-4 hidden lg:table-cell">
             <UserStorageQuota :user="user" @update-quota="(id, quota) => emit('update-quota', id, quota)" />
           </td>
-          <td class="px-6 py-4">
+          <td class="px-3 md:px-6 py-4">
             <span
               class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
               :class="user.status === '活跃' ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'"
@@ -76,7 +77,8 @@ const getGroupName = (groupId?: string) => {
           </td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
 </template>
 
