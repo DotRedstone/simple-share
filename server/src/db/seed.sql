@@ -16,10 +16,9 @@ VALUES (
   unixepoch()
 );
 
--- 创建默认用户组
+-- 创建默认用户组（必须的两个组）
 INSERT OR IGNORE INTO user_groups (id, name, description, storage_quota, max_users, current_users, created_at, updated_at)
 VALUES
-  ('grp_001', '管理员组', '系统管理员', 1000.0, 10, 1, unixepoch(), unixepoch()),
-  ('grp_002', '标准用户组', '普通用户', 50.0, 1000, 0, unixepoch(), unixepoch()),
-  ('grp_003', '高级用户组', '高级用户', 200.0, 100, 0, unixepoch(), unixepoch());
+  ('admin_group', '管理员组', '系统管理员组', 1000.0, 100, 1, unixepoch(), unixepoch()),
+  ('user_group', '用户组', '普通用户组', 50.0, 10000, 0, unixepoch(), unixepoch());
 

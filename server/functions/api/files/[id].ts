@@ -1,6 +1,6 @@
 import { Database } from '../../../src/utils/db'
 import { requireAuth } from '../../../src/middleware/auth'
-import { deleteFromR2 } from '../../../src/utils/r2'
+import { createStorageAdapter, type StorageBackendConfig } from '../../../src/utils/storage'
 import type { Env } from '../../../src/utils/db'
 
 // 更新文件（重命名、收藏）
@@ -85,9 +85,24 @@ export async function onRequestDelete(context: { env: Env; request: Request; par
       )
     }
 
-    // 从 R2 删除文件（如果不是文件夹）
+    // 从存储后端删除文件（如果不是文件夹）
     if (file.type !== 'folder') {
-      await deleteFromR2(env.FILES, file.storage_key)
+      let storageAdapter = null
+      if (file.storage_backend_id) {
+        const storageBackend = await db.getStorageBackendById(file.storage_backend_id)
+        if (storageBackend && storageBackend.enabled === 1) {
+          const config: StorageBackendConfig = JSON.parse(storageBackend.config)
+          config.type = storageBackend.type as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+          storageAdapter = createStorageAdapter(config, env.FILES)
+        }
+      }
+      
+      // 如果没有配置存储后端，使用默认的 R2
+      if (!storageAdapter) {
+        storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
+      }
+      
+      await storageAdapter.delete(file.storage_key)
     }
 
     // 更新用户存储使用量

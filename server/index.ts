@@ -25,6 +25,10 @@ import { onRequestPut as adminGroupsUpdateHandler, onRequestDelete as adminGroup
 import { onRequestGet as adminFilesHandler } from './functions/api/admin/files'
 import { onRequestGet as adminStatsHandler } from './functions/api/admin/stats'
 import { onRequestGet as adminLogsHandler } from './functions/api/admin/logs'
+import { onRequestGet as adminStorageHandler, onRequestPost as adminStorageCreateHandler } from './functions/api/admin/storage'
+import { onRequestPut as adminStorageUpdateHandler, onRequestDelete as adminStorageDeleteHandler } from './functions/api/admin/storage/[id]'
+import { onRequestGet as userStorageHandler, onRequestPost as userStorageCreateHandler } from './functions/api/user/storage'
+import { onRequestPut as userStorageUpdateHandler, onRequestDelete as userStorageDeleteHandler } from './functions/api/user/storage/[id]'
 
 export interface WorkerEnv extends Env {
   ASSETS?: {
@@ -74,6 +78,10 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   },
   'admin/logs': {
     'GET': adminLogsHandler
+  },
+  'admin/storage': {
+    'GET': adminStorageHandler,
+    'POST': adminStorageCreateHandler
   }
 }
 
@@ -140,6 +148,15 @@ export default {
               handler = adminGroupsUpdateHandler
             } else if (method === 'DELETE') {
               handler = adminGroupsDeleteHandler
+            }
+          } else if (apiPath.match(/^admin\/storage\/[a-zA-Z0-9_-]+$/)) {
+            // admin/storage/[id] 路由
+            const id = apiPath.split('/')[2]
+            params = { id }
+            if (method === 'PUT') {
+              handler = adminStorageUpdateHandler
+            } else if (method === 'DELETE') {
+              handler = adminStorageDeleteHandler
             }
           }
         }

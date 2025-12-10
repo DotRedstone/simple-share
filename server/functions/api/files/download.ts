@@ -1,6 +1,6 @@
 import { Database } from '../../../src/utils/db'
 import { requireAuth } from '../../../src/middleware/auth'
-import { getR2Object } from '../../../src/utils/r2'
+import { createStorageAdapter, type StorageBackendConfig } from '../../../src/utils/storage'
 import type { Env } from '../../../src/utils/db'
 
 export async function onRequestGet(context: { env: Env; request: Request }): Promise<Response> {
@@ -56,9 +56,27 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       )
     }
 
-    // 从 R2 获取文件
-    const r2Object = await getR2Object(env.FILES, file.storage_key)
-    if (!r2Object) {
+    // 获取存储后端并创建适配器
+    let storageAdapter = null
+    if (file.storage_backend_id) {
+      const storageBackend = await db.getStorageBackendById(file.storage_backend_id)
+      if (!storageBackend || storageBackend.enabled !== 1) {
+        return new Response(
+          JSON.stringify({ success: false, error: '存储后端不可用' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+      const config: StorageBackendConfig = JSON.parse(storageBackend.config)
+      config.type = storageBackend.type as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+      storageAdapter = createStorageAdapter(config, env.FILES)
+    } else {
+      // 默认使用 R2
+      storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
+    }
+    
+    // 从存储后端获取文件
+    const fileData = await storageAdapter.get(file.storage_key)
+    if (!fileData) {
       return new Response(
         JSON.stringify({ success: false, error: '文件不存在' }),
         { status: 404, headers: { 'Content-Type': 'application/json' } }
@@ -83,7 +101,7 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     }
 
     // 返回文件
-    return new Response(r2Object.body, {
+    return new Response(fileData, {
       headers: {
         'Content-Type': file.mime_type || 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${file.name}"`,

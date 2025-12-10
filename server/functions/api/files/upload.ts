@@ -1,6 +1,7 @@
 import { Database } from '../../../src/utils/db'
 import { requireAuth } from '../../../src/middleware/auth'
-import { uploadToR2, generateR2Key, getFileType, formatFileSize } from '../../../src/utils/r2'
+import { generateR2Key, getFileType, formatFileSize } from '../../../src/utils/r2'
+import { createStorageAdapter, type StorageBackendConfig } from '../../../src/utils/storage'
 import type { Env } from '../../../src/utils/db'
 
 export async function onRequestPost(context: { env: Env; request: Request }): Promise<Response> {
@@ -33,10 +34,36 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       }
     }
 
-    // 上传到 R2
+    // 获取默认存储后端或指定的存储后端
+    const storageBackendId = formData.get('storageBackendId') as string | null
+    let storageBackend = null
+    let storageAdapter = null
+    
+    if (storageBackendId) {
+      storageBackend = await db.getStorageBackendById(storageBackendId)
+      if (!storageBackend || storageBackend.enabled !== 1) {
+        return new Response(
+          JSON.stringify({ success: false, error: '指定的存储后端不可用' }),
+          { status: 400, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
+    } else {
+      storageBackend = await db.getDefaultStorageBackend()
+    }
+    
+    // 如果没有配置存储后端，使用默认的 R2
+    if (!storageBackend) {
+      storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
+    } else {
+      const config: StorageBackendConfig = JSON.parse(storageBackend.config)
+      config.type = storageBackend.type as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+      storageAdapter = createStorageAdapter(config, env.FILES)
+    }
+    
+    // 上传文件
     const storageKey = generateR2Key(user.userId, file.name)
     const fileBuffer = await file.arrayBuffer()
-    await uploadToR2(env.FILES, storageKey, fileBuffer, file.type)
+    await storageAdapter.upload(storageKey, fileBuffer, file.type)
 
     // 构建文件路径
     let path = `/${file.name}`
@@ -53,6 +80,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       sizeBytes: file.size,
       mimeType: file.type,
       storageKey,
+      storageBackendId: storageBackend?.id || null,
       userId: user.userId,
       parentId,
       path,

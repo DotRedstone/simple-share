@@ -117,11 +117,13 @@ export const uploadFile = async (
   })
 }
 
-export default {
+export const api = {
   get,
   post,
   put,
   delete: del,
   uploadFile,
 }
+
+export default api
 

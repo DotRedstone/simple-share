@@ -23,18 +23,63 @@ export class Database {
   async createUser(user: {
     id: string
     name: string
-    email: string
-    passwordHash: string
+    email?: string
+    passwordHash?: string
+    phone?: string
     role?: 'admin' | 'user'
     groupId?: string
+    authProvider?: string
+    authProviderId?: string
+    avatarUrl?: string
   }) {
     const now = Date.now()
+    // 如果没有指定组，默认使用 user_group
+    const defaultGroupId = user.groupId || (user.role === 'admin' ? 'admin_group' : 'user_group')
+    
+    // 确保默认用户组存在
+    await this.ensureDefaultGroups()
+    
     await this.db
       .prepare(
-        'INSERT INTO users (id, name, email, password_hash, role, group_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO users (id, name, email, password_hash, phone, role, group_id, auth_provider, auth_provider_id, avatar_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
       )
-      .bind(user.id, user.name, user.email, user.passwordHash, user.role || 'user', user.groupId || null, now, now)
+      .bind(
+        user.id,
+        user.name,
+        user.email || null,
+        user.passwordHash || null,
+        user.phone || null,
+        user.role || 'user',
+        defaultGroupId,
+        user.authProvider || 'local',
+        user.authProviderId || null,
+        user.avatarUrl || null,
+        now,
+        now
+      )
       .run()
+    
+    // 更新用户组当前用户数
+    await this.db.prepare('UPDATE user_groups SET current_users = current_users + 1 WHERE id = ?').bind(defaultGroupId).run()
+  }
+
+  async ensureDefaultGroups() {
+    // 确保默认用户组存在
+    const adminGroup = await this.db.prepare('SELECT * FROM user_groups WHERE id = ?').bind('admin_group').first()
+    if (!adminGroup) {
+      const now = Date.now()
+      await this.db.prepare(
+        'INSERT INTO user_groups (id, name, description, storage_quota, max_users, current_users, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      ).bind('admin_group', '管理员组', '系统管理员组', 1000.0, 100, 0, now, now).run()
+    }
+    
+    const userGroup = await this.db.prepare('SELECT * FROM user_groups WHERE id = ?').bind('user_group').first()
+    if (!userGroup) {
+      const now = Date.now()
+      await this.db.prepare(
+        'INSERT INTO user_groups (id, name, description, storage_quota, max_users, current_users, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      ).bind('user_group', '用户组', '普通用户组', 50.0, 10000, 0, now, now).run()
+    }
   }
 
   async updateUser(id: string, updates: Partial<{ name: string; status: string; storageQuota: number; groupId: string }>) {
@@ -96,6 +141,7 @@ export class Database {
     sizeBytes: number
     mimeType?: string
     storageKey: string
+    storageBackendId?: string | null
     userId: string
     parentId?: number | null
     path: string
@@ -104,13 +150,14 @@ export class Database {
     const now = Date.now()
     const result = await this.db
       .prepare(
-        'INSERT INTO files (name, size_bytes, mime_type, storage_key, user_id, parent_id, path, type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO files (name, size_bytes, mime_type, storage_key, storage_backend_id, user_id, parent_id, path, type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
       )
       .bind(
         file.name,
         file.sizeBytes,
         file.mimeType || null,
         file.storageKey,
+        file.storageBackendId || null,
         file.userId,
         file.parentId || null,
         file.path,
@@ -311,6 +358,108 @@ export class Database {
   async getAllFiles(limit: number = 100) {
     const result = await this.db.prepare('SELECT * FROM files WHERE type != "folder" ORDER BY created_at DESC LIMIT ?').bind(limit).all()
     return result.results as any[]
+  }
+
+  // 存储后端相关
+  async getAllStorageBackends() {
+    const result = await this.db.prepare('SELECT * FROM storage_backends ORDER BY is_default DESC, created_at ASC').all()
+    return result.results as any[]
+  }
+
+  async getStorageBackendById(id: string) {
+    const result = await this.db.prepare('SELECT * FROM storage_backends WHERE id = ?').bind(id).first()
+    return result as any
+  }
+
+  async getDefaultStorageBackend() {
+    const result = await this.db.prepare('SELECT * FROM storage_backends WHERE is_default = 1 AND enabled = 1 LIMIT 1').first()
+    return result as any
+  }
+
+  async createStorageBackend(backend: {
+    id: string
+    name: string
+    type: 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+    config: string // JSON string
+    description?: string
+    enabled?: boolean
+    isDefault?: boolean
+  }) {
+    const now = Date.now()
+    // 如果设置为默认，先取消其他默认
+    if (backend.isDefault) {
+      await this.db.prepare('UPDATE storage_backends SET is_default = 0').run()
+    }
+    
+    await this.db
+      .prepare(
+        'INSERT INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      )
+      .bind(
+        backend.id,
+        backend.name,
+        backend.type,
+        backend.config,
+        backend.description || null,
+        backend.enabled ? 1 : 0,
+        backend.isDefault ? 1 : 0,
+        now,
+        now
+      )
+      .run()
+  }
+
+  async updateStorageBackend(id: string, updates: Partial<{
+    name: string
+    config: string
+    description: string
+    enabled: boolean
+    isDefault: boolean
+  }>) {
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (updates.name) {
+      fields.push('name = ?')
+      values.push(updates.name)
+    }
+    if (updates.config) {
+      fields.push('config = ?')
+      values.push(updates.config)
+    }
+    if (updates.description !== undefined) {
+      fields.push('description = ?')
+      values.push(updates.description)
+    }
+    if (updates.enabled !== undefined) {
+      fields.push('enabled = ?')
+      values.push(updates.enabled ? 1 : 0)
+    }
+    if (updates.isDefault !== undefined) {
+      if (updates.isDefault) {
+        // 先取消其他默认
+        await this.db.prepare('UPDATE storage_backends SET is_default = 0').run()
+      }
+      fields.push('is_default = ?')
+      values.push(updates.isDefault ? 1 : 0)
+    }
+
+    if (fields.length === 0) return
+
+    fields.push('updated_at = ?')
+    values.push(Date.now())
+    values.push(id)
+
+    await this.db.prepare(`UPDATE storage_backends SET ${fields.join(', ')} WHERE id = ?`).bind(...values).run()
+  }
+
+  async deleteStorageBackend(id: string) {
+    // 检查是否有文件使用此存储后端
+    const files = await this.db.prepare('SELECT COUNT(*) as count FROM files WHERE storage_backend_id = ?').bind(id).first<{ count: number }>()
+    if (files && files.count > 0) {
+      throw new Error('无法删除：仍有文件使用此存储后端')
+    }
+    await this.db.prepare('DELETE FROM storage_backends WHERE id = ?').bind(id).run()
   }
 }
 
