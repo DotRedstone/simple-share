@@ -271,7 +271,7 @@ npx wrangler d1 create simpleshare-db
 npx wrangler r2 bucket create simpleshare-files
 ```
 
-将返回的 `database_id` 填入 `wrangler.toml`（项目根目录）。
+在 Cloudflare Dashboard 中绑定数据库（见部署教程步骤 3），无需修改配置文件。
 
 #### 5. 初始化数据库（可选）
 
