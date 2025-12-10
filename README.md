@@ -81,7 +81,8 @@
    ⚠️ **重要提示**：
    - D1 数据库是**必需的**，必须创建并绑定才能部署成功
    - R2 bucket 是**可选的**，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
-   - 绑定必须在 Dashboard 中完成，`wrangler.toml` 中的配置仅用于本地开发
+   - ✅ **绑定配置已自动设置**：`wrangler.toml` 中已配置绑定，使用 `database_name` 自动查找，这样每次自动部署时绑定不会丢失
+   - 如果使用不同的数据库名称，请修改 `wrangler.toml` 中的 `database_name` 和 `bucket_name`
 
 6. **创建 Cloudflare 资源**
    ```bash

@@ -11,16 +11,16 @@ directory = "dist"
 binding = "ASSETS"
 
 # 本地开发配置
-# 注意：D1 和 R2 绑定应该在 Cloudflare Dashboard 中配置
-# 如果数据库不存在，请先在 Dashboard 中创建并绑定
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "simpleshare-db"
-# database_id = "your-database-id-here"
+# 注意：使用 database_name 而不是 database_id，Wrangler 会自动查找并绑定
+# 这样在自动部署时绑定不会丢失
+[[d1_databases]]
+binding = "DB"
+database_name = "simpleshare-db"
+# database_id 是可选的，如果指定了会使用指定的，否则会自动查找同名的数据库
 
-# [[r2_buckets]]
-# binding = "FILES"
-# bucket_name = "simpleshare-files"
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "simpleshare-files"
 
 [vars]
 JWT_SECRET = "dev-jwt-secret-change-in-production"
@@ -30,15 +30,14 @@ R2_PUBLIC_URL = "https://your-r2-domain.com"
 [env.production]
 name = "simple-share"
 
-# 注意：D1 和 R2 绑定应该在 Cloudflare Dashboard 中配置
-# [[env.production.d1_databases]]
-# binding = "DB"
-# database_name = "simpleshare-db"
-# database_id = "your-production-database-id-here"
+# 生产环境绑定（使用 database_name 自动查找）
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "simpleshare-db"
 
-# [[env.production.r2_buckets]]
-# binding = "FILES"
-# bucket_name = "simpleshare-files"
+[[env.production.r2_buckets]]
+binding = "FILES"
+bucket_name = "simpleshare-files"
 
 [env.production.vars]
 JWT_SECRET = "your-jwt-secret-key-change-in-production"
