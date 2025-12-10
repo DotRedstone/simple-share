@@ -4,19 +4,81 @@
  */
 
 import { corsHeaders, handleOptions } from './src/utils/cors'
+import type { Env } from './src/utils/db'
 
-export interface Env {
-  DB: D1Database
-  FILES: R2Bucket
-  JWT_SECRET: string
-  R2_PUBLIC_URL?: string
+// 导入所有 API 处理函数
+import { onRequestPost as loginHandler } from './functions/api/auth/login'
+import { onRequestPost as registerHandler } from './functions/api/auth/register'
+import { onRequestGet as extractHandler } from './functions/api/extract/[code]'
+import { onRequestGet as filesListHandler } from './functions/api/files/list'
+import { onRequestPost as filesUploadHandler } from './functions/api/files/upload'
+import { onRequestGet as filesDownloadHandler } from './functions/api/files/download'
+import { onRequestPost as filesFoldersHandler } from './functions/api/files/folders'
+import { onRequestPut as filesUpdateHandler, onRequestDelete as filesDeleteHandler } from './functions/api/files/[id]'
+import { onRequestPost as sharesCreateHandler } from './functions/api/shares/create'
+import { onRequestGet as sharesListHandler } from './functions/api/shares/list'
+import { onRequestDelete as sharesDeleteHandler } from './functions/api/shares/[id]'
+import { onRequestGet as adminUsersHandler, onRequestPost as adminUsersCreateHandler } from './functions/api/admin/users'
+import { onRequestPut as adminUsersUpdateHandler, onRequestDelete as adminUsersDeleteHandler } from './functions/api/admin/users/[id]'
+import { onRequestGet as adminGroupsHandler, onRequestPost as adminGroupsCreateHandler } from './functions/api/admin/groups'
+import { onRequestPut as adminGroupsUpdateHandler, onRequestDelete as adminGroupsDeleteHandler } from './functions/api/admin/groups/[id]'
+import { onRequestGet as adminFilesHandler } from './functions/api/admin/files'
+import { onRequestGet as adminStatsHandler } from './functions/api/admin/stats'
+import { onRequestGet as adminLogsHandler } from './functions/api/admin/logs'
+
+export interface WorkerEnv extends Env {
   ASSETS?: {
     fetch: (request: Request) => Promise<Response>
   }
 }
 
+// API 路由映射
+const apiRoutes: Record<string, Record<string, (context: any) => Promise<Response>>> = {
+  'auth/login': {
+    'POST': loginHandler
+  },
+  'auth/register': {
+    'POST': registerHandler
+  },
+  'files/list': {
+    'GET': filesListHandler
+  },
+  'files/upload': {
+    'POST': filesUploadHandler
+  },
+  'files/download': {
+    'GET': filesDownloadHandler
+  },
+  'files/folders': {
+    'POST': filesFoldersHandler
+  },
+  'shares/create': {
+    'POST': sharesCreateHandler
+  },
+  'shares/list': {
+    'GET': sharesListHandler
+  },
+  'admin/users': {
+    'GET': adminUsersHandler,
+    'POST': adminUsersCreateHandler
+  },
+  'admin/groups': {
+    'GET': adminGroupsHandler,
+    'POST': adminGroupsCreateHandler
+  },
+  'admin/files': {
+    'GET': adminFilesHandler
+  },
+  'admin/stats': {
+    'GET': adminStatsHandler
+  },
+  'admin/logs': {
+    'GET': adminLogsHandler
+  }
+}
+
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     
     // 处理 CORS 预检请求
@@ -27,87 +89,87 @@ export default {
     // 处理 API 路由
     if (url.pathname.startsWith('/api/')) {
       try {
-        // 动态路由处理
         const apiPath = url.pathname.replace('/api/', '')
+        const method = request.method
         
-        // 导入对应的 API 处理函数
-        let handler: any = null
-        let handlerPath = ''
+        // 处理动态路由
+        let handler: ((context: any) => Promise<Response>) | null = null
+        let params: Record<string, string> = {}
         
-        // 根据路径匹配处理函数
-        if (apiPath === 'auth/login') {
-          handlerPath = './functions/api/auth/login.ts'
-        } else if (apiPath === 'auth/register') {
-          handlerPath = './functions/api/auth/register.ts'
-        } else if (apiPath.startsWith('extract/')) {
-          handlerPath = './functions/api/extract/[code].ts'
-        } else if (apiPath === 'files/list') {
-          handlerPath = './functions/api/files/list.ts'
-        } else if (apiPath === 'files/upload') {
-          handlerPath = './functions/api/files/upload.ts'
-        } else if (apiPath === 'files/download') {
-          handlerPath = './functions/api/files/download.ts'
-        } else if (apiPath === 'files/folders') {
-          handlerPath = './functions/api/files/folders.ts'
-        } else if (apiPath.startsWith('files/') && apiPath.split('/').length === 2) {
-          handlerPath = './functions/api/files/[id].ts'
-        } else if (apiPath === 'shares/create') {
-          handlerPath = './functions/api/shares/create.ts'
-        } else if (apiPath === 'shares/list') {
-          handlerPath = './functions/api/shares/list.ts'
-        } else if (apiPath.startsWith('shares/') && apiPath.split('/').length === 2) {
-          handlerPath = './functions/api/shares/[id].ts'
-        } else if (apiPath === 'admin/users') {
-          handlerPath = './functions/api/admin/users.ts'
-        } else if (apiPath.startsWith('admin/users/') && apiPath.split('/').length === 3) {
-          handlerPath = './functions/api/admin/users/[id].ts'
-        } else if (apiPath === 'admin/groups') {
-          handlerPath = './functions/api/admin/groups.ts'
-        } else if (apiPath.startsWith('admin/groups/') && apiPath.split('/').length === 3) {
-          handlerPath = './functions/api/admin/groups/[id].ts'
-        } else if (apiPath === 'admin/files') {
-          handlerPath = './functions/api/admin/files.ts'
-        } else if (apiPath === 'admin/stats') {
-          handlerPath = './functions/api/admin/stats.ts'
-        } else if (apiPath === 'admin/logs') {
-          handlerPath = './functions/api/admin/logs.ts'
+        // 检查是否是动态路由（带参数的路由）
+        if (apiPath.startsWith('extract/')) {
+          // extract/[code] 路由
+          const code = apiPath.replace('extract/', '')
+          params = { code }
+          handler = extractHandler
+        } else if (apiPath.match(/^files\/\d+$/)) {
+          // files/[id] 路由
+          const id = apiPath.split('/')[1]
+          params = { id }
+          if (method === 'PUT') {
+            handler = filesUpdateHandler
+          } else if (method === 'DELETE') {
+            handler = filesDeleteHandler
+          }
+        } else if (apiPath.match(/^shares\/[^/]+$/)) {
+          // shares/[id] 路由
+          const id = apiPath.split('/')[1]
+          params = { id }
+          if (method === 'DELETE') {
+            handler = sharesDeleteHandler
+          }
+        } else if (apiPath.match(/^admin\/users\/\d+$/)) {
+          // admin/users/[id] 路由
+          const id = apiPath.split('/')[2]
+          params = { id }
+          if (method === 'PUT') {
+            handler = adminUsersUpdateHandler
+          } else if (method === 'DELETE') {
+            handler = adminUsersDeleteHandler
+          }
+        } else if (apiPath.match(/^admin\/groups\/\d+$/)) {
+          // admin/groups/[id] 路由
+          const id = apiPath.split('/')[2]
+          params = { id }
+          if (method === 'PUT') {
+            handler = adminGroupsUpdateHandler
+          } else if (method === 'DELETE') {
+            handler = adminGroupsDeleteHandler
+          }
+        } else {
+          // 静态路由
+          const route = apiRoutes[apiPath]
+          if (route) {
+            handler = route[method] || null
+          }
         }
         
-        if (handlerPath) {
-          try {
-            const handlerModule = await import(handlerPath)
-            // 尝试不同的导出方式
-            handler = handlerModule.default || 
-                     handlerModule.onRequest || 
-                     handlerModule.onRequestPost || 
-                     handlerModule.onRequestGet ||
-                     handlerModule.onRequestPut ||
-                     handlerModule.onRequestDelete
-            
-            if (handler) {
-              const context = {
-                request,
-                env,
-                next: () => fetch(request, env, ctx)
-              }
-              const response = await handler(context)
-              
-              // 添加 CORS 头
-              const origin = request.headers.get('Origin')
-              const headers = new Headers(response.headers)
-              Object.entries(corsHeaders(origin || '')).forEach(([key, value]) => {
-                headers.set(key, value as string)
-              })
-              
-              return new Response(response.body, {
-                status: response.status,
-                statusText: response.statusText,
-                headers
-              })
-            }
-          } catch (importError) {
-            console.error('Import error for', handlerPath, importError)
+        if (handler) {
+          const context: any = {
+            request,
+            env,
+            next: () => fetch(request, env, ctx)
           }
+          
+          // 如果有参数，添加到 context
+          if (Object.keys(params).length > 0) {
+            context.params = params
+          }
+          
+          const response = await handler(context)
+          
+          // 添加 CORS 头
+          const origin = request.headers.get('Origin')
+          const headers = new Headers(response.headers)
+          Object.entries(corsHeaders(origin || '')).forEach(([key, value]) => {
+            headers.set(key, value as string)
+          })
+          
+          return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers
+          })
         }
         
         // 如果找不到处理函数，返回 404
@@ -137,7 +199,6 @@ export default {
     }
 
     // 处理静态文件 - 通过 ASSETS 绑定
-    // ASSETS 是一个 Fetcher 对象，可以直接调用 fetch
     if (env.ASSETS) {
       try {
         const assetResponse = await env.ASSETS.fetch(request)
@@ -151,7 +212,6 @@ export default {
     }
     
     // 如果没有找到静态文件，返回 index.html（用于 SPA 路由）
-    // 或者返回 404
     if (url.pathname === '/' || !url.pathname.includes('.')) {
       // SPA 路由，返回 index.html
       if (env.ASSETS) {
