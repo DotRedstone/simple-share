@@ -39,6 +39,7 @@
    - **Node.js version**: `20` 或更高版本（重要！项目需要 Node.js 20+）
      - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
        - `NODE_VERSION`: `20`（或更高版本）
+   - ⚠️ **重要**：**不要设置部署命令（Deploy command）**，留空即可！Cloudflare Pages 会自动部署 `dist` 目录和其中的 `functions` 目录
 
 5. **配置环境变量和绑定**
    - 在 **Settings** → **Environment Variables** 中添加：
@@ -63,6 +64,7 @@
 8. **部署**
    - 点击 **Save and Deploy**
    - 等待构建完成即可访问你的应用！
+   - ⚠️ **如果遇到部署错误**：检查 **Settings** → **Builds & deployments** → **Deploy command** 是否为空，如果设置了 `npx wrangler deploy` 等命令，请删除它！Cloudflare Pages 会自动部署 `dist` 目录，不需要额外的部署命令。
 
 ### 方式二：使用 Wrangler CLI 部署
 

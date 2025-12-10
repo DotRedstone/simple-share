@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vue-tsc -b && vite build && node scripts/copy-functions.js",
     "preview": "vite preview",
     "deploy": "npm run build && cd server && npm run deploy",
     "server:dev": "cd server && npm run dev",
