@@ -11,10 +11,10 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build && node scripts/copy-functions.js",
     "preview": "vite preview",
-    "build:worker": "npm run build && cd server && npm install && cd ..",
-    "deploy": "npm run build && cd server && npm run deploy",
-    "server:dev": "cd server && npm run dev",
-    "server:deploy": "cd server && npm run deploy",
+    "build:worker": "npm run build",
+    "deploy": "npm run build && npx wrangler deploy",
+    "server:dev": "npx wrangler dev",
+    "server:deploy": "npx wrangler deploy",
     "db:init": "cd server && npx wrangler d1 execute simpleshare-db --file=./src/db/schema.sql",
     "db:init:prod": "cd server && npx wrangler d1 execute simpleshare-db --remote --file=./src/db/schema.sql"
   },
@@ -27,6 +27,7 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251210.0",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/tsconfig": "^0.8.1",
@@ -35,6 +36,7 @@
     "tailwindcss": "^4.1.17",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
-    "vue-tsc": "^3.1.4"
+    "vue-tsc": "^3.1.4",
+    "wrangler": "^3.114.15"
   }
 }

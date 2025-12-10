@@ -45,7 +45,7 @@
    - **Node.js version**: `20` 或更高版本（重要！项目需要 Node.js 20+）
      - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
        - `NODE_VERSION`: `20`（或更高版本）
-   - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`cd server && npx wrangler deploy`
+   - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`npx wrangler deploy`
    - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
 
 5. **配置环境变量和绑定**
