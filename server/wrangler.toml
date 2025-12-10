@@ -1,8 +1,11 @@
 name = "simpleshare"
 compatibility_date = "2024-01-01"
+main = "index.ts"
 
-# Pages Functions 配置
-pages_build_output_dir = "../dist"
+# Worker 模式：使用 assets 目录提供静态文件
+# 注意：需要先构建前端，dist 目录必须存在
+[site]
+bucket = "../dist"
 
 # 本地开发配置
 [[d1_databases]]
