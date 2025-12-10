@@ -92,6 +92,9 @@ export default {
         const apiPath = url.pathname.replace('/api/', '')
         const method = request.method
         
+        // 调试日志（生产环境可以移除）
+        console.log('API request:', { path: apiPath, method })
+        
         // 处理动态路由
         let handler: ((context: any) => Promise<Response>) | null = null
         let params: Record<string, string> = {}
@@ -139,8 +142,10 @@ export default {
         } else {
           // 静态路由
           const route = apiRoutes[apiPath]
+          console.log('Route lookup:', { apiPath, route: route ? Object.keys(route) : 'not found' })
           if (route) {
             handler = route[method] || null
+            console.log('Handler found:', { method, handler: handler ? 'yes' : 'no' })
           }
         }
         
