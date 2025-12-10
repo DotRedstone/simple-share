@@ -1,4 +1,4 @@
-name = "simpleshare"
+name = "simple-share"
 compatibility_date = "2024-01-01"
 main = "server/index.ts"
 compatibility_flags = ["nodejs_compat"]
@@ -26,7 +26,7 @@ R2_PUBLIC_URL = "https://your-r2-domain.com"
 
 # 生产环境配置
 [env.production]
-name = "simpleshare"
+name = "simple-share"
 
 [[env.production.d1_databases]]
 binding = "DB"

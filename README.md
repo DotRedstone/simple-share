@@ -48,16 +48,33 @@
    - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`npx wrangler deploy`
    - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
 
-5. **配置环境变量和绑定**
-   - 在 **Settings** → **Variables** 中添加：
-     - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串）
-   - 在 **Settings** → **Variables** → **D1 Database bindings** 中绑定 D1 数据库：
+5. **创建并绑定 Cloudflare 资源（重要！）**
+   
+   ⚠️ **必须先创建资源，然后才能部署成功！**
+   
+   **创建 D1 数据库：**
+   - 进入 Cloudflare Dashboard → **Workers & Pages** → **D1**
+   - 点击 **Create database**
+   - 数据库名称：`simpleshare-db`
+   - 创建后，复制 `database_id`
+   - 在 **Workers & Pages** → 选择你的 Worker → **Settings** → **Variables** → **D1 Database bindings** 中添加：
      - Variable name: `DB`
-     - Database: `simpleshare-db`
-   - 在 **Settings** → **Variables** → **R2 Bucket bindings** 中绑定 R2 存储桶（可选）：
+     - Database: `simpleshare-db`（选择刚创建的数据库）
+   
+   **创建 R2 存储桶（可选）：**
+   - 进入 Cloudflare Dashboard → **R2**
+   - 点击 **Create bucket**
+   - 存储桶名称：`simpleshare-files`
+   - 在 **Workers & Pages** → 选择你的 Worker → **Settings** → **Variables** → **R2 Bucket bindings** 中添加：
      - Variable name: `FILES`
-     - Bucket: `simpleshare-files`
-     - ⚠️ **注意**：R2 bucket 是可选的，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
+     - Bucket: `simpleshare-files`（选择刚创建的存储桶）
+   
+   **配置环境变量：**
+   - 在 **Settings** → **Variables** → **Environment Variables** 中添加：
+     - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串）
+     - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问）
+   
+   ⚠️ **注意**：R2 bucket 是可选的，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
 
 6. **创建 Cloudflare 资源**
    ```bash
