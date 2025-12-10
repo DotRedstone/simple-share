@@ -10,6 +10,17 @@ Executing user deploy command: npx wrangler deploy
 
 **这是因为在 Cloudflare Pages 中配置了错误的部署命令。**
 
+### 🚨 紧急修复（如果无法立即访问 Dashboard）
+
+如果你暂时无法访问 Cloudflare Dashboard，可以临时使用以下方法：
+
+在 Cloudflare Pages 的 **Deploy command** 字段中，将 `npx wrangler deploy` 替换为：
+```bash
+node scripts/noop-deploy.js
+```
+
+这会避免部署错误，但**正确的做法仍然是删除部署命令**。
+
 ## 🔧 修复步骤
 
 ### 方法一：通过 Cloudflare Dashboard（推荐）

@@ -40,6 +40,7 @@
      - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
        - `NODE_VERSION`: `20`（或更高版本）
    - ⚠️ **重要**：**不要设置部署命令（Deploy command）**，留空即可！Cloudflare Pages 会自动部署 `dist` 目录和其中的 `functions` 目录
+   - 🚨 **如果已经设置了部署命令导致错误**：在 **Deploy command** 字段中删除 `npx wrangler deploy`，或者临时替换为 `node scripts/noop-deploy.js`（但最终应该删除）
 
 5. **配置环境变量和绑定**
    - 在 **Settings** → **Environment Variables** 中添加：
