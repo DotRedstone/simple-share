@@ -337,26 +337,9 @@ npm run build
      - `JWT_SECRET`: 强随机字符串（用于 JWT 签名）
      - `R2_PUBLIC_URL`: R2 公共访问 URL（可选）
 
-#### 3. 更新 wrangler.toml
+#### 3. 在 Dashboard 中绑定资源
 
-确保 `wrangler.toml`（项目根目录）中的生产环境配置正确：
-
-```toml
-[env.production]
-name = "simpleshare"
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "simpleshare-db"
-database_id = "your-production-database-id"
-
-[[env.production.r2_buckets]]
-binding = "FILES"
-bucket_name = "simpleshare-files"
-
-[env.production.vars]
-JWT_SECRET = "your-production-jwt-secret"
-```
+在 Cloudflare Dashboard 中配置绑定（见部署教程步骤 3），这样每次自动部署时绑定不会丢失，无需修改配置文件。
 
 #### 4. 初始化生产数据库（可选）
 
