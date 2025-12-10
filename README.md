@@ -253,21 +253,13 @@ cd server && npm install && cd ..
 
 #### 3. 配置 Cloudflare
 
-在 `wrangler.toml`（项目根目录）中配置：
+**推荐方式**：在 Cloudflare Dashboard 中配置绑定（见部署教程步骤 3），这样每次自动部署时绑定不会丢失，无需修改任何配置文件。
 
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "simpleshare-db"
-database_id = "your-database-id"  # 需要创建 D1 数据库后获取
-
-[[r2_buckets]]
-binding = "FILES"
-bucket_name = "simpleshare-files"  # 需要创建 R2 存储桶
-
-[vars]
-JWT_SECRET = "your-jwt-secret-key"  # 生产环境使用强随机字符串
-```
+**环境变量配置**：
+- 在 Cloudflare Dashboard → Workers & Pages → 你的 Worker → Settings → Variables → Environment Variables 中添加：
+  - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串）
+  - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问，可选）
+  - `D1_DATABASE_ID`: （可选）如果设置了，部署脚本会自动配置绑定
 
 #### 4. 创建 Cloudflare 资源
 
