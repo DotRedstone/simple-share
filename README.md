@@ -63,7 +63,7 @@
    ```bash
    # 创建 D1 数据库
    npx wrangler d1 create simpleshare-db
-   # 将返回的 database_id 填入 server/wrangler.toml
+   # 将返回的 database_id 填入 wrangler.toml（项目根目录）
    
    # 创建 R2 存储桶（可选）
    npx wrangler r2 bucket create simpleshare-files
@@ -99,7 +99,7 @@
    ```bash
    # 创建 D1 数据库
    npx wrangler d1 create simpleshare-db
-   # 将返回的 database_id 填入 server/wrangler.toml
+   # 将返回的 database_id 填入 wrangler.toml（项目根目录）
    
    # 创建 R2 存储桶（可选）
    npx wrangler r2 bucket create simpleshare-files
@@ -111,11 +111,12 @@
 
 6. **部署**
    ```bash
-   cd server
    npx wrangler deploy
    ```
    
-   ✅ **完成！** Worker 会在首次请求时自动初始化数据库。
+   ✅ **完成！** 
+   - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
+   - 访问你的 Worker URL，系统会自动完成初始化
 
 ### 方式三：使用 Wrangler CLI 部署（旧方式，使用部署脚本）
 
@@ -198,15 +199,13 @@ cd SimpleShare
 # 安装前端依赖
 npm install
 
-# 安装后端依赖
-cd server
-npm install
-cd ..
+# 安装后端依赖（server 目录中的依赖）
+cd server && npm install && cd ..
 ```
 
 #### 3. 配置 Cloudflare
 
-在 `server/wrangler.toml` 中配置：
+在 `wrangler.toml`（项目根目录）中配置：
 
 ```toml
 [[d1_databases]]
@@ -225,8 +224,6 @@ JWT_SECRET = "your-jwt-secret-key"  # 生产环境使用强随机字符串
 #### 4. 创建 Cloudflare 资源
 
 ```bash
-cd server
-
 # 创建 D1 数据库
 npx wrangler d1 create simpleshare-db
 
@@ -234,18 +231,21 @@ npx wrangler d1 create simpleshare-db
 npx wrangler r2 bucket create simpleshare-files
 ```
 
-将返回的 `database_id` 填入 `wrangler.toml`。
+将返回的 `database_id` 填入 `wrangler.toml`（项目根目录）。
 
-#### 5. 初始化数据库
+#### 5. 初始化数据库（可选）
+
+数据库会在首次请求时自动初始化，无需手动执行。如果需要手动初始化：
 
 ```bash
-cd server
+# 执行数据库 Schema（本地）
+npx wrangler d1 execute simpleshare-db --file=./server/src/db/schema.sql
 
-# 执行数据库 Schema
-npx wrangler d1 execute simpleshare-db --file=./src/db/schema.sql
+# 执行数据库 Schema（远程）
+npx wrangler d1 execute simpleshare-db --remote --file=./server/src/db/schema.sql
 
 # 可选：导入初始数据
-npx wrangler d1 execute simpleshare-db --file=./src/db/seed.sql
+npx wrangler d1 execute simpleshare-db --file=./server/src/db/seed.sql
 ```
 
 #### 6. 启动开发服务器
