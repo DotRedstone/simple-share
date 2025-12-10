@@ -137,12 +137,34 @@ export default {
     }
 
     // 处理静态文件 - 通过 ASSETS 绑定
+    // ASSETS 是一个 Fetcher 对象，可以直接调用 fetch
     if (env.ASSETS) {
-      return env.ASSETS.fetch(request)
+      try {
+        const assetResponse = await env.ASSETS.fetch(request)
+        // 如果找到静态文件，直接返回
+        if (assetResponse.status !== 404) {
+          return assetResponse
+        }
+      } catch (error) {
+        console.error('Asset fetch error:', error)
+      }
     }
     
-    // 如果没有 ASSETS 绑定，返回默认响应
-    return new Response('Static assets not configured', {
+    // 如果没有找到静态文件，返回 index.html（用于 SPA 路由）
+    // 或者返回 404
+    if (url.pathname === '/' || !url.pathname.includes('.')) {
+      // SPA 路由，返回 index.html
+      if (env.ASSETS) {
+        const indexRequest = new Request(new URL('/index.html', request.url))
+        const indexResponse = await env.ASSETS.fetch(indexRequest)
+        if (indexResponse.status !== 404) {
+          return indexResponse
+        }
+      }
+    }
+    
+    // 如果都没有找到，返回 404
+    return new Response('Not Found', {
       status: 404,
       headers: {
         'Content-Type': 'text/plain',
