@@ -20,37 +20,36 @@ console.log('📝 检测到 D1_DATABASE_ID 环境变量，正在更新 wrangler.
 let content = readFileSync(wranglerPath, 'utf-8')
 
 // 取消注释本地开发配置
-content = content.replace(
-  /# \[\[d1_databases\]\]\s*\n# binding = "DB"\s*\n# database_name = "simpleshare-db"\s*\n# database_id = "\$\{D1_DATABASE_ID\}"/,
-  `[[d1_databases]]
+const localD1Match = content.match(/# \[\[d1_databases\]\]\s*\n# binding = "DB"\s*\n# database_name = "simpleshare-db"\s*\n# database_id = .*?\n\n# \[\[r2_buckets\]\]\s*\n# binding = "FILES"\s*\n# bucket_name = "simpleshare-files"/s)
+if (localD1Match) {
+  content = content.replace(
+    localD1Match[0],
+    `[[d1_databases]]
 binding = "DB"
 database_name = "simpleshare-db"
-database_id = "${d1DatabaseId}"`
-)
+database_id = "${d1DatabaseId}"
 
-content = content.replace(
-  /# \[\[r2_buckets\]\]\s*\n# binding = "FILES"\s*\n# bucket_name = "simpleshare-files"/,
-  `[[r2_buckets]]
+[[r2_buckets]]
 binding = "FILES"
 bucket_name = "simpleshare-files"`
-)
+  )
+}
 
 // 取消注释生产环境配置
-content = content.replace(
-  /# \[\[env\.production\.d1_databases\]\]\s*\n# binding = "DB"\s*\n# database_name = "simpleshare-db"\s*\n# database_id = "YOUR_DATABASE_ID_HERE"/,
-  `[[env.production.d1_databases]]
+const prodD1Match = content.match(/# \[\[env\.production\.d1_databases\]\]\s*\n# binding = "DB"\s*\n# database_name = "simpleshare-db"\s*\n# database_id = .*?\n\n# \[\[env\.production\.r2_buckets\]\]\s*\n# binding = "FILES"\s*\n# bucket_name = "simpleshare-files"/s)
+if (prodD1Match) {
+  content = content.replace(
+    prodD1Match[0],
+    `[[env.production.d1_databases]]
 binding = "DB"
 database_name = "simpleshare-db"
-database_id = "${d1DatabaseId}"`
-)
+database_id = "${d1DatabaseId}"
 
-content = content.replace(
-  /# \[\[env\.production\.r2_buckets\]\]\s*\n# binding = "FILES"\s*\n# bucket_name = "simpleshare-files"/,
-  `[[env.production.r2_buckets]]
+[[env.production.r2_buckets]]
 binding = "FILES"
 bucket_name = "simpleshare-files"`
-)
+  )
+}
 
 writeFileSync(wranglerPath, content, 'utf-8')
 console.log('✅ wrangler.toml 已更新')
-
