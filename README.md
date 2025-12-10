@@ -88,11 +88,13 @@
    ```bash
    # 创建 D1 数据库
    npx wrangler d1 create simpleshare-db
-   # 将返回的 database_id 填入 wrangler.toml（项目根目录）
+   # 注意：不需要手动填入 database_id，wrangler.toml 中使用 database_name 会自动查找
    
    # 创建 R2 存储桶（可选）
    npx wrangler r2 bucket create simpleshare-files
    ```
+   
+   ✅ **重要**：创建资源后，`wrangler.toml` 中的绑定配置会自动生效，每次部署时绑定不会丢失
 
 7. **部署**
    - 点击 **Save and Deploy**
