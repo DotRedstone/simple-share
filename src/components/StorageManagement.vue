@@ -123,7 +123,15 @@ const resetForm = () => {
     accessKeyId: '',
     secretAccessKey: '',
     bucketName: '',
-    publicUrl: ''
+    // WebDAV 配置
+    webdavUrl: '',
+    username: '',
+    password: '',
+    basePath: '',
+    // FTP/SFTP 配置
+    host: '',
+    port: 21,
+    path: ''
   }
   editingBackend.value = null
 }
