@@ -99,53 +99,51 @@ export default {
         let handler: ((context: any) => Promise<Response>) | null = null
         let params: Record<string, string> = {}
         
-        // 检查是否是动态路由（带参数的路由）
-        if (apiPath.startsWith('extract/')) {
-          // extract/[code] 路由
-          const code = apiPath.replace('extract/', '')
-          params = { code }
-          handler = extractHandler
-        } else if (apiPath.match(/^files\/\d+$/)) {
-          // files/[id] 路由
-          const id = apiPath.split('/')[1]
-          params = { id }
-          if (method === 'PUT') {
-            handler = filesUpdateHandler
-          } else if (method === 'DELETE') {
-            handler = filesDeleteHandler
-          }
-        } else if (apiPath.match(/^shares\/[^/]+$/)) {
-          // shares/[id] 路由
-          const id = apiPath.split('/')[1]
-          params = { id }
-          if (method === 'DELETE') {
-            handler = sharesDeleteHandler
-          }
-        } else if (apiPath.match(/^admin\/users\/\d+$/)) {
-          // admin/users/[id] 路由
-          const id = apiPath.split('/')[2]
-          params = { id }
-          if (method === 'PUT') {
-            handler = adminUsersUpdateHandler
-          } else if (method === 'DELETE') {
-            handler = adminUsersDeleteHandler
-          }
-        } else if (apiPath.match(/^admin\/groups\/\d+$/)) {
-          // admin/groups/[id] 路由
-          const id = apiPath.split('/')[2]
-          params = { id }
-          if (method === 'PUT') {
-            handler = adminGroupsUpdateHandler
-          } else if (method === 'DELETE') {
-            handler = adminGroupsDeleteHandler
-          }
+        // 先检查静态路由（必须在动态路由之前）
+        const staticRoute = apiRoutes[apiPath]
+        if (staticRoute && staticRoute[method]) {
+          handler = staticRoute[method]
         } else {
-          // 静态路由
-          const route = apiRoutes[apiPath]
-          console.log('Route lookup:', { apiPath, route: route ? Object.keys(route) : 'not found' })
-          if (route) {
-            handler = route[method] || null
-            console.log('Handler found:', { method, handler: handler ? 'yes' : 'no' })
+          // 检查是否是动态路由（带参数的路由）
+          if (apiPath.startsWith('extract/')) {
+            // extract/[code] 路由
+            const code = apiPath.replace('extract/', '')
+            params = { code }
+            handler = extractHandler
+          } else if (apiPath.match(/^files\/\d+$/)) {
+            // files/[id] 路由（必须是数字）
+            const id = apiPath.split('/')[1]
+            params = { id }
+            if (method === 'PUT') {
+              handler = filesUpdateHandler
+            } else if (method === 'DELETE') {
+              handler = filesDeleteHandler
+            }
+          } else if (apiPath.match(/^shares\/[a-zA-Z0-9_-]+$/) && !apiPath.startsWith('shares/create') && !apiPath.startsWith('shares/list')) {
+            // shares/[id] 路由（排除 shares/create 和 shares/list）
+            const id = apiPath.split('/')[1]
+            params = { id }
+            if (method === 'DELETE') {
+              handler = sharesDeleteHandler
+            }
+          } else if (apiPath.match(/^admin\/users\/\d+$/)) {
+            // admin/users/[id] 路由（必须是数字）
+            const id = apiPath.split('/')[2]
+            params = { id }
+            if (method === 'PUT') {
+              handler = adminUsersUpdateHandler
+            } else if (method === 'DELETE') {
+              handler = adminUsersDeleteHandler
+            }
+          } else if (apiPath.match(/^admin\/groups\/\d+$/)) {
+            // admin/groups/[id] 路由（必须是数字）
+            const id = apiPath.split('/')[2]
+            params = { id }
+            if (method === 'PUT') {
+              handler = adminGroupsUpdateHandler
+            } else if (method === 'DELETE') {
+              handler = adminGroupsDeleteHandler
+            }
           }
         }
         
