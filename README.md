@@ -60,7 +60,6 @@
    - 点击 **Create database**
    - 数据库名称：`simpleshare-db`
    - 创建后，**复制 `database_id`**（格式类似：`fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d`）
-   - ⚠️ **重要**：将 `database_id` 填入 `wrangler.toml` 文件中的 `YOUR_DATABASE_ID_HERE` 位置
    
    **步骤 2：创建 R2 存储桶（可选）**
    - 进入 Cloudflare Dashboard → **R2**
@@ -76,19 +75,21 @@
    - 在 **R2 Bucket bindings** 中添加（可选）：
      - Variable name: `FILES`
      - Bucket: 选择 `simpleshare-files`（刚创建的存储桶）
+   - ✅ **重要**：Dashboard 中的绑定会持久化，每次自动部署时不会丢失，无需修改任何配置文件
    
    **步骤 4：配置环境变量**
    - 在 **Settings** → **Variables** → **Environment Variables** 中添加：
      - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串，例如：`openssl rand -hex 32`）
      - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问，可选）
-     - `D1_DATABASE_ID`: （可选）你的 D1 数据库 ID，如果设置，会在 `wrangler.toml` 中自动绑定
+     - `D1_DATABASE_ID`: （可选）你的 D1 数据库 ID
+       - 如果设置了此环境变量，部署脚本会自动在 `wrangler.toml` 中配置绑定
+       - 如果未设置，使用 Dashboard 绑定（**步骤 3**，推荐方式）
    
    ⚠️ **重要提示**：
    - D1 数据库是**必需的**，必须创建并绑定才能部署成功
    - R2 bucket 是**可选的**，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
-   - ✅ **推荐方式**：在 Dashboard 中配置绑定（**步骤 3**），这样每次自动部署时绑定不会丢失
-   - 🔧 **可选方式**：设置 `D1_DATABASE_ID` 环境变量，`wrangler.toml` 会自动绑定（需要取消注释相关配置）
-   - 💡 **最佳实践**：使用 Dashboard 绑定，更简单且不会因为代码更新而丢失
+   - ✅ **推荐方式**：在 Dashboard 中配置绑定（**步骤 3**），这样每次自动部署时绑定不会丢失，无需修改任何配置文件
+   - 🔧 **可选方式**：设置 `D1_DATABASE_ID` 环境变量，部署脚本会自动配置 `wrangler.toml` 中的绑定
 
 6. **创建 Cloudflare 资源**
    ```bash
