@@ -3,9 +3,6 @@ compatibility_date = "2024-01-01"
 main = "server/index.ts"
 compatibility_flags = ["nodejs_compat"]
 
-# 指定 node_modules 目录，确保能找到依赖
-node_compat = true
-
 # Worker 模式：使用 assets 目录提供静态文件
 # 注意：需要先构建前端，dist 目录必须存在
 # 新版本使用 assets 配置替代 [site]
