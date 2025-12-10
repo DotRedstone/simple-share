@@ -14,7 +14,10 @@
     "build:worker": "npm run build && cd server && npm install && cd ..",
     "deploy": "npm run build && cd server && npm run deploy",
     "server:dev": "cd server && npm run dev",
-    "server:deploy": "cd server && npm run deploy"
+    "server:deploy": "cd server && npm run deploy",
+    "db:init": "cd server && npx wrangler d1 execute simpleshare-db --file=./src/db/schema.sql",
+    "db:check": "bash scripts/check-and-init-db.sh",
+    "db:init:prod": "cd server && npx wrangler d1 execute simpleshare-db --env=production --file=./src/db/schema.sql"
   },
   "dependencies": {
     "@phosphor-icons/vue": "^2.2.1",
