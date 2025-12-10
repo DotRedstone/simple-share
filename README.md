@@ -54,28 +54,38 @@
    - 在 **Settings** → **Variables** → **D1 Database bindings** 中绑定 D1 数据库：
      - Variable name: `DB`
      - Database: `simpleshare-db`
-   - 在 **Settings** → **Variables** → **R2 Bucket bindings** 中绑定 R2 存储桶：
+   - 在 **Settings** → **Variables** → **R2 Bucket bindings** 中绑定 R2 存储桶（可选）：
      - Variable name: `FILES`
      - Bucket: `simpleshare-files`
+     - ⚠️ **注意**：R2 bucket 是可选的，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
 
 6. **创建 Cloudflare 资源**
    ```bash
    # 创建 D1 数据库
    npx wrangler d1 create simpleshare-db
+   # 将返回的 database_id 填入 server/wrangler.toml
    
-   # 创建 R2 存储桶
+   # 创建 R2 存储桶（可选）
    npx wrangler r2 bucket create simpleshare-files
+   # 注意：部署脚本会自动尝试创建 R2 bucket（如果不存在），但需要相应权限
    ```
 
 7. **初始化数据库**
    ```bash
+   # 本地数据库（开发）
    npx wrangler d1 execute simpleshare-db --file=./server/src/db/schema.sql
+   
+   # 远程数据库（生产）
+   npx wrangler d1 execute simpleshare-db --remote --file=./server/src/db/schema.sql
    ```
 
 8. **部署**
    - 点击 **Save and Deploy**
    - 等待构建完成即可访问你的应用！
-   - ⚠️ **如果遇到部署错误**：确保部署命令设置为 `bash scripts/deploy-worker.sh`，该脚本会自动处理数据库初始化和 Worker 部署。
+   - ⚠️ **如果遇到部署错误**：
+     - 确保部署命令设置为 `bash scripts/deploy-worker.sh`
+     - 部署脚本会自动处理数据库初始化和 R2 bucket 创建
+     - 如果 R2 bucket 创建失败，部署仍会继续（可在部署后手动创建或使用其他存储后端）
 
 ### 方式二：使用 Wrangler CLI 部署
 
