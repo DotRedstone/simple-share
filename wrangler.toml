@@ -11,12 +11,13 @@ directory = "dist"
 binding = "ASSETS"
 
 # 本地开发配置
-# 注意：使用 database_name 而不是 database_id，Wrangler 会自动查找并绑定
-# 这样在自动部署时绑定不会丢失
+# 注意：Wrangler 3.x 需要同时指定 database_id 和 database_name
+# 请将下面的 database_id 替换为你实际的数据库 ID
+# 获取方式：npx wrangler d1 list 或 Cloudflare Dashboard
 [[d1_databases]]
 binding = "DB"
 database_name = "simpleshare-db"
-# database_id 是可选的，如果指定了会使用指定的，否则会自动查找同名的数据库
+database_id = "YOUR_DATABASE_ID_HERE"  # ⚠️ 请替换为你的实际 database_id
 
 [[r2_buckets]]
 binding = "FILES"
