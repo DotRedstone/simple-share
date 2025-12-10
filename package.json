@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "vue-tsc -b && vite build && node scripts/copy-functions.js",
     "preview": "vite preview",
+    "build:worker": "npm run build && cd server && npm install && cd ..",
     "deploy": "npm run build && cd server && npm run deploy",
     "server:dev": "cd server && npm run dev",
     "server:deploy": "cd server && npm run deploy"
