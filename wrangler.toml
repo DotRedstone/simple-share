@@ -30,10 +30,12 @@ R2_PUBLIC_URL = "https://your-r2-domain.com"
 [env.production]
 name = "simple-share"
 
-# 生产环境绑定（使用 database_name 自动查找）
+# 生产环境绑定
+# 注意：如果生产环境使用不同的数据库，请修改下面的 database_id
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "simpleshare-db"
+database_id = "YOUR_DATABASE_ID_HERE"  # ⚠️ 请替换为你的实际 database_id（生产环境可以使用相同的数据库）
 
 [[env.production.r2_buckets]]
 binding = "FILES"
