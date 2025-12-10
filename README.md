@@ -13,9 +13,9 @@
 
 ### ⚡ 一键部署到 Cloudflare Pages
 
-**最简单的方式：** 在 Cloudflare Dashboard 中连接此 GitHub 仓库，自动部署！
+点击下面的按钮，一键将项目部署到 Cloudflare Pages！
 
-👉 **[点击这里部署到 Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages/new)** 
+[![Deploy to Cloudflare Pages](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/DotRedstone/simple-share) 
 
 ### 方式一：通过 Cloudflare Dashboard 部署（推荐）
 
