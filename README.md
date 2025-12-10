@@ -106,7 +106,7 @@
    ```
 
 5. **配置环境变量**
-   - 编辑 `server/wrangler.toml`，填入你的 `database_id`
+   - 编辑 `wrangler.toml`（项目根目录），填入你的 `database_id`
    - 在 Cloudflare Dashboard 中设置 `JWT_SECRET` 环境变量
 
 6. **部署**
