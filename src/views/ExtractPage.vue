@@ -43,7 +43,8 @@ const fetchFileInfo = async (code: string) => {
         downloadUrl: data.data.downloadUrl || data.data.url
       }
       // 增加访问计数
-      if (shareStore.getShareByCode(code)) {
+      const share = await shareStore.getShareByCode(code)
+      if (share) {
         shareStore.incrementAccess(code)
       }
     } else {
@@ -66,10 +67,9 @@ const confirmDownload = async () => {
   if (!fileInfo.value) return
   
   try {
-    // 从 downloadUrl 中提取文件ID和分享码
+    // 从 downloadUrl 中提取文件ID
     const url = new URL(fileInfo.value.downloadUrl, window.location.origin)
     const fileId = parseInt(url.searchParams.get('id') || '0')
-    const shareCode = url.searchParams.get('shareCode') || shareCode.value
     
     if (fileId) {
       // 使用 fetch 下载文件

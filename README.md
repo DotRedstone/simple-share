@@ -36,6 +36,9 @@
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
    - **Root directory**: `/`（项目根目录）
+   - **Node.js version**: `20` 或更高版本（重要！项目需要 Node.js 20+）
+     - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
+       - `NODE_VERSION`: `20`（或更高版本）
 
 5. **配置环境变量和绑定**
    - 在 **Settings** → **Environment Variables** 中添加：

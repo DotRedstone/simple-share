@@ -5,7 +5,6 @@ import { useFileStore } from '../stores'
 import type { ShareRecord } from '../stores/share'
 import BaseButton from './BaseButton.vue'
 import BaseModal from './BaseModal.vue'
-import EmptyState from './EmptyState.vue'
 
 const shareStore = useShareStore()
 const fileStore = useFileStore()

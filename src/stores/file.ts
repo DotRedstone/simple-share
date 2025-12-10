@@ -176,7 +176,7 @@ export const useFileStore = defineStore('file', () => {
     }
   }
 
-  const uploadFile = async (file: File, parentId?: number | null, onProgress?: (progress: number) => void) => {
+  const uploadFile = async (file: File, parentId?: number | null, _onProgress?: (progress: number) => void) => {
     const formData = new FormData()
     formData.append('file', file)
     if (parentId !== undefined && parentId !== null) {
@@ -267,7 +267,7 @@ export const useFileStore = defineStore('file', () => {
       let filename = 'download'
       if (contentDisposition) {
         const matches = contentDisposition.match(/filename="?(.+?)"?/i)
-        if (matches) {
+        if (matches && matches[1]) {
           filename = matches[1]
         }
       }

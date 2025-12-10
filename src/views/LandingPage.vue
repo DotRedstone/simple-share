@@ -31,7 +31,7 @@ const handleExtraction = async (code: string) => {
   
   try {
     // 使用 shareStore 验证提取码
-    const share = shareStore.getShareByCode(code.toUpperCase())
+    const share = await shareStore.getShareByCode(code.toUpperCase())
     if (share) {
       router.push(`/extract/${code.toUpperCase()}`)
     } else {
