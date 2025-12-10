@@ -90,6 +90,16 @@ export default {
   async fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     
+    // 自动初始化数据库（仅在首次请求时执行）
+    if (env.DB) {
+      try {
+        await ensureDatabaseInitialized(env.DB)
+      } catch (error) {
+        console.error('数据库初始化错误:', error)
+        // 继续处理请求，即使初始化失败
+      }
+    }
+    
     // 处理 CORS 预检请求
     if (request.method === 'OPTIONS') {
       return handleOptions()
