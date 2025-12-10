@@ -45,7 +45,10 @@
    - **Node.js version**: `20` 或更高版本（重要！项目需要 Node.js 20+）
      - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
        - `NODE_VERSION`: `20`（或更高版本）
-   - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`npx wrangler deploy`
+   - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`node scripts/prepare-wrangler.js && npm run build && npx wrangler deploy`
+   - 部署脚本会自动检查 `D1_DATABASE_ID` 环境变量：
+     - 如果设置了，会自动配置 `wrangler.toml` 中的绑定
+     - 如果未设置，使用 Dashboard 绑定配置（推荐，更简单）
    - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
 
 5. **创建并绑定 Cloudflare 资源（重要！必须在部署前完成）**
