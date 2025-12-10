@@ -20,15 +20,16 @@ const emit = defineEmits<{
 
 <template>
   <div v-if="files.length > 0">
-    <table v-if="viewMode === 'list'" class="w-full text-left text-sm text-slate-400">
-      <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
-        <tr>
-          <th class="px-6 py-4">名称</th>
-          <th class="px-6 py-4 w-32 hidden sm:table-cell">大小</th>
-          <th class="px-6 py-4 w-40 hidden sm:table-cell">修改日期</th>
-          <th class="px-6 py-4 w-20 text-right"></th>
-        </tr>
-      </thead>
+    <div v-if="viewMode === 'list'" class="overflow-x-auto -mx-4 md:mx-0">
+      <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
+        <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
+          <tr>
+            <th class="px-3 md:px-6 py-4">名称</th>
+            <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell">大小</th>
+            <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell">修改日期</th>
+            <th class="px-3 md:px-6 py-4 w-20 text-right"></th>
+          </tr>
+        </thead>
       <tbody class="divide-y divide-white/5">
         <FileItemComponent
           v-for="file in files"
@@ -40,8 +41,9 @@ const emit = defineEmits<{
           @action="(action, f) => emit('file-action', action, f)"
         />
       </tbody>
-    </table>
-    <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      </table>
+    </div>
+    <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
       <FileItemComponent
         v-for="file in files"
         :key="file.id"

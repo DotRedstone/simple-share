@@ -17,7 +17,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div 
-    class="w-full box-border transition-all duration-500 ease-in-out"
+    class="w-full max-w-full box-border transition-all duration-500 ease-in-out"
     :class="fullScreen ? 'min-h-screen flex flex-col' : ''"
   >
     <div

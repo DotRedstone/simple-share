@@ -52,7 +52,7 @@ const activeColor = computed(() => {
 </script>
 
 <template>
-  <aside class="w-full md:w-64 shrink-0 bg-slate-900/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full">
+  <aside class="w-full md:w-64 shrink-0 bg-slate-900/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden">
     <div class="h-16 md:h-20 flex items-center px-6 border-b border-white/5 shrink-0">
       <div :class="logoClasses" class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold mr-3">
         {{ logo }}
@@ -62,7 +62,7 @@ const activeColor = computed(() => {
       </span>
     </div>
 
-    <div class="p-2 md:p-4 space-x-1 md:space-x-0 md:space-y-1 flex md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide">
+    <div class="p-2 md:p-4 space-x-1 md:space-x-0 md:space-y-1 flex md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide -mx-2 md:mx-0">
       <button
         v-for="item in menuItems"
         :key="item.id"

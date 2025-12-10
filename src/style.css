@@ -15,12 +15,33 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 body {
     margin: 0;
     padding: 0;
+    width: 100%;
     min-width: 320px;
     min-height: 100vh;
+    max-width: 100vw;
+    overflow-x: hidden;
+    overflow-y: auto;
     background-color: #0f172a;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+#app {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
 }
 
 /* === 4. 自定义动画类 === */

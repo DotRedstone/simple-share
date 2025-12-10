@@ -41,23 +41,24 @@ const iconColor = computed(() => getFileIconColor(props.file.type))
     class="hover:bg-white/5 transition-colors group"
     :class="file.type === 'folder' ? 'cursor-pointer' : ''"
   >
-    <td class="px-6 py-4 font-medium text-white">
-      <div class="flex items-center gap-3">
-        <svg class="w-6 h-6 shrink-0" :class="iconColor" fill="currentColor" viewBox="0 0 24 24">
+    <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0">
+      <div class="flex items-center gap-2 md:gap-3 min-w-0">
+        <svg class="w-5 h-5 md:w-6 md:h-6 shrink-0" :class="iconColor" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
         </svg>
-        <span>{{ file.name }}</span>
+        <span class="truncate">{{ file.name }}</span>
       </div>
     </td>
-    <td class="px-6 py-4 font-mono hidden sm:table-cell">{{ file.size }}</td>
-    <td class="px-6 py-4 hidden sm:table-cell">{{ file.date }}</td>
-    <td class="px-6 py-4 text-right">
-      <div class="relative options-menu-container">
+    <td class="px-3 md:px-6 py-4 font-mono text-xs md:text-sm hidden sm:table-cell whitespace-nowrap">{{ file.size }}</td>
+    <td class="px-3 md:px-6 py-4 text-xs md:text-sm hidden sm:table-cell whitespace-nowrap">{{ file.date }}</td>
+    <td class="px-3 md:px-6 py-4 text-right">
+      <div class="relative options-menu-container inline-block">
         <button
           @click.stop="$emit('action', 'options', file)"
-          class="p-1.5 rounded-full text-slate-400 hover:bg-black/20 hover:text-white transition-colors"
+          class="p-1.5 md:p-2 rounded-full text-slate-400 hover:bg-black/20 hover:text-white active:bg-black/30 transition-colors touch-manipulation"
+          aria-label="文件选项"
         >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
           </svg>
         </button>
@@ -87,12 +88,13 @@ const iconColor = computed(() => getFileIconColor(props.file.type))
       <p class="text-sm font-medium text-slate-200 truncate">{{ file.name }}</p>
       <p class="text-[10px] text-slate-500 font-mono mt-0.5">{{ file.size }}</p>
     </div>
-    <div class="absolute top-2 right-2 options-menu-container">
+    <div class="absolute top-2 right-2 options-menu-container z-10">
       <button
         @click.stop="$emit('action', 'options', file)"
-        class="p-1.5 rounded-full text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-black/20 hover:text-white transition-all"
+        class="p-1.5 md:p-2 rounded-full text-slate-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-black/20 hover:text-white active:bg-black/30 transition-all touch-manipulation"
+        aria-label="文件选项"
       >
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
       </button>

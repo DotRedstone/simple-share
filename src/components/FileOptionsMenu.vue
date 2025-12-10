@@ -16,7 +16,7 @@ const handleAction = (action: FileAction, file: FileItem) => {
 </script>
 
 <template>
-  <div v-if="show" class="absolute right-0 mt-2 w-auto bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-10 py-1">
+  <div v-if="show" class="absolute right-0 mt-2 w-auto min-w-[140px] bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 py-1">
     <button
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('分享', file)"

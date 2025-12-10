@@ -318,7 +318,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
 
 <template>
   <PageFrame no-padding :allow-overflow="false" :full-screen="true">
-    <div class="absolute inset-0 flex flex-col md:flex-row overflow-hidden">
+    <div class="absolute inset-0 flex flex-col md:flex-row overflow-hidden max-w-full">
       <Sidebar
         :menu-items="menuItems"
         :active-tab="activeTab"
@@ -332,28 +332,35 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         <template #title>SimpleShare</template>
       </Sidebar>
 
-      <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900/20 relative min-w-0">
-        <header class="h-16 md:h-20 shrink-0 border-b border-white/5 flex items-center justify-between px-4 md:px-8">
-          <SearchBar v-model="searchQuery" />
-          <div class="flex items-center gap-3 ml-4 shrink-0">
+      <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900/20 relative min-w-0 max-w-full">
+        <header class="h-16 md:h-20 shrink-0 border-b border-white/5 flex items-center justify-between px-3 md:px-4 lg:px-8 gap-2 overflow-hidden">
+          <div class="flex-1 min-w-0">
+            <SearchBar v-model="searchQuery" />
+          </div>
+          <div class="flex items-center gap-2 md:gap-3 shrink-0">
             <ViewModeToggle v-model="viewMode" />
             <BaseButton
               v-if="activeTab === 'all'"
               variant="glass"
-              class="!py-1.5 !px-3 !text-xs"
+              class="!py-1.5 !px-2 md:!px-3 !text-xs hidden sm:inline-flex"
               @click="handleCreateFolder"
               title="新建文件夹"
             >
               <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              新建文件夹
+              <span class="hidden md:inline">新建文件夹</span>
             </BaseButton>
-            <BaseButton variant="primary" class="!py-1.5 !px-3 !text-xs" @click="showUpload = true">上传</BaseButton>
+            <BaseButton variant="primary" class="!py-1.5 !px-2 md:!px-3 !text-xs" @click="showUpload = true">
+              <span class="hidden sm:inline">上传</span>
+              <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </BaseButton>
           </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-slate-700 relative">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-4 lg:p-8 scrollbar-thin scrollbar-thumb-slate-700 relative">
           <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>

@@ -11,7 +11,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex-1 max-w-sm md:max-w-md">
+  <div class="flex-1 min-w-0 max-w-sm md:max-w-md">
     <BaseInput :model-value="modelValue" placeholder="搜索当前目录..." @update:model-value="emit('update:modelValue', $event)">
       <template #icon>
         <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
