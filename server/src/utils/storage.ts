@@ -288,6 +288,4 @@ export function createStorageAdapter(
       throw new Error(`Unsupported storage type: ${config.type}`)
   }
 }
-  }
-}
 
