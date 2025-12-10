@@ -92,9 +92,6 @@ export default {
         const apiPath = url.pathname.replace('/api/', '')
         const method = request.method
         
-        // 调试日志（生产环境可以移除）
-        console.log('API request:', { path: apiPath, method })
-        
         // 处理动态路由
         let handler: ((context: any) => Promise<Response>) | null = null
         let params: Record<string, string> = {}

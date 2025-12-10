@@ -1,13 +1,19 @@
 # SimpleShare
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
-![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages-F38020?logo=cloudflare&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
 
-一个安全、极速的文件传输与分享平台，基于 Vue 3 + TypeScript + Cloudflare Pages Functions 构建。
+一个安全、极速的文件传输与分享平台，基于 Vue 3 + TypeScript + Cloudflare Workers 构建。
 
 > 🌟 **Star 这个项目** 如果你觉得它有用！
+
+## 📦 版本信息
+
+- **当前版本**: v1.0.0
+- **首次发布**: 2025-12-10
 
 ## 🚀 快速部署
 
@@ -24,7 +30,7 @@
 
 2. **登录 Cloudflare Dashboard**
    - 访问 [Cloudflare Dashboard](https://dash.cloudflare.com/)
-   - 进入 **Pages** → **Create a project**
+   - 进入 **Workers & Pages** → **Create** → **Worker**
 
 3. **连接 GitHub 仓库**
    - 选择 **Connect to Git**
@@ -39,14 +45,18 @@
    - **Node.js version**: `20` 或更高版本（重要！项目需要 Node.js 20+）
      - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
        - `NODE_VERSION`: `20`（或更高版本）
-   - ⚠️ **重要**：**不要设置部署命令（Deploy command）**，留空即可！Cloudflare Pages 会自动部署 `dist` 目录和其中的 `functions` 目录
-   - 🚨 **如果已经设置了部署命令导致错误**：在 **Deploy command** 字段中删除 `npx wrangler deploy`，或者临时替换为 `node scripts/noop-deploy.js`（但最终应该删除）
+   - ⚠️ **重要**：**部署命令（Deploy command）** 设置为：`bash scripts/deploy-worker.sh`
+   - 部署脚本会自动检查并初始化数据库（如果表不存在）
 
 5. **配置环境变量和绑定**
-   - 在 **Settings** → **Environment Variables** 中添加：
+   - 在 **Settings** → **Variables** 中添加：
      - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串）
-   - 在 **Settings** → **Functions** → **D1 Database bindings** 中绑定 D1 数据库
-   - 在 **Settings** → **Functions** → **R2 Bucket bindings** 中绑定 R2 存储桶
+   - 在 **Settings** → **Variables** → **D1 Database bindings** 中绑定 D1 数据库：
+     - Variable name: `DB`
+     - Database: `simpleshare-db`
+   - 在 **Settings** → **Variables** → **R2 Bucket bindings** 中绑定 R2 存储桶：
+     - Variable name: `FILES`
+     - Bucket: `simpleshare-files`
 
 6. **创建 Cloudflare 资源**
    ```bash
@@ -65,8 +75,7 @@
 8. **部署**
    - 点击 **Save and Deploy**
    - 等待构建完成即可访问你的应用！
-   - ⚠️ **如果遇到部署错误**：检查 **Settings** → **Builds & deployments** → **Deploy command** 是否为空，如果设置了 `npx wrangler deploy` 等命令，请删除它！Cloudflare Pages 会自动部署 `dist` 目录，不需要额外的部署命令。
-   - 📖 **详细说明**：如果仍然遇到问题，请查看 [CLOUDFLARE_PAGES_SETUP.md](./CLOUDFLARE_PAGES_SETUP.md) 获取详细的故障排除指南。
+   - ⚠️ **如果遇到部署错误**：确保部署命令设置为 `bash scripts/deploy-worker.sh`，该脚本会自动处理数据库初始化和 Worker 部署。
 
 ### 方式二：使用 Wrangler CLI 部署
 
