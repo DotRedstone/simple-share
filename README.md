@@ -45,8 +45,8 @@
    - **Node.js version**: `20` 或更高版本（重要！项目需要 Node.js 20+）
      - 在 **Settings** → **Builds & deployments** → **Environment variables** 中添加：
        - `NODE_VERSION`: `20`（或更高版本）
-   - ⚠️ **重要**：**部署命令（Deploy command）** 设置为：`bash scripts/deploy-worker.sh`
-   - 部署脚本会自动检查并初始化数据库（如果表不存在）
+   - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`cd server && npx wrangler deploy`
+   - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
 
 5. **配置环境变量和绑定**
    - 在 **Settings** → **Variables** 中添加：
@@ -67,27 +67,57 @@
    
    # 创建 R2 存储桶（可选）
    npx wrangler r2 bucket create simpleshare-files
-   # 注意：部署脚本会自动尝试创建 R2 bucket（如果不存在），但需要相应权限
    ```
 
-7. **初始化数据库**
-   ```bash
-   # 本地数据库（开发）
-   npx wrangler d1 execute simpleshare-db --file=./server/src/db/schema.sql
-   
-   # 远程数据库（生产）
-   npx wrangler d1 execute simpleshare-db --remote --file=./server/src/db/schema.sql
-   ```
-
-8. **部署**
+7. **部署**
    - 点击 **Save and Deploy**
    - 等待构建完成即可访问你的应用！
-   - ⚠️ **如果遇到部署错误**：
-     - 确保部署命令设置为 `bash scripts/deploy-worker.sh`
-     - 部署脚本会自动处理数据库初始化和 R2 bucket 创建
-     - 如果 R2 bucket 创建失败，部署仍会继续（可在部署后手动创建或使用其他存储后端）
+   - ✅ **数据库会自动初始化**：Worker 会在首次请求时自动创建所有必要的表
+   - ⚠️ **如果使用 R2**：确保在 Cloudflare Dashboard 中创建并绑定了 R2 bucket
+   - 💡 **如果不使用 R2**：部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）即可
 
-### 方式二：使用 Wrangler CLI 部署
+### 方式二：使用 Wrangler CLI 部署（推荐，最简单）
+
+1. **克隆项目**
+   ```bash
+   git clone https://github.com/DotRedstone/simple-share.git
+   cd simple-share
+   ```
+
+2. **安装依赖**
+   ```bash
+   npm install
+   cd server && npm install && cd ..
+   ```
+
+3. **构建项目**
+   ```bash
+   npm run build
+   ```
+
+4. **创建 Cloudflare 资源**
+   ```bash
+   # 创建 D1 数据库
+   npx wrangler d1 create simpleshare-db
+   # 将返回的 database_id 填入 server/wrangler.toml
+   
+   # 创建 R2 存储桶（可选）
+   npx wrangler r2 bucket create simpleshare-files
+   ```
+
+5. **配置环境变量**
+   - 编辑 `server/wrangler.toml`，填入你的 `database_id`
+   - 在 Cloudflare Dashboard 中设置 `JWT_SECRET` 环境变量
+
+6. **部署**
+   ```bash
+   cd server
+   npx wrangler deploy
+   ```
+   
+   ✅ **完成！** Worker 会在首次请求时自动初始化数据库。
+
+### 方式三：使用 Wrangler CLI 部署（旧方式，使用部署脚本）
 
 详见下方 [📋 部署到 Cloudflare Pages](#-部署到-cloudflare-pages) 章节。
 

@@ -4,6 +4,7 @@
  */
 
 import { corsHeaders, handleOptions } from './src/utils/cors'
+import { ensureDatabaseInitialized } from './src/utils/init'
 import type { Env } from './src/utils/db'
 
 // 导入所有 API 处理函数
