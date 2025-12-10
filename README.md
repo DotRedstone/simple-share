@@ -255,8 +255,7 @@ npx wrangler d1 execute simpleshare-db --file=./server/src/db/seed.sql
 npm run dev
 
 # 终端 2: 启动后端开发服务器
-cd server
-npm run dev
+npx wrangler dev
 ```
 
 前端运行在 `http://localhost:5173`，后端 API 运行在 `http://localhost:8788`。
@@ -300,7 +299,7 @@ npm run build
 
 #### 3. 更新 wrangler.toml
 
-确保 `server/wrangler.toml` 中的生产环境配置正确：
+确保 `wrangler.toml`（项目根目录）中的生产环境配置正确：
 
 ```toml
 [env.production]
@@ -319,16 +318,16 @@ bucket_name = "simpleshare-files"
 JWT_SECRET = "your-production-jwt-secret"
 ```
 
-#### 4. 初始化生产数据库
+#### 4. 初始化生产数据库（可选）
+
+数据库会在首次请求时自动初始化，无需手动执行。如果需要手动初始化：
 
 ```bash
-cd server
-
 # 在生产数据库上执行 Schema
-npx wrangler d1 execute simpleshare-db --env=production --file=./src/db/schema.sql
+npx wrangler d1 execute simpleshare-db --env=production --remote --file=./server/src/db/schema.sql
 
 # 可选：导入初始数据（创建管理员账户）
-npx wrangler d1 execute simpleshare-db --env=production --file=./src/db/seed.sql
+npx wrangler d1 execute simpleshare-db --env=production --remote --file=./server/src/db/seed.sql
 ```
 
 #### 5. 部署到 Cloudflare Pages
@@ -336,8 +335,9 @@ npx wrangler d1 execute simpleshare-db --env=production --file=./src/db/seed.sql
 **方式一：使用 Wrangler CLI**
 
 ```bash
-cd server
 npm run deploy
+# 或直接使用
+npx wrangler deploy
 ```
 
 **方式二：使用 Cloudflare Dashboard**
