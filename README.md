@@ -65,6 +65,7 @@
    - 点击 **Save and Deploy**
    - 等待构建完成即可访问你的应用！
    - ⚠️ **如果遇到部署错误**：检查 **Settings** → **Builds & deployments** → **Deploy command** 是否为空，如果设置了 `npx wrangler deploy` 等命令，请删除它！Cloudflare Pages 会自动部署 `dist` 目录，不需要额外的部署命令。
+   - 📖 **详细说明**：如果仍然遇到问题，请查看 [CLOUDFLARE_PAGES_SETUP.md](./CLOUDFLARE_PAGES_SETUP.md) 获取详细的故障排除指南。
 
 ### 方式二：使用 Wrangler CLI 部署
 
