@@ -11,14 +11,16 @@ directory = "dist"
 binding = "ASSETS"
 
 # 本地开发配置
-[[d1_databases]]
-binding = "DB"
-database_name = "simpleshare-db"
-database_id = "fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d"
+# 注意：D1 和 R2 绑定应该在 Cloudflare Dashboard 中配置
+# 如果数据库不存在，请先在 Dashboard 中创建并绑定
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "simpleshare-db"
+# database_id = "your-database-id-here"
 
-[[r2_buckets]]
-binding = "FILES"
-bucket_name = "simpleshare-files"
+# [[r2_buckets]]
+# binding = "FILES"
+# bucket_name = "simpleshare-files"
 
 [vars]
 JWT_SECRET = "dev-jwt-secret-change-in-production"

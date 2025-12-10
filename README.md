@@ -48,33 +48,40 @@
    - ⚠️ **重要**：**部署命令（Deploy command）** 留空，或设置为：`npx wrangler deploy`
    - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
 
-5. **创建并绑定 Cloudflare 资源（重要！）**
+5. **创建并绑定 Cloudflare 资源（重要！必须在部署前完成）**
    
-   ⚠️ **必须先创建资源，然后才能部署成功！**
+   ⚠️ **必须先创建资源并在 Dashboard 中绑定，然后才能部署成功！**
    
-   **创建 D1 数据库：**
+   **步骤 1：创建 D1 数据库**
    - 进入 Cloudflare Dashboard → **Workers & Pages** → **D1**
    - 点击 **Create database**
    - 数据库名称：`simpleshare-db`
-   - 创建后，复制 `database_id`
-   - 在 **Workers & Pages** → 选择你的 Worker → **Settings** → **Variables** → **D1 Database bindings** 中添加：
-     - Variable name: `DB`
-     - Database: `simpleshare-db`（选择刚创建的数据库）
+   - 创建后，记录下 `database_id`（如果需要，可以更新到 `wrangler.toml`）
    
-   **创建 R2 存储桶（可选）：**
+   **步骤 2：创建 R2 存储桶（可选）**
    - 进入 Cloudflare Dashboard → **R2**
    - 点击 **Create bucket**
    - 存储桶名称：`simpleshare-files`
-   - 在 **Workers & Pages** → 选择你的 Worker → **Settings** → **Variables** → **R2 Bucket bindings** 中添加：
+   
+   **步骤 3：绑定资源到 Worker（关键步骤！）**
+   - 进入 **Workers & Pages** → 选择你的 Worker (`simple-share`)
+   - 进入 **Settings** → **Variables**
+   - 在 **D1 Database bindings** 中添加：
+     - Variable name: `DB`
+     - Database: 选择 `simpleshare-db`（刚创建的数据库）
+   - 在 **R2 Bucket bindings** 中添加（可选）：
      - Variable name: `FILES`
-     - Bucket: `simpleshare-files`（选择刚创建的存储桶）
+     - Bucket: 选择 `simpleshare-files`（刚创建的存储桶）
    
-   **配置环境变量：**
+   **步骤 4：配置环境变量**
    - 在 **Settings** → **Variables** → **Environment Variables** 中添加：
-     - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串）
-     - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问）
+     - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串，例如：`openssl rand -hex 32`）
+     - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问，可选）
    
-   ⚠️ **注意**：R2 bucket 是可选的，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
+   ⚠️ **重要提示**：
+   - D1 数据库是**必需的**，必须创建并绑定才能部署成功
+   - R2 bucket 是**可选的**，如果不使用 R2，可以在部署后通过管理员面板添加其他存储后端（S3、WebDAV 等）
+   - 绑定必须在 Dashboard 中完成，`wrangler.toml` 中的配置仅用于本地开发
 
 6. **创建 Cloudflare 资源**
    ```bash
