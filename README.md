@@ -1,7 +1,7 @@
 # SimpleShare
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
@@ -12,7 +12,7 @@
 
 ## 📦 版本信息
 
-- **当前版本**: v1.0.0
+- **当前版本**: v0.1.0
 - **首次发布**: 2025-12-10
 
 ## 🚀 快速部署
