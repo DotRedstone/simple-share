@@ -1,6 +1,69 @@
 # SimpleShare
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages-F38020?logo=cloudflare&logoColor=white)
+
 一个安全、极速的文件传输与分享平台，基于 Vue 3 + TypeScript + Cloudflare Pages Functions 构建。
+
+> 🌟 **Star 这个项目** 如果你觉得它有用！
+
+## 🚀 快速部署
+
+### ⚡ 一键部署到 Cloudflare Pages
+
+**最简单的方式：** 在 Cloudflare Dashboard 中连接此 GitHub 仓库，自动部署！
+
+👉 **[点击这里部署到 Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages/new)** 
+
+### 方式一：通过 Cloudflare Dashboard 部署（推荐）
+
+1. **Fork 此仓库**到你的 GitHub 账号
+   - 点击 GitHub 右上角的 **Fork** 按钮
+
+2. **登录 Cloudflare Dashboard**
+   - 访问 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+   - 进入 **Pages** → **Create a project**
+
+3. **连接 GitHub 仓库**
+   - 选择 **Connect to Git**
+   - 授权 Cloudflare 访问你的 GitHub
+   - 选择你 Fork 的 `simple-share` 仓库
+
+4. **配置构建设置**
+   - **Framework preset**: `Vite`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+   - **Root directory**: `/`（项目根目录）
+
+5. **配置环境变量和绑定**
+   - 在 **Settings** → **Environment Variables** 中添加：
+     - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串）
+   - 在 **Settings** → **Functions** → **D1 Database bindings** 中绑定 D1 数据库
+   - 在 **Settings** → **Functions** → **R2 Bucket bindings** 中绑定 R2 存储桶
+
+6. **创建 Cloudflare 资源**
+   ```bash
+   # 创建 D1 数据库
+   npx wrangler d1 create simpleshare-db
+   
+   # 创建 R2 存储桶
+   npx wrangler r2 bucket create simpleshare-files
+   ```
+
+7. **初始化数据库**
+   ```bash
+   npx wrangler d1 execute simpleshare-db --file=./server/src/db/schema.sql
+   ```
+
+8. **部署**
+   - 点击 **Save and Deploy**
+   - 等待构建完成即可访问你的应用！
+
+### 方式二：使用 Wrangler CLI 部署
+
+详见下方 [📋 部署到 Cloudflare Pages](#-部署到-cloudflare-pages) 章节。
 
 ## ✨ 功能特性
 
