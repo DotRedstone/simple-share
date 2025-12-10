@@ -101,7 +101,7 @@
    npx wrangler r2 bucket create simpleshare-files
    ```
    
-   ✅ **重要**：绑定配置在 Dashboard 中完成（见步骤 3），这样每次自动部署时绑定不会丢失
+   ✅ **重要**：绑定配置在 Dashboard 中完成（见步骤 3），这样每次自动部署时绑定不会丢失，无需修改任何配置文件
 
 7. **部署**
    - 点击 **Save and Deploy**
@@ -129,28 +129,42 @@
    npm run build
    ```
 
-4. **创建 Cloudflare 资源**
+4. **创建 Cloudflare 资源并绑定**
    ```bash
    # 创建 D1 数据库
    npx wrangler d1 create simpleshare-db
-   # 将返回的 database_id 填入 wrangler.toml（项目根目录）
+   # 输出会包含 database_id，类似：fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d
    
    # 创建 R2 存储桶（可选）
    npx wrangler r2 bucket create simpleshare-files
    ```
+   
+   **在 Dashboard 中绑定资源（重要！）**
+   - 进入 Cloudflare Dashboard → **Workers & Pages** → 选择你的 Worker (`simple-share`)
+   - 进入 **Settings** → **Variables**
+   - 在 **D1 Database bindings** 中添加：
+     - Variable name: `DB`
+     - Database: 选择 `simpleshare-db`
+   - 在 **R2 Bucket bindings** 中添加（可选）：
+     - Variable name: `FILES`
+     - Bucket: 选择 `simpleshare-files`
+   - ✅ **重要**：Dashboard 中的绑定会持久化，每次部署时不会丢失，无需修改配置文件
 
 5. **配置环境变量**
-   - 编辑 `wrangler.toml`（项目根目录），填入你的 `database_id`
-   - 在 Cloudflare Dashboard 中设置 `JWT_SECRET` 环境变量
+   - 在 Cloudflare Dashboard → **Workers & Pages** → 你的 Worker → **Settings** → **Variables** → **Environment Variables** 中添加：
+     - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串，例如：`openssl rand -hex 32`）
+     - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问，可选）
+     - `D1_DATABASE_ID`: （可选）如果设置了，部署脚本会自动配置绑定
 
 6. **部署**
    ```bash
-   npx wrangler deploy
+   node scripts/prepare-wrangler.js && npm run build && npx wrangler deploy
    ```
    
    ✅ **完成！** 
    - Worker 会在首次请求时自动初始化数据库（无需手动执行 SQL）
    - 访问你的 Worker URL，系统会自动完成初始化
+   - ✅ **后续更新**：只需 `git push`，Cloudflare 会自动部署，绑定不会丢失
 
 ### 方式三：使用 Wrangler CLI 部署（旧方式，使用部署脚本）
 
