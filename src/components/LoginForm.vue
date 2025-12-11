@@ -49,6 +49,11 @@ const handleLogin = async () => {
     isLoading.value = false
   }
 }
+
+const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
+  localStorage.setItem('oauth_provider', provider)
+  emit('oauth', provider)
+}
 </script>
 
 <template>

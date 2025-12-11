@@ -152,22 +152,29 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     let avatarUrl: string | undefined
 
     if (provider === 'wechat') {
-      oauthId = userInfo.openid
-      name = userInfo.nickname || `微信用户_${oauthId.substring(0, 8)}`
+      oauthId = userInfo.openid || tokenData.openid
+      name = userInfo.nickname || `微信用户_${(oauthId || '').substring(0, 8)}`
       avatarUrl = userInfo.headimgurl
     } else if (provider === 'github') {
-      oauthId = userInfo.id.toString()
+      oauthId = userInfo.id?.toString() || userInfo.node_id
       name = userInfo.name || userInfo.login
       email = userInfo.email
       avatarUrl = userInfo.avatar_url
     } else if (provider === 'google') {
-      oauthId = userInfo.id
+      oauthId = userInfo.id || userInfo.sub
       name = userInfo.name
       email = userInfo.email
       avatarUrl = userInfo.picture
     } else {
       return new Response(
         JSON.stringify({ success: false, error: '不支持的提供商' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    if (!oauthId) {
+      return new Response(
+        JSON.stringify({ success: false, error: '无法获取用户ID' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }

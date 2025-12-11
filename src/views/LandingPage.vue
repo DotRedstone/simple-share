@@ -21,9 +21,6 @@ const showRegister = ref(false)
 const isExtracting = ref(false)
 const extractionError = ref('')
 
-onMounted(() => {
-  authStore.initAuth()
-})
 
 const handleExtraction = async (code: string) => {
   isExtracting.value = true
@@ -88,6 +85,58 @@ const switchToLogin = () => {
   showRegister.value = false
   showLogin.value = true
 }
+
+const handleOAuth = async (provider: 'wechat' | 'github' | 'google') => {
+  try {
+    const response = await fetch(`/api/auth/oauth?provider=${provider}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/oauth/callback')}`)
+    const data = await response.json()
+    if (data.success && data.authUrl) {
+      window.location.href = data.authUrl
+    } else {
+      loginError.value = data.error || 'OAuth 登录失败'
+    }
+  } catch (err) {
+    loginError.value = 'OAuth 登录失败，请稍后重试'
+  }
+}
+
+// 处理 OAuth 回调
+onMounted(async () => {
+  authStore.initAuth()
+  
+  // 检查是否是 OAuth 回调
+  const url = new URL(window.location.href)
+  const code = url.searchParams.get('code')
+  const state = url.searchParams.get('state')
+  const provider = url.searchParams.get('provider') || localStorage.getItem('oauth_provider')
+  
+  if (code && provider) {
+    try {
+      const response = await fetch('/api/auth/oauth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, code, state })
+      })
+      const data = await response.json()
+      
+      if (data.success) {
+        // 保存 token 并跳转
+        if (data.data.token) {
+          localStorage.setItem('token', data.data.token)
+          authStore.setUser(data.data.user)
+          const isAdmin = data.data.user?.role === 'admin'
+          router.push(isAdmin ? '/admin' : '/dashboard')
+        }
+      } else {
+        loginError.value = data.error || 'OAuth 登录失败'
+        showLogin.value = true
+      }
+    } catch (err) {
+      loginError.value = 'OAuth 登录失败，请稍后重试'
+      showLogin.value = true
+    }
+  }
+})
 </script>
 
 <template>
