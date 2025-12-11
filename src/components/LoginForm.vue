@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useAuth0 } from '@auth0/auth0-vue'
 import BaseButton from './BaseButton.vue'
 import BaseCheckbox from './BaseCheckbox.vue'
 import BaseInput from './BaseInput.vue'
@@ -11,6 +12,14 @@ const isLoading = ref(false)
 const error = ref('')
 const availableProviders = ref<string[]>([])
 const auth0Configured = ref(false)
+
+// 尝试获取 Auth0 实例（如果已配置）
+let auth0: ReturnType<typeof useAuth0> | null = null
+try {
+  auth0 = useAuth0()
+} catch (e) {
+  // Auth0 未配置，忽略错误
+}
 
 const emit = defineEmits<{
   (e: 'login', data: { username: string; password: string; remember?: boolean }): void
@@ -79,12 +88,34 @@ onMounted(async () => {
   } catch (err) {
     console.error('获取 OAuth 提供商失败:', err)
   }
+  
+  // 如果 Auth0 已配置，检查是否可用
+  if (auth0) {
+    auth0Configured.value = true
+  }
 })
 
-const handleAuth0Click = () => {
-  localStorage.setItem('auth0_login', 'true')
-  emit('auth0')
+const handleAuth0Click = async () => {
+  if (auth0) {
+    try {
+      await auth0.loginWithRedirect({
+        appState: {
+          returnTo: window.location.origin
+        }
+      })
+    } catch (err) {
+      error.value = 'Auth0 登录失败，请稍后重试'
+    }
+  } else {
+    // 降级到旧的实现
+    localStorage.setItem('auth0_login', 'true')
+    emit('auth0')
+  }
 }
+
+const isAuth0Available = computed(() => {
+  return auth0 !== null && auth0Configured.value
+})
 </script>
 
 <template>
@@ -128,9 +159,9 @@ const handleAuth0Click = () => {
       </div>
     </div>
 
-    <!-- Auth0 登录按钮（优先显示） -->
+    <!-- Auth0 登录按钮（优先显示，使用官方 SDK） -->
     <BaseButton
-      v-if="auth0Configured"
+      v-if="isAuth0Available"
       type="button"
       variant="glass"
       class="w-full !py-2.5 sm:!py-3 flex items-center justify-center gap-2"

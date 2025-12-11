@@ -32,6 +32,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '提取文件 - SimpleShare' }
     },
     {
+        path: '/callback',
+        name: 'Auth0Callback',
+        component: () => import('../views/Auth0Callback.vue'),
+        meta: { title: '登录中...' }
+    },
+    {
         path: '/:pathMatch(.*)*',
         redirect: '/'
     }

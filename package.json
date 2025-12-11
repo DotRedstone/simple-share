@@ -19,6 +19,7 @@
     "db:init:prod": "cd server && npx wrangler d1 execute simpleshare-db --remote --file=./src/db/schema.sql"
   },
   "dependencies": {
+    "@auth0/auth0-vue": "^2.4.0",
     "@phosphor-icons/vue": "^2.2.1",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",

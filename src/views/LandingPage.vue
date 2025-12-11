@@ -114,45 +114,18 @@ const handleAuth0 = async () => {
   }
 }
 
-// 处理 OAuth/Auth0 回调
+// 处理直接 OAuth 回调（非 Auth0）
 onMounted(async () => {
   authStore.initAuth()
   
-  // 检查是否是 OAuth 回调
+  // 检查是否是直接 OAuth 回调（非 Auth0）
   const url = new URL(window.location.href)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
   const provider = url.searchParams.get('provider') || localStorage.getItem('oauth_provider')
   
-  // 检查是否是 Auth0 回调
-  const isAuth0Callback = url.pathname.includes('/api/auth/auth0/callback') || localStorage.getItem('auth0_login')
-  
-  if (code && isAuth0Callback) {
-    try {
-      localStorage.removeItem('auth0_login')
-      const response = await fetch('/api/auth/auth0', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, state })
-      })
-      const data = await response.json()
-      
-      if (data.success) {
-        if (data.data.token && data.data.user) {
-          authStore.login(data.data.user, data.data.token)
-          const isAdmin = data.data.user?.role === 'admin'
-          router.push(isAdmin ? '/admin' : '/dashboard')
-        }
-      } else {
-        loginError.value = data.error || 'Auth0 登录失败'
-        showLogin.value = true
-      }
-    } catch (err) {
-      loginError.value = 'Auth0 登录失败，请稍后重试'
-      showLogin.value = true
-    }
-  } else if (code && provider) {
-    // 直接 OAuth 回调
+  // Auth0 回调由 Auth0Callback.vue 处理，这里只处理直接 OAuth
+  if (code && provider && !url.pathname.includes('/callback')) {
     try {
       const response = await fetch('/api/auth/oauth', {
         method: 'POST',

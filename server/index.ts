@@ -14,6 +14,8 @@ import { onRequestGet as oauthGetHandler, onRequestPost as oauthPostHandler } fr
 import { onRequestGet as oauthProvidersHandler } from './functions/api/auth/oauth/providers'
 import { onRequestGet as auth0GetHandler, onRequestPost as auth0PostHandler } from './functions/api/auth/auth0'
 import { onRequestGet as auth0ProvidersHandler } from './functions/api/auth/auth0/providers'
+import { onRequestGet as auth0ConfigHandler } from './functions/api/auth/auth0/config'
+import { onRequestPost as auth0VerifyHandler } from './functions/api/auth/auth0/verify'
 import { onRequestGet as extractHandler } from './functions/api/extract/[code]'
 import { onRequestGet as filesListHandler } from './functions/api/files/list'
 import { onRequestPost as filesUploadHandler } from './functions/api/files/upload'
@@ -62,6 +64,12 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   },
   'auth/auth0/providers': {
     'GET': auth0ProvidersHandler
+  },
+  'auth/auth0/config': {
+    'GET': auth0ConfigHandler
+  },
+  'auth/auth0/verify': {
+    'POST': auth0VerifyHandler
   },
   'files/list': {
     'GET': filesListHandler

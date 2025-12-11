@@ -511,8 +511,9 @@ Auth0 是一个专业的身份认证平台，可以统一管理多个 OAuth 提�
 
 2. **配置应用**
    - 在 Auth0 Dashboard → Applications → 你的应用
-   - 设置 **Allowed Callback URLs**: `https://你的域名.com/api/auth/auth0/callback`
+   - 设置 **Allowed Callback URLs**: `https://你的域名.com/callback`
    - 设置 **Allowed Logout URLs**: `https://你的域名.com`
+   - 设置 **Allowed Web Origins**: `https://你的域名.com`
    - 保存配置
 
 3. **配置 Social Connections（社交登录）**
