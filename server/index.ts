@@ -16,6 +16,8 @@ import { onRequestGet as auth0GetHandler, onRequestPost as auth0PostHandler } fr
 import { onRequestGet as auth0ProvidersHandler } from './functions/api/auth/auth0/providers'
 import { onRequestGet as auth0ConfigHandler } from './functions/api/auth/auth0/config'
 import { onRequestPost as auth0VerifyHandler } from './functions/api/auth/auth0/verify'
+import { onRequestGet as auth0ConnectionsHandler } from './functions/api/auth/auth0/connections'
+import { onRequestGet as auth0SocialHandler } from './functions/api/auth/auth0/social'
 import { onRequestGet as extractHandler } from './functions/api/extract/[code]'
 import { onRequestGet as filesListHandler } from './functions/api/files/list'
 import { onRequestPost as filesUploadHandler } from './functions/api/files/upload'
@@ -70,6 +72,12 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   },
   'auth/auth0/verify': {
     'POST': auth0VerifyHandler
+  },
+  'auth/auth0/connections': {
+    'GET': auth0ConnectionsHandler
+  },
+  'auth/auth0/social': {
+    'GET': auth0SocialHandler
   },
   'files/list': {
     'GET': filesListHandler

@@ -12,6 +12,7 @@ const isLoading = ref(false)
 const error = ref('')
 const availableProviders = ref<string[]>([])
 const auth0Configured = ref(false)
+const auth0Connections = ref<Array<{ id: string; name: string; strategy: string }>>([])
 
 // 尝试获取 Auth0 实例（如果已配置）
 let auth0: ReturnType<typeof useAuth0> | null = null
@@ -75,6 +76,19 @@ onMounted(async () => {
     const auth0Data = await auth0Response.json()
     if (auth0Data.success) {
       auth0Configured.value = auth0Data.configured || false
+      
+      // 如果 Auth0 已配置，获取 Social Connections
+      if (auth0Configured.value) {
+        try {
+          const connectionsResponse = await fetch('/api/auth/auth0/connections')
+          const connectionsData = await connectionsResponse.json()
+          if (connectionsData.success && connectionsData.connections) {
+            auth0Connections.value = connectionsData.connections
+          }
+        } catch (err) {
+          console.error('获取 Auth0 Connections 失败:', err)
+        }
+      }
     }
     
     // 如果 Auth0 未配置，检查直接 OAuth 提供商
@@ -95,27 +109,22 @@ onMounted(async () => {
   }
 })
 
-const handleAuth0Click = async () => {
-  if (auth0) {
-    try {
-      await auth0.loginWithRedirect({
-        appState: {
-          returnTo: window.location.origin
-        }
-      })
-    } catch (err) {
-      error.value = 'Auth0 登录失败，请稍后重试'
+const handleAuth0SocialClick = async (connection: string) => {
+  try {
+    const redirectUri = window.location.origin + '/callback'
+    const response = await fetch(`/api/auth/auth0/social?connection=${encodeURIComponent(connection)}&redirect_uri=${encodeURIComponent(redirectUri)}`)
+    const data = await response.json()
+    
+    if (data.success && data.authUrl) {
+      window.location.href = data.authUrl
+    } else {
+      error.value = '登录失败，请稍后重试'
     }
-  } else {
-    // 降级到旧的实现
-    localStorage.setItem('auth0_login', 'true')
-    emit('auth0')
+  } catch (err) {
+    error.value = '登录失败，请稍后重试'
   }
 }
 
-const isAuth0Available = computed(() => {
-  return auth0 !== null && auth0Configured.value
-})
 </script>
 
 <template>
@@ -150,7 +159,7 @@ const isAuth0Available = computed(() => {
       登录
     </BaseButton>
 
-    <div v-if="auth0Configured || availableProviders.length > 0" class="relative my-4">
+    <div v-if="auth0Connections.length > 0 || availableProviders.length > 0" class="relative my-4">
       <div class="absolute inset-0 flex items-center">
         <div class="w-full border-t border-slate-700"></div>
       </div>
@@ -159,23 +168,46 @@ const isAuth0Available = computed(() => {
       </div>
     </div>
 
-    <!-- Auth0 登录按钮（优先显示，使用官方 SDK） -->
-    <BaseButton
-      v-if="isAuth0Available"
-      type="button"
-      variant="glass"
-      class="w-full !py-2.5 sm:!py-3 flex items-center justify-center gap-2"
-      :disabled="isLoading"
-      @click="handleAuth0Click"
-    >
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M21.98 7.448L19.62 0H4.347L2.02 7.448c-1.352 4.312.03 9.206 3.815 12.015L12.007 24l6.157-4.537c3.785-2.81 5.167-7.703 3.815-12.015zM12 13.39c-1.435 0-2.605-1.161-2.605-2.606 0-1.443 1.17-2.605 2.605-2.605 1.436 0 2.605 1.162 2.605 2.605 0 1.445-1.169 2.606-2.605 2.606z"/>
-      </svg>
-      <span>使用 Auth0 登录</span>
-    </BaseButton>
+    <!-- Auth0 Social Connections（直接显示各个提供商按钮） -->
+    <div v-if="auth0Connections.length > 0" class="grid gap-2" :class="auth0Connections.length === 1 ? 'grid-cols-1' : auth0Connections.length === 2 ? 'grid-cols-2' : 'grid-cols-3'">
+      <BaseButton
+        v-for="conn in auth0Connections"
+        :key="conn.id"
+        type="button"
+        variant="glass"
+        class="!py-2 flex flex-col items-center gap-1"
+        :disabled="isLoading"
+        @click="handleAuth0SocialClick(conn.id)"
+      >
+        <!-- Google -->
+        <svg v-if="conn.id === 'google-oauth2'" class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <!-- GitHub -->
+        <svg v-else-if="conn.id === 'github'" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        <!-- Microsoft -->
+        <svg v-else-if="conn.id === 'windowslive'" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M0 0h11.377v11.372H0zm12.623 0H24v11.372H12.623zM0 12.628h11.377V24H0zm12.623 0H24V24H12.623z"/>
+        </svg>
+        <!-- 微信 -->
+        <svg v-else-if="conn.id === 'wechat'" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-1.898-2.186-3.542-4.495-4.414A9.654 9.654 0 0 0 8.691 2.188zm-.744 5.524c-.587 0-1.062.42-1.062.938 0 .517.475.937 1.062.937.588 0 1.063-.42 1.063-.937 0-.518-.475-.938-1.063-.938zm4.001 0c-.587 0-1.062.42-1.062.938 0 .517.475.937 1.062.937.588 0 1.063-.42 1.063-.937 0-.518-.475-.938-1.063-.938z"/>
+        </svg>
+        <!-- 默认图标 -->
+        <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+        <span class="text-xs">{{ conn.name }}</span>
+      </BaseButton>
+    </div>
 
     <!-- 直接 OAuth 提供商（仅在 Auth0 未配置时显示） -->
-    <div v-if="!auth0Configured && availableProviders.length > 0" class="grid gap-2" :class="availableProviders.length === 1 ? 'grid-cols-1' : availableProviders.length === 2 ? 'grid-cols-2' : 'grid-cols-3'">
+    <div v-if="auth0Connections.length === 0 && availableProviders.length > 0" class="grid gap-2" :class="availableProviders.length === 1 ? 'grid-cols-1' : availableProviders.length === 2 ? 'grid-cols-2' : 'grid-cols-3'">
       <BaseButton
         v-if="availableProviders.includes('wechat')"
         type="button"
