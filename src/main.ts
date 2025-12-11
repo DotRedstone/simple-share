@@ -22,10 +22,8 @@ async function initAuth0() {
           domain: data.domain,
           clientId: data.clientId,
           authorizationParams: {
-            redirect_uri: window.location.origin,
-            audience: `https://${data.domain}/api/v2/`, // 可选：如果需要访问 Management API
+            redirect_uri: window.location.origin + '/callback',
           },
-          // 使用我们的自定义回调处理
           useRefreshTokens: true,
           cacheLocation: 'localstorage',
         })
