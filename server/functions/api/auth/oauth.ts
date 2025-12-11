@@ -119,7 +119,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     }
 
     const tokenData = await tokenResponse.json()
-    const accessToken = tokenData.access_token || tokenData.access_token
+    const accessToken = tokenData.access_token || tokenData.token
 
     if (!accessToken) {
       return new Response(
