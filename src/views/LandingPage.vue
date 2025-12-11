@@ -121,9 +121,8 @@ onMounted(async () => {
       
       if (data.success) {
         // 保存 token 并跳转
-        if (data.data.token) {
-          localStorage.setItem('token', data.data.token)
-          authStore.setUser(data.data.user)
+        if (data.data.token && data.data.user) {
+          authStore.login(data.data.user, data.data.token)
           const isAdmin = data.data.user?.role === 'admin'
           router.push(isAdmin ? '/admin' : '/dashboard')
         }
