@@ -14,6 +14,7 @@ const emit = defineEmits<{
   (e: 'login', data: { username: string; password: string; remember?: boolean }): void
   (e: 'forgot'): void
   (e: 'switch-to-register'): void
+  (e: 'oauth', provider: 'wechat' | 'github' | 'google'): void
 }>()
 
 const handleLogin = async () => {

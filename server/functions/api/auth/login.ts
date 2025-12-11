@@ -29,9 +29,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
-    // 验证密码（注意：数据库字段名是 password_hash）
-    const passwordHash = user.password_hash || user.passwordHash
+    // 验证密码（注意：数据库字段名是 password_hash，D1 返回的是下划线格式）
+    const passwordHash = (user as any).password_hash || (user as any).passwordHash
     if (!passwordHash) {
+      // OAuth 用户可能没有密码
+      if ((user as any).auth_provider !== 'local') {
+        return new Response(
+          JSON.stringify({ success: false, error: '该账户使用第三方登录，请使用对应的登录方式' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
       return new Response(
         JSON.stringify({ success: false, error: '用户数据异常' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -39,6 +46,11 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     }
 
     const isValid = await verifyPassword(password, passwordHash)
+    console.log('Password verification:', { 
+      provided: password.substring(0, 1) + '***', 
+      hashMatch: isValid,
+      hashLength: passwordHash.length 
+    })
     if (!isValid) {
       return new Response(
         JSON.stringify({ success: false, error: '用户名或密码错误' }),

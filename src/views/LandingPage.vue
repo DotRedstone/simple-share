@@ -122,7 +122,12 @@ const switchToLogin = () => {
       <div v-if="loginError" class="mb-4 bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
         {{ loginError }}
       </div>
-      <LoginForm @login="onLoginSuccess" @forgot="showLogin = false" @switch-to-register="switchToRegister" />
+      <LoginForm 
+        @login="onLoginSuccess" 
+        @forgot="showLogin = false" 
+        @switch-to-register="switchToRegister"
+        @oauth="handleOAuth"
+      />
     </BaseModal>
 
     <BaseModal :show="showRegister" title="创建账号" width="max-w-sm" @close="showRegister = false">

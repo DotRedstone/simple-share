@@ -351,7 +351,12 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               </svg>
               <span class="hidden md:inline">新建文件夹</span>
             </BaseButton>
-            <BaseButton variant="primary" class="!py-1.5 !px-2 md:!px-3 !text-xs" @click="showUpload = true">
+            <BaseButton 
+              v-if="activeTab === 'all'" 
+              variant="primary" 
+              class="!py-1.5 !px-2 md:!px-3 !text-xs" 
+              @click="showUpload = true"
+            >
               <span class="hidden sm:inline">上传</span>
               <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -395,7 +400,6 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               :active-options-menu="activeOptionsMenu"
               @file-click="handleFileClick"
               @file-action="handleFileAction"
-              @upload="showUpload = true"
             />
           </div>
 
@@ -407,7 +411,6 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             :active-options-menu="activeOptionsMenu"
             @file-click="handleFileClick"
             @file-action="handleFileAction"
-            @upload="showUpload = true"
           />
         </div>
       </main>
