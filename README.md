@@ -83,8 +83,9 @@
      - 点击 **Save**
    - ✅ **重要**：控制台中的绑定会持久化，每次自动部署时不会丢失，无需修改任何配置文件
    
-   **步骤 4：配置环境变量**
+   **步骤 4：配置环境变量（重要！）**
    - 在同一个 **Settings** 页面，向下滚动到 **Environment Variables** 部分
+   - ⚠️ **重要**：环境变量必须在 Dashboard 中配置，这样每次自动部署时不会丢失
    - 点击 **Add variable** 添加以下变量：
      - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串，例如：`openssl rand -hex 32`）
      - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问，可选）
