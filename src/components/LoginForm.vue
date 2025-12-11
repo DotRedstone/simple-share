@@ -10,12 +10,14 @@ const remember = ref(false)
 const isLoading = ref(false)
 const error = ref('')
 const availableProviders = ref<string[]>([])
+const auth0Configured = ref(false)
 
 const emit = defineEmits<{
   (e: 'login', data: { username: string; password: string; remember?: boolean }): void
   (e: 'forgot'): void
   (e: 'switch-to-register'): void
   (e: 'oauth', provider: 'wechat' | 'github' | 'google'): void
+  (e: 'auth0'): void
 }>()
 
 const handleLogin = async () => {
@@ -59,15 +61,30 @@ const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
 // 获取可用的 OAuth 提供商
 onMounted(async () => {
   try {
-    const response = await fetch('/api/auth/oauth/providers')
-    const data = await response.json()
-    if (data.success && data.providers) {
-      availableProviders.value = data.providers
+    // 检查 Auth0 是否配置
+    const auth0Response = await fetch('/api/auth/auth0/providers')
+    const auth0Data = await auth0Response.json()
+    if (auth0Data.success) {
+      auth0Configured.value = auth0Data.configured || false
+    }
+    
+    // 如果 Auth0 未配置，检查直接 OAuth 提供商
+    if (!auth0Configured.value) {
+      const response = await fetch('/api/auth/oauth/providers')
+      const data = await response.json()
+      if (data.success && data.providers) {
+        availableProviders.value = data.providers
+      }
     }
   } catch (err) {
     console.error('获取 OAuth 提供商失败:', err)
   }
 })
+
+const handleAuth0Click = () => {
+  localStorage.setItem('auth0_login', 'true')
+  emit('auth0')
+}
 </script>
 
 <template>
@@ -102,7 +119,7 @@ onMounted(async () => {
       登录
     </BaseButton>
 
-    <div v-if="availableProviders.length > 0" class="relative my-4">
+    <div v-if="auth0Configured || availableProviders.length > 0" class="relative my-4">
       <div class="absolute inset-0 flex items-center">
         <div class="w-full border-t border-slate-700"></div>
       </div>
@@ -111,7 +128,23 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="availableProviders.length > 0" class="grid gap-2" :class="availableProviders.length === 1 ? 'grid-cols-1' : availableProviders.length === 2 ? 'grid-cols-2' : 'grid-cols-3'">
+    <!-- Auth0 登录按钮（优先显示） -->
+    <BaseButton
+      v-if="auth0Configured"
+      type="button"
+      variant="glass"
+      class="w-full !py-2.5 sm:!py-3 flex items-center justify-center gap-2"
+      :disabled="isLoading"
+      @click="handleAuth0Click"
+    >
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.98 7.448L19.62 0H4.347L2.02 7.448c-1.352 4.312.03 9.206 3.815 12.015L12.007 24l6.157-4.537c3.785-2.81 5.167-7.703 3.815-12.015zM12 13.39c-1.435 0-2.605-1.161-2.605-2.606 0-1.443 1.17-2.605 2.605-2.605 1.436 0 2.605 1.162 2.605 2.605 0 1.445-1.169 2.606-2.605 2.606z"/>
+      </svg>
+      <span>使用 Auth0 登录</span>
+    </BaseButton>
+
+    <!-- 直接 OAuth 提供商（仅在 Auth0 未配置时显示） -->
+    <div v-if="!auth0Configured && availableProviders.length > 0" class="grid gap-2" :class="availableProviders.length === 1 ? 'grid-cols-1' : availableProviders.length === 2 ? 'grid-cols-2' : 'grid-cols-3'">
       <BaseButton
         v-if="availableProviders.includes('wechat')"
         type="button"

@@ -496,13 +496,60 @@ npx wrangler deploy
 
 ## 🔐 OAuth 登录配置
 
-项目支持第三方 OAuth 登录，包括微信、GitHub、Google。配置后，登录页面会自动显示对应的登录按钮。
+项目支持两种第三方登录方式：
+
+### 方式一：使用 Auth0（推荐）
+
+Auth0 是一个专业的身份认证平台，可以统一管理多个 OAuth 提供商（微信、GitHub、Google、Apple 等），配置更简单，安全性更高。
+
+#### Auth0 配置步骤
+
+1. **注册 Auth0 账号**
+   - 访问 [Auth0](https://auth0.com/)
+   - 注册免费账号（免费套餐支持 7000+ 月活用户）
+   - 创建应用（Application）
+
+2. **配置应用**
+   - 在 Auth0 Dashboard → Applications → 你的应用
+   - 设置 **Allowed Callback URLs**: `https://你的域名.com/api/auth/auth0/callback`
+   - 设置 **Allowed Logout URLs**: `https://你的域名.com`
+   - 保存配置
+
+3. **配置 Social Connections（社交登录）**
+   - 在 Auth0 Dashboard → Authentication → Social
+   - 点击对应的提供商（如 GitHub、Google、微信等）进行配置
+   - 填入各提供商的 Client ID 和 Client Secret
+   - 启用对应的连接
+
+4. **配置环境变量**
+   - 在 Cloudflare 控制台添加以下环境变量：
+     - `AUTH0_DOMAIN`: 你的 Auth0 域名（格式：`your-tenant.auth0.com`）
+     - `AUTH0_CLIENT_ID`: 你的 Auth0 Application Client ID
+     - `AUTH0_CLIENT_SECRET`: 你的 Auth0 Application Client Secret
+
+5. **完成**
+   - 配置完成后，登录页面会自动显示 "使用 Auth0 登录" 按钮
+   - 点击后会跳转到 Auth0 的登录页面，用户可以选择已配置的社交登录方式
+
+**优点**：
+- ✅ 统一管理多个 OAuth 提供商
+- ✅ 配置简单，只需配置一次
+- ✅ 支持更多提供商（包括微信、GitHub、Google、Apple、Microsoft 等）
+- ✅ 免费套餐足够个人和小型项目使用
+- ✅ 安全性高，由专业团队维护
+- ✅ 支持多因素认证（MFA）
+
+### 方式二：直接配置 OAuth 提供商（备选）
+
+如果不想使用 Auth0，也可以直接配置各个 OAuth 提供商。配置后，登录页面会自动显示对应的登录按钮。
 
 ### 配置方式
 
 在 Cloudflare 控制台的 **Workers & Pages** → 你的 Worker → **Settings** → **Variables** → **Environment Variables** 中添加以下环境变量：
 
-#### 1. 微信登录配置
+#### 直接 OAuth 配置（方式二）
+
+##### 1. 微信登录配置
 
 1. **注册微信开放平台账号**
    - 访问 [微信开放平台](https://open.weixin.qq.com/)
@@ -519,7 +566,7 @@ npx wrangler deploy
 
 **注意**：微信登录需要企业认证，个人开发者无法使用。如果无法使用微信登录，可以考虑使用其他平台。
 
-#### 2. GitHub 登录配置
+##### 2. GitHub 登录配置
 
 1. **创建 GitHub OAuth App**
    - 访问 [GitHub Developer Settings](https://github.com/settings/developers)
@@ -539,7 +586,7 @@ npx wrangler deploy
 - ✅ 配置简单
 - ✅ 适合开发者使用
 
-#### 3. Google 登录配置
+##### 3. Google 登录配置
 
 1. **创建 Google OAuth 2.0 凭据**
    - 访问 [Google Cloud Console](https://console.cloud.google.com/)
@@ -564,21 +611,28 @@ npx wrangler deploy
 
 ### 推荐配置
 
-**个人开发者推荐**：
+**强烈推荐使用 Auth0**：
+- ✅ 配置一次，支持所有提供商
+- ✅ 免费套餐足够使用
+- ✅ 更安全、更专业
+
+**如果不想使用 Auth0，个人开发者推荐**：
 - ✅ **GitHub**：最简单，免费，适合开发者
 - ✅ **Google**：用户基数大，免费
 
-**企业用户推荐**：
-- ✅ **微信**：国内用户首选
+**如果不想使用 Auth0，企业用户推荐**：
+- ✅ **微信**：国内用户首选（需要企业认证）
 - ✅ **GitHub**：开发者友好
 - ✅ **Google**：国际化用户
 
 ### 注意事项
 
-1. **回调地址必须正确**：所有 OAuth 提供商都需要配置正确的回调地址
-2. **环境变量安全**：`Client Secret` 是敏感信息，不要泄露
-3. **自动显示/隐藏**：只有配置了完整的环境变量（Client ID 和 Secret），对应的登录按钮才会显示
-4. **首次登录自动注册**：使用 OAuth 登录的用户会自动创建账户
+1. **Auth0 优先**：如果配置了 Auth0，系统会优先显示 Auth0 登录按钮，隐藏直接 OAuth 按钮
+2. **回调地址必须正确**：所有 OAuth 提供商都需要配置正确的回调地址
+3. **环境变量安全**：`Client Secret` 是敏感信息，不要泄露
+4. **自动显示/隐藏**：只有配置了完整的环境变量，对应的登录按钮才会显示
+5. **首次登录自动注册**：使用 OAuth/Auth0 登录的用户会自动创建账户
+6. **微信登录限制**：直接配置微信登录需要企业认证，但通过 Auth0 可以使用微信登录（如果 Auth0 支持）
 
 ## 📄 许可证
 

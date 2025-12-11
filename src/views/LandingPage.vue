@@ -100,7 +100,21 @@ const handleOAuth = async (provider: 'wechat' | 'github' | 'google') => {
   }
 }
 
-// 处理 OAuth 回调
+const handleAuth0 = async () => {
+  try {
+    const response = await fetch(`/api/auth/auth0?redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/auth0/callback')}`)
+    const data = await response.json()
+    if (data.success && data.authUrl) {
+      window.location.href = data.authUrl
+    } else {
+      loginError.value = data.error || 'Auth0 登录失败'
+    }
+  } catch (err) {
+    loginError.value = 'Auth0 登录失败，请稍后重试'
+  }
+}
+
+// 处理 OAuth/Auth0 回调
 onMounted(async () => {
   authStore.initAuth()
   
@@ -110,7 +124,35 @@ onMounted(async () => {
   const state = url.searchParams.get('state')
   const provider = url.searchParams.get('provider') || localStorage.getItem('oauth_provider')
   
-  if (code && provider) {
+  // 检查是否是 Auth0 回调
+  const isAuth0Callback = url.pathname.includes('/api/auth/auth0/callback') || localStorage.getItem('auth0_login')
+  
+  if (code && isAuth0Callback) {
+    try {
+      localStorage.removeItem('auth0_login')
+      const response = await fetch('/api/auth/auth0', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, state })
+      })
+      const data = await response.json()
+      
+      if (data.success) {
+        if (data.data.token && data.data.user) {
+          authStore.login(data.data.user, data.data.token)
+          const isAdmin = data.data.user?.role === 'admin'
+          router.push(isAdmin ? '/admin' : '/dashboard')
+        }
+      } else {
+        loginError.value = data.error || 'Auth0 登录失败'
+        showLogin.value = true
+      }
+    } catch (err) {
+      loginError.value = 'Auth0 登录失败，请稍后重试'
+      showLogin.value = true
+    }
+  } else if (code && provider) {
+    // 直接 OAuth 回调
     try {
       const response = await fetch('/api/auth/oauth', {
         method: 'POST',
@@ -120,7 +162,6 @@ onMounted(async () => {
       const data = await response.json()
       
       if (data.success) {
-        // 保存 token 并跳转
         if (data.data.token && data.data.user) {
           authStore.login(data.data.user, data.data.token)
           const isAdmin = data.data.user?.role === 'admin'
@@ -175,6 +216,7 @@ onMounted(async () => {
         @forgot="showLogin = false" 
         @switch-to-register="switchToRegister"
         @oauth="handleOAuth"
+        @auth0="handleAuth0"
       />
     </BaseModal>
 

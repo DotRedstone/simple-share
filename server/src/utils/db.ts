@@ -5,6 +5,17 @@ export interface Env {
   FILES?: R2Bucket  // R2 bucket 现在是可选的
   JWT_SECRET: string
   R2_PUBLIC_URL?: string
+  // Auth0 配置
+  AUTH0_DOMAIN?: string
+  AUTH0_CLIENT_ID?: string
+  AUTH0_CLIENT_SECRET?: string
+  // 直接 OAuth 配置（备选）
+  WECHAT_CLIENT_ID?: string
+  WECHAT_CLIENT_SECRET?: string
+  GITHUB_CLIENT_ID?: string
+  GITHUB_CLIENT_SECRET?: string
+  GOOGLE_CLIENT_ID?: string
+  GOOGLE_CLIENT_SECRET?: string
 }
 
 export class Database {
