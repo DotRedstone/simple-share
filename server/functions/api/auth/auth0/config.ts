@@ -1,4 +1,4 @@
-import type { Env } from '../../../src/utils/db'
+import type { Env } from '../../../../src/utils/db'
 
 // 获取 Auth0 前端配置（不包含敏感信息）
 export async function onRequestGet(context: { env: Env; request: Request }): Promise<Response> {

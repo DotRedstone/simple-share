@@ -1,4 +1,4 @@
-import type { Env } from '../../../src/utils/db'
+import type { Env } from '../../../../src/utils/db'
 
 // 检查 Auth0 是否已配置
 export async function onRequestGet(context: { env: Env; request: Request }): Promise<Response> {

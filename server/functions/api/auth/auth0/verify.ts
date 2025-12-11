@@ -1,6 +1,6 @@
-import { Database } from '../../../src/utils/db'
-import { generateToken } from '../../../src/utils/auth'
-import type { Env } from '../../../src/utils/db'
+import { Database } from '../../../../src/utils/db'
+import { generateToken } from '../../../../src/utils/auth'
+import type { Env } from '../../../../src/utils/db'
 
 // 验证 Auth0 token 并创建/获取用户
 export async function onRequestPost(context: { env: Env; request: Request }): Promise<Response> {
