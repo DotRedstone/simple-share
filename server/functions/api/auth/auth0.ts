@@ -57,16 +57,18 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
 
     // 交换 access_token
     const redirectUri = new URL(request.url).origin + '/api/auth/auth0/callback'
+    const tokenParams = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: auth0ClientId,
+      client_secret: auth0ClientSecret,
+      code,
+      redirect_uri: redirectUri,
+    })
+    
     const tokenResponse = await fetch(`https://${auth0Domain}/oauth/token`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        grant_type: 'authorization_code',
-        client_id: auth0ClientId,
-        client_secret: auth0ClientSecret,
-        code,
-        redirect_uri: redirectUri,
-      }),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: tokenParams.toString(),
     })
 
     if (!tokenResponse.ok) {
