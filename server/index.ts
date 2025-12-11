@@ -11,6 +11,7 @@ import type { Env } from './src/utils/db'
 import { onRequestPost as loginHandler } from './functions/api/auth/login'
 import { onRequestPost as registerHandler } from './functions/api/auth/register'
 import { onRequestGet as oauthGetHandler, onRequestPost as oauthPostHandler } from './functions/api/auth/oauth'
+import { onRequestGet as oauthProvidersHandler } from './functions/api/auth/oauth/providers'
 import { onRequestGet as extractHandler } from './functions/api/extract/[code]'
 import { onRequestGet as filesListHandler } from './functions/api/files/list'
 import { onRequestPost as filesUploadHandler } from './functions/api/files/upload'
@@ -49,6 +50,9 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   'auth/oauth': {
     'GET': oauthGetHandler,
     'POST': oauthPostHandler
+  },
+  'auth/oauth/providers': {
+    'GET': oauthProvidersHandler
   },
   'files/list': {
     'GET': filesListHandler

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import BaseButton from './BaseButton.vue'
 import BaseCheckbox from './BaseCheckbox.vue'
 import BaseInput from './BaseInput.vue'
@@ -9,6 +9,7 @@ const password = ref('')
 const remember = ref(false)
 const isLoading = ref(false)
 const error = ref('')
+const availableProviders = ref<string[]>([])
 
 const emit = defineEmits<{
   (e: 'login', data: { username: string; password: string; remember?: boolean }): void
@@ -54,6 +55,19 @@ const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
   localStorage.setItem('oauth_provider', provider)
   emit('oauth', provider)
 }
+
+// 获取可用的 OAuth 提供商
+onMounted(async () => {
+  try {
+    const response = await fetch('/api/auth/oauth/providers')
+    const data = await response.json()
+    if (data.success && data.providers) {
+      availableProviders.value = data.providers
+    }
+  } catch (err) {
+    console.error('获取 OAuth 提供商失败:', err)
+  }
+})
 </script>
 
 <template>
@@ -88,7 +102,7 @@ const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
       登录
     </BaseButton>
 
-    <div class="relative my-4">
+    <div v-if="availableProviders.length > 0" class="relative my-4">
       <div class="absolute inset-0 flex items-center">
         <div class="w-full border-t border-slate-700"></div>
       </div>
@@ -97,8 +111,9 @@ const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
       </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-2">
+    <div v-if="availableProviders.length > 0" class="grid gap-2" :class="availableProviders.length === 1 ? 'grid-cols-1' : availableProviders.length === 2 ? 'grid-cols-2' : 'grid-cols-3'">
       <BaseButton
+        v-if="availableProviders.includes('wechat')"
         type="button"
         variant="glass"
         class="!py-2 flex flex-col items-center gap-1"
@@ -111,6 +126,7 @@ const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
         <span class="text-xs">微信</span>
       </BaseButton>
       <BaseButton
+        v-if="availableProviders.includes('github')"
         type="button"
         variant="glass"
         class="!py-2 flex flex-col items-center gap-1"
@@ -123,6 +139,7 @@ const handleOAuthClick = (provider: 'wechat' | 'github' | 'google') => {
         <span class="text-xs">GitHub</span>
       </BaseButton>
       <BaseButton
+        v-if="availableProviders.includes('google')"
         type="button"
         variant="glass"
         class="!py-2 flex flex-col items-center gap-1"

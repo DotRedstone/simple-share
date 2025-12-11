@@ -489,6 +489,92 @@ npx wrangler deploy
 - 检查 JWT_SECRET 是否设置
 - 查看 Cloudflare Workers 日志
 
+## 🔐 OAuth 登录配置
+
+项目支持第三方 OAuth 登录，包括微信、GitHub、Google。配置后，登录页面会自动显示对应的登录按钮。
+
+### 配置方式
+
+在 Cloudflare 控制台的 **Workers & Pages** → 你的 Worker → **Settings** → **Variables** → **Environment Variables** 中添加以下环境变量：
+
+#### 1. 微信登录配置
+
+1. **注册微信开放平台账号**
+   - 访问 [微信开放平台](https://open.weixin.qq.com/)
+   - 注册并完成开发者认证（需要企业认证，个人开发者无法使用）
+   - 创建网站应用，获取 `AppID` 和 `AppSecret`
+
+2. **配置环境变量**
+   - `WECHAT_CLIENT_ID`: 你的微信 AppID
+   - `WECHAT_CLIENT_SECRET`: 你的微信 AppSecret
+
+3. **配置回调地址**
+   - 在微信开放平台设置授权回调域名为：`你的域名.com`
+   - 回调 URL 格式：`https://你的域名.com/api/auth/oauth/callback`
+
+**注意**：微信登录需要企业认证，个人开发者无法使用。如果无法使用微信登录，可以考虑使用其他平台。
+
+#### 2. GitHub 登录配置
+
+1. **创建 GitHub OAuth App**
+   - 访问 [GitHub Developer Settings](https://github.com/settings/developers)
+   - 点击 **New OAuth App**
+   - 填写信息：
+     - **Application name**: 你的应用名称
+     - **Homepage URL**: `https://你的域名.com`
+     - **Authorization callback URL**: `https://你的域名.com/api/auth/oauth/callback`
+   - 创建后获取 `Client ID` 和 `Client Secret`
+
+2. **配置环境变量**
+   - `GITHUB_CLIENT_ID`: 你的 GitHub Client ID
+   - `GITHUB_CLIENT_SECRET`: 你的 GitHub Client Secret
+
+**优点**：
+- ✅ 免费，无需认证
+- ✅ 配置简单
+- ✅ 适合开发者使用
+
+#### 3. Google 登录配置
+
+1. **创建 Google OAuth 2.0 凭据**
+   - 访问 [Google Cloud Console](https://console.cloud.google.com/)
+   - 创建新项目或选择现有项目
+   - 启用 **Google+ API** 或 **Google Identity API**
+   - 进入 **API 和服务** → **凭据** → **创建凭据** → **OAuth 客户端 ID**
+   - 选择 **Web 应用程序**
+   - 填写信息：
+     - **名称**: 你的应用名称
+     - **已授权的 JavaScript 来源**: `https://你的域名.com`
+     - **已授权的重定向 URI**: `https://你的域名.com/api/auth/oauth/callback`
+   - 创建后获取 `Client ID` 和 `Client Secret`
+
+2. **配置环境变量**
+   - `GOOGLE_CLIENT_ID`: 你的 Google Client ID
+   - `GOOGLE_CLIENT_SECRET`: 你的 Google Client Secret
+
+**优点**：
+- ✅ 免费，个人开发者可用
+- ✅ 用户基数大
+- ✅ 配置相对简单
+
+### 推荐配置
+
+**个人开发者推荐**：
+- ✅ **GitHub**：最简单，免费，适合开发者
+- ✅ **Google**：用户基数大，免费
+
+**企业用户推荐**：
+- ✅ **微信**：国内用户首选
+- ✅ **GitHub**：开发者友好
+- ✅ **Google**：国际化用户
+
+### 注意事项
+
+1. **回调地址必须正确**：所有 OAuth 提供商都需要配置正确的回调地址
+2. **环境变量安全**：`Client Secret` 是敏感信息，不要泄露
+3. **自动显示/隐藏**：只有配置了完整的环境变量（Client ID 和 Secret），对应的登录按钮才会显示
+4. **首次登录自动注册**：使用 OAuth 登录的用户会自动创建账户
+
 ## 📄 许可证
 
 MIT License
