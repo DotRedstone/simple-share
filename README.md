@@ -86,12 +86,33 @@
    **步骤 4：配置环境变量（重要！）**
    - 在同一个 **Settings** 页面，向下滚动到 **Environment Variables** 部分
    - ⚠️ **重要**：环境变量必须在 Dashboard 中配置，这样每次自动部署时不会丢失
+   - ⚠️ **重要**：确保选择 **Production** 环境（不是 Preview），这样生产环境才能使用这些变量
    - 点击 **Add variable** 添加以下变量：
+     
+     **必需变量：**
      - `JWT_SECRET`: 你的 JWT 密钥（至少 32 字符的随机字符串，例如：`openssl rand -hex 32`）
      - `R2_PUBLIC_URL`: `https://your-r2-domain.com`（如果使用 R2 公共访问，可选）
-     - `D1_DATABASE_ID`: （可选）你的 D1 数据库 ID
+     
+     **Auth0 配置（如果使用 Auth0）：**
+     - `AUTH0_DOMAIN`: 你的 Auth0 域名（格式：`your-tenant.auth0.com`）
+     - `AUTH0_CLIENT_ID`: 你的 Auth0 Application Client ID
+     - `AUTH0_CLIENT_SECRET`: 你的 Auth0 Application Client Secret
+     
+     **直接 OAuth 配置（如果不用 Auth0，可选）：**
+     - `WECHAT_CLIENT_ID`: 微信 AppID（可选）
+     - `WECHAT_CLIENT_SECRET`: 微信 AppSecret（可选）
+     - `GITHUB_CLIENT_ID`: GitHub Client ID（可选）
+     - `GITHUB_CLIENT_SECRET`: GitHub Client Secret（可选）
+     - `GOOGLE_CLIENT_ID`: Google Client ID（可选）
+     - `GOOGLE_CLIENT_SECRET`: Google Client Secret（可选）
+     
+     **其他（可选）：**
+     - `D1_DATABASE_ID`: 你的 D1 数据库 ID
        - 如果设置了此环境变量，部署脚本会自动在 `wrangler.toml` 中配置绑定
        - 如果未设置，使用 Dashboard 绑定（**步骤 3**，推荐方式）
+   
+   - ✅ **验证**：配置完成后，在 Dashboard 中应该能看到所有添加的变量。这些变量会在每次自动部署时保留。
+   - 📖 **详细说明**：查看 [ENV_SETUP.md](./ENV_SETUP.md) 获取完整的环境变量配置指南
    
    **步骤 5：配置 OAuth 登录（可选）**
    - OAuth 登录按钮会根据环境变量自动显示/隐藏
