@@ -524,35 +524,210 @@ npx wrangler deploy
 
 Auth0 是一个专业的身份认证平台，可以统一管理多个 OAuth 提供商（微信、GitHub、Google、Apple 等），配置更简单，安全性更高。
 
-#### Auth0 配置步骤
+#### Auth0 配置步骤（详细版）
 
-1. **注册 Auth0 账号**
-   - 访问 [Auth0](https://auth0.com/)
-   - 注册免费账号（免费套餐支持 7000+ 月活用户）
-   - 创建应用（Application）
+##### 步骤 1：注册 Auth0 账号
 
-2. **配置应用**
-   - 在 Auth0 Dashboard → Applications → 你的应用
-   - 设置 **Allowed Callback URLs**: `https://你的域名.com/callback`
-   - 设置 **Allowed Logout URLs**: `https://你的域名.com`
-   - 设置 **Allowed Web Origins**: `https://你的域名.com`
-   - 保存配置
+1. **访问 Auth0 官网**
+   - 打开 [https://auth0.com/](https://auth0.com/)
+   - 点击右上角 **Sign Up** 按钮
 
-3. **配置 Social Connections（社交登录）**
-   - 在 Auth0 Dashboard → Authentication → Social
-   - 点击对应的提供商（如 GitHub、Google、微信等）进行配置
-   - 填入各提供商的 Client ID 和 Client Secret
-   - 启用对应的连接
+2. **注册账号**
+   - 填写邮箱、密码等信息
+   - 选择 **Free** 套餐（免费套餐支持 7000+ 月活用户，足够个人和小型项目使用）
+   - 完成邮箱验证
 
-4. **配置环境变量**
-   - 在 Cloudflare 控制台添加以下环境变量：
-     - `AUTH0_DOMAIN`: 你的 Auth0 域名（格式：`your-tenant.auth0.com`）
-     - `AUTH0_CLIENT_ID`: 你的 Auth0 Application Client ID
-     - `AUTH0_CLIENT_SECRET`: 你的 Auth0 Application Client Secret
+3. **选择租户（Tenant）**
+   - 注册后，Auth0 会要求你选择一个租户域名
+   - 格式：`你的租户名.auth0.com`（例如：`myapp.auth0.com`）
+   - ⚠️ **重要**：记下这个域名，后续配置会用到
 
-5. **完成**
-   - 配置完成后，登录页面会自动显示 "使用 Auth0 登录" 按钮
-   - 点击后会跳转到 Auth0 的登录页面，用户可以选择已配置的社交登录方式
+##### 步骤 2：创建 Auth0 应用
+
+1. **进入 Applications 页面**
+   - 登录 Auth0 Dashboard
+   - 在左侧菜单点击 **Applications** → **Applications**
+
+2. **创建新应用**
+   - 点击右上角 **Create Application** 按钮
+   - **Name**: 输入你的应用名称（例如：`Simple Share`）
+   - **Application Type**: 选择 **Single Page Web Applications**
+   - 点击 **Create** 按钮
+
+3. **获取应用凭证**
+   - 创建后，进入应用详情页面
+   - 在 **Settings** 标签页中，找到以下信息：
+     - **Domain**: 你的 Auth0 域名（格式：`your-tenant.auth0.com`）
+     - **Client ID**: 你的应用 Client ID（复制保存）
+     - **Client Secret**: 你的应用 Client Secret（点击 **Show** 显示，复制保存）
+   - ⚠️ **重要**：这些信息后续需要在 Cloudflare Dashboard 中配置
+
+##### 步骤 3：配置应用回调地址
+
+1. **进入应用设置**
+   - 在应用详情页面的 **Settings** 标签页
+   - 向下滚动找到 **Application URIs** 部分
+
+2. **配置回调地址**
+   - **Allowed Callback URLs**: 
+     ```
+     https://你的域名.com/callback,http://localhost:5173/callback
+     ```
+     - 生产环境：`https://你的域名.com/callback`
+     - 本地开发：`http://localhost:5173/callback`（可选，用于本地测试）
+   
+   - **Allowed Logout URLs**: 
+     ```
+     https://你的域名.com,http://localhost:5173
+     ```
+     - 生产环境：`https://你的域名.com`
+     - 本地开发：`http://localhost:5173`（可选）
+   
+   - **Allowed Web Origins**: 
+     ```
+     https://你的域名.com,http://localhost:5173
+     ```
+     - 生产环境：`https://你的域名.com`
+     - 本地开发：`http://localhost:5173`（可选）
+
+3. **保存配置**
+   - 滚动到页面底部，点击 **Save Changes** 按钮
+
+##### 步骤 4：配置 Social Connections（社交登录）
+
+Auth0 支持多种社交登录提供商，你可以根据需要配置一个或多个。
+
+###### 4.1 配置 GitHub 登录
+
+1. **进入 Social Connections 页面**
+   - 在 Auth0 Dashboard 左侧菜单
+   - 点击 **Authentication** → **Social**
+
+2. **创建 GitHub 连接**
+   - 在连接列表中，找到 **GitHub** 并点击
+   - 或者点击 **Create Connection** → 选择 **GitHub**
+
+3. **获取 GitHub OAuth App 凭证**
+   - 访问 [GitHub Developer Settings](https://github.com/settings/developers)
+   - 点击 **New OAuth App** 按钮
+   - 填写信息：
+     - **Application name**: 你的应用名称
+     - **Homepage URL**: `https://你的域名.com`
+     - **Authorization callback URL**: `https://你的-tenant.auth0.com/login/callback`
+       - ⚠️ **注意**：这里填写的是 Auth0 的回调地址，不是你的应用地址
+   - 点击 **Register application**
+   - 创建后，复制 **Client ID** 和 **Client Secret**
+
+4. **在 Auth0 中配置 GitHub**
+   - 回到 Auth0 Dashboard → Authentication → Social → GitHub
+   - 填入刚才复制的 **Client ID** 和 **Client Secret**
+   - 点击 **Save** 按钮
+   - 确保连接状态为 **Enabled**（已启用）
+
+###### 4.2 配置 Google 登录
+
+1. **创建 Google OAuth 2.0 凭据**
+   - 访问 [Google Cloud Console](https://console.cloud.google.com/)
+   - 创建新项目或选择现有项目
+   - 进入 **API 和服务** → **凭据**
+   - 点击 **创建凭据** → **OAuth 客户端 ID**
+   - 如果提示需要配置 OAuth 同意屏幕，先完成配置：
+     - 选择 **外部**（External）
+     - 填写应用名称、用户支持邮箱等信息
+     - 保存并继续
+   - 选择 **Web 应用程序**
+   - 填写信息：
+     - **名称**: 你的应用名称
+     - **已授权的 JavaScript 来源**: `https://你的-tenant.auth0.com`
+     - **已授权的重定向 URI**: `https://你的-tenant.auth0.com/login/callback`
+   - 创建后，复制 **Client ID** 和 **Client Secret**
+
+2. **在 Auth0 中配置 Google**
+   - 在 Auth0 Dashboard → Authentication → Social → Google
+   - 填入刚才复制的 **Client ID** 和 **Client Secret**
+   - 点击 **Save** 按钮
+   - 确保连接状态为 **Enabled**（已启用）
+
+###### 4.3 配置 Microsoft 登录
+
+1. **创建 Microsoft Azure 应用**
+   - 访问 [Azure Portal](https://portal.azure.com/)
+   - 进入 **Azure Active Directory** → **App registrations**
+   - 点击 **New registration**
+   - 填写信息：
+     - **Name**: 你的应用名称
+     - **Supported account types**: 选择适合的类型
+     - **Redirect URI**: 
+       - Type: **Web**
+       - URI: `https://你的-tenant.auth0.com/login/callback`
+   - 注册后，在 **Overview** 页面复制 **Application (client) ID**
+   - 进入 **Certificates & secrets** → **New client secret**
+   - 创建密钥后，复制 **Value**（这就是 Client Secret）
+
+2. **在 Auth0 中配置 Microsoft**
+   - 在 Auth0 Dashboard → Authentication → Social → Microsoft Account
+   - 填入 **Client ID** 和 **Client Secret**
+   - 点击 **Save** 按钮
+   - 确保连接状态为 **Enabled**（已启用）
+
+###### 4.4 配置其他社交登录
+
+Auth0 还支持其他社交登录提供商，配置方式类似：
+- **Apple**: 需要 Apple Developer 账号
+- **Facebook**: 需要 Facebook 开发者账号
+- **微信**: 需要企业认证（通过 Auth0 配置更简单）
+- 更多提供商请查看 [Auth0 Social Connections 文档](https://auth0.com/docs/authenticate/identity-providers)
+
+##### 步骤 5：在 Cloudflare Dashboard 中配置环境变量
+
+1. **进入 Cloudflare Dashboard**
+   - 访问 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+   - 登录你的账号
+
+2. **找到你的 Worker**
+   - 在左侧菜单点击 **Workers & Pages**
+   - 找到并点击你的 Worker 名称（`simple-share`）
+
+3. **配置环境变量**
+   - 点击顶部的 **Settings** 标签页
+   - 向下滚动找到 **Variables** → **Environment Variables**
+   - ⚠️ **重要**：确保选择 **Production** 环境（不是 Preview）
+   - 点击 **Add variable** 添加以下变量：
+
+   | 变量名 | 值 | 说明 |
+   |--------|-----|------|
+   | `AUTH0_DOMAIN` | `your-tenant.auth0.com` | 你的 Auth0 域名（步骤 1 中记下的） |
+   | `AUTH0_CLIENT_ID` | `你的 Client ID` | 步骤 2 中复制的 Client ID |
+   | `AUTH0_CLIENT_SECRET` | `你的 Client Secret` | 步骤 2 中复制的 Client Secret |
+
+4. **保存配置**
+   - 添加完所有变量后，点击 **Save** 按钮
+   - ✅ **验证**：在变量列表中应该能看到所有添加的变量
+
+##### 步骤 6：验证配置
+
+1. **部署应用**
+   - 如果还没有部署，按照部署教程完成部署
+   - 确保环境变量已正确配置
+
+2. **测试登录**
+   - 访问你的应用登录页面
+   - ✅ **应该看到**：直接显示各个社交登录按钮（Google、GitHub、Microsoft 等）
+   - ✅ **不应该看到**：不会跳转到 Auth0 的通用登录页面
+   - 点击任意社交登录按钮，应该能正常跳转到对应的提供商登录页面
+
+3. **检查日志**
+   - 如果登录失败，查看 Cloudflare Workers 日志
+   - 检查环境变量是否正确配置
+   - 检查 Auth0 应用的回调地址是否正确
+
+##### 配置完成！
+
+配置完成后，你的登录页面会：
+- ✅ 直接显示各个社交登录按钮（Google、GitHub、Microsoft 等）
+- ✅ 点击按钮后直接跳转到对应的提供商登录页面
+- ✅ 不会显示 Auth0 的通用登录页面
+- ✅ 登录成功后自动创建用户账户（首次登录）
 
 **优点**：
 - ✅ 统一管理多个 OAuth 提供商
