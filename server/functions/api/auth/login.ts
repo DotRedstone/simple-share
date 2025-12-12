@@ -7,7 +7,8 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
   const db = new Database(env.DB)
 
   try {
-    const { username, password, remember } = await request.json()
+    const body = await request.json() as { username?: string; password?: string; remember?: boolean }
+    const { username, password, remember } = body
 
     if (!username || !password) {
       return new Response(
