@@ -403,7 +403,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             />
           </div>
 
-          <!-- 其他标签页 -->
+          <!-- 其他标签页（最近上传、我的收藏、我的分享、回收站） -->
           <FileListView
             v-else
             :files="currentFiles"

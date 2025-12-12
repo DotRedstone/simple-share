@@ -33,6 +33,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     // 验证密码（注意：数据库字段名是 password_hash，D1 返回的是下划线格式）
     // D1 数据库返回的字段名可能是下划线格式，需要兼容处理
     const passwordHash = (user as any).password_hash || (user as any).passwordHash || (user as any)['password_hash']
+    
+    // 调试信息：打印用户对象的所有键
+    console.log('User object keys:', Object.keys(user as any))
+    console.log('Password hash field:', {
+      'password_hash': (user as any).password_hash,
+      'passwordHash': (user as any).passwordHash,
+      'has password_hash key': 'password_hash' in (user as any),
+      'all keys': Object.keys(user as any)
+    })
+    
     if (!passwordHash) {
       // OAuth 用户可能没有密码
       if ((user as any).auth_provider !== 'local' || (user as any).auth_provider_id) {
@@ -41,6 +51,11 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
           { status: 401, headers: { 'Content-Type': 'application/json' } }
         )
       }
+      console.error('No password hash found for user:', {
+        userId: user.id,
+        email: user.email,
+        userKeys: Object.keys(user as any)
+      })
       return new Response(
         JSON.stringify({ success: false, error: '用户数据异常：未找到密码哈希' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -49,12 +64,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
 
     const isValid = await verifyPassword(password, passwordHash)
     if (!isValid) {
+      // 测试：重新哈希密码看看是否匹配
+      const testHash = await hashPassword(password)
       console.error('Password verification failed:', {
         userId: user.id,
         email: user.email,
         providedPasswordLength: password.length,
         storedHashLength: passwordHash.length,
-        hashPrefix: passwordHash.substring(0, 10) + '...'
+        storedHashPrefix: passwordHash.substring(0, 20) + '...',
+        testHashPrefix: testHash.substring(0, 20) + '...',
+        hashesMatch: testHash === passwordHash
       })
     }
     if (!isValid) {

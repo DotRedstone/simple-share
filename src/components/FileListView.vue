@@ -60,8 +60,6 @@ const emit = defineEmits<{
     icon="folder"
     title="此文件夹为空"
     description="当前目录下还没有任何文件或文件夹"
-    action-label="上传文件"
-    @action="$emit('upload')"
   />
 </template>
 
