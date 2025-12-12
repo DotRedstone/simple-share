@@ -37,6 +37,13 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     // 创建用户
     const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     const passwordHash = await hashPassword(password)
+    
+    // 调试信息：打印密码哈希
+    console.log('Register - Password hash created:', {
+      passwordLength: password.length,
+      hashLength: passwordHash.length,
+      hashPrefix: passwordHash.substring(0, 20) + '...'
+    })
 
     await db.createUser({
       id: userId,
@@ -45,6 +52,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       passwordHash,
       role: 'user'
     })
+    
+    // 验证用户是否创建成功
+    const createdUser = await db.getUserByEmail(userEmail)
+    if (createdUser) {
+      console.log('Register - User created successfully:', {
+        userId: createdUser.id,
+        email: createdUser.email,
+        hasPasswordHash: !!(createdUser as any).password_hash || !!(createdUser as any).passwordHash
+      })
+    }
 
     // 生成 token
     const token = await generateToken(

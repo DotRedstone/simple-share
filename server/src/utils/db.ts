@@ -28,6 +28,15 @@ export class Database {
 
   async getUserByEmail(email: string) {
     const result = await this.db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first()
+    // D1 数据库返回的字段名是下划线格式，确保正确返回
+    if (result) {
+      // 确保 password_hash 字段存在
+      const user = result as any
+      if (user.password_hash === undefined && user.passwordHash === undefined) {
+        // 尝试从所有字段中查找
+        console.warn('User query result keys:', Object.keys(user))
+      }
+    }
     return result as any
   }
 
