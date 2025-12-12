@@ -168,6 +168,8 @@ const goHome = () => {
           </div>
         </div>
       </PageFrame>
+    </div>
+
     <!-- 下载确认 -->
     <BaseModal :show="showDownloadModal" title="下载文件" width="max-w-sm" @close="showDownloadModal = false">
       <div class="text-center py-4">
