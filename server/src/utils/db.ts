@@ -27,14 +27,17 @@ export class Database {
   }
 
   async getUserByEmail(email: string) {
-    const result = await this.db.prepare('SELECT * FROM users WHERE email = ?').bind(email).first()
-    // D1 数据库返回的字段名是下划线格式，确保正确返回
+    // 显式查询所有字段，确保 password_hash 字段被正确返回
+    const result = await this.db.prepare(
+      'SELECT id, name, email, password_hash, phone, role, status, storage_quota, storage_used, group_id, auth_provider, auth_provider_id, avatar_url, created_at, updated_at FROM users WHERE email = ?'
+    ).bind(email).first()
+    
     if (result) {
-      // 确保 password_hash 字段存在
       const user = result as any
+      // D1 数据库返回的字段名是下划线格式
+      // 确保 password_hash 字段存在
       if (user.password_hash === undefined && user.passwordHash === undefined) {
-        // 尝试从所有字段中查找
-        console.warn('User query result keys:', Object.keys(user))
+        console.warn('User query result - password_hash not found. Keys:', Object.keys(user))
       }
     }
     return result as any

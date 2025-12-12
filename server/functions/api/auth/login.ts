@@ -31,21 +31,22 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     }
 
     // 验证密码（注意：数据库字段名是 password_hash，D1 返回的是下划线格式）
-    // D1 数据库返回的字段名可能是下划线格式，需要兼容处理
-    const passwordHash = (user as any).password_hash || (user as any).passwordHash || (user as any)['password_hash']
+    // D1 数据库返回的字段名是下划线格式
+    const passwordHash = (user as any).password_hash
     
-    // 调试信息：打印用户对象的所有键
-    console.log('User object keys:', Object.keys(user as any))
-    console.log('Password hash field:', {
-      'password_hash': (user as any).password_hash,
-      'passwordHash': (user as any).passwordHash,
-      'has password_hash key': 'password_hash' in (user as any),
-      'all keys': Object.keys(user as any)
+    // 调试信息
+    console.log('Login attempt:', {
+      email: user.email,
+      userId: user.id,
+      hasPasswordHash: !!passwordHash,
+      passwordHashLength: passwordHash?.length,
+      passwordHashType: typeof passwordHash,
+      userKeys: Object.keys(user as any)
     })
     
     if (!passwordHash) {
       // OAuth 用户可能没有密码
-      if ((user as any).auth_provider !== 'local' || (user as any).auth_provider_id) {
+      if ((user as any).auth_provider && (user as any).auth_provider !== 'local') {
         return new Response(
           JSON.stringify({ success: false, error: '该账户使用第三方登录，请使用对应的登录方式' }),
           { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -54,6 +55,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       console.error('No password hash found for user:', {
         userId: user.id,
         email: user.email,
+        authProvider: (user as any).auth_provider,
         userKeys: Object.keys(user as any)
       })
       return new Response(
@@ -62,7 +64,9 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
+    // 验证密码
     const isValid = await verifyPassword(password, passwordHash)
+    
     if (!isValid) {
       // 测试：重新哈希密码看看是否匹配
       const testHash = await hashPassword(password)
@@ -73,7 +77,9 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
         storedHashLength: passwordHash.length,
         storedHashPrefix: passwordHash.substring(0, 20) + '...',
         testHashPrefix: testHash.substring(0, 20) + '...',
-        hashesMatch: testHash === passwordHash
+        hashesMatch: testHash === passwordHash,
+        storedHash: passwordHash,
+        testHash: testHash
       })
     }
     if (!isValid) {
