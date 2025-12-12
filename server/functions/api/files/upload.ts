@@ -2,6 +2,7 @@ import { Database } from '../../../src/utils/db'
 import { requireAuth } from '../../../src/middleware/auth'
 import { generateR2Key, getFileType, formatFileSize } from '../../../src/utils/r2'
 import { createStorageAdapter, type StorageBackendConfig } from '../../../src/utils/storage'
+import { corsHeaders } from '../../../src/utils/cors'
 import type { Env } from '../../../src/utils/db'
 
 export async function onRequestPost(context: { env: Env; request: Request }): Promise<Response> {
@@ -16,9 +17,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     const parentId = formData.get('parentId') ? parseInt(formData.get('parentId') as string) : null
 
     if (!file) {
+      const origin = request.headers.get('Origin')
       return new Response(
         JSON.stringify({ success: false, error: '请选择要上传的文件' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -27,9 +35,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     if (userData) {
       const newSize = (userData.storage_used || 0) + file.size
       if (userData.storage_quota && newSize > userData.storage_quota * 1024 * 1024 * 1024) {
+        const origin = request.headers.get('Origin')
         return new Response(
           JSON.stringify({ success: false, error: '存储空间不足' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { 
+            status: 403, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
         )
       }
     }
@@ -42,9 +57,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     if (storageBackendId) {
       storageBackend = await db.getStorageBackendById(storageBackendId)
       if (!storageBackend || storageBackend.enabled !== 1) {
+        const origin = request.headers.get('Origin')
         return new Response(
           JSON.stringify({ success: false, error: '指定的存储后端不可用' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { 
+            status: 400, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
         )
       }
     } else {
@@ -54,9 +76,16 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     // 如果没有配置存储后端，尝试使用默认的 R2
     if (!storageBackend) {
       if (!env.FILES) {
+        const origin = request.headers.get('Origin')
         return new Response(
           JSON.stringify({ success: false, error: '未配置存储后端，请在管理员面板或用户设置中添加存储后端' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { 
+            status: 400, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
         )
       }
       storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
@@ -111,6 +140,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       ip: request.headers.get('CF-Connecting-IP') || undefined
     })
 
+    const origin = request.headers.get('Origin')
     return new Response(
       JSON.stringify({
         success: true,
@@ -123,14 +153,37 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
           starred: false
         }
       }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders(origin)
+        } 
+      }
     )
   } catch (error: any) {
-    if (error instanceof Response) return error
+    if (error instanceof Response) {
+      const origin = request.headers.get('Origin')
+      const headers = new Headers(error.headers)
+      Object.entries(corsHeaders(origin)).forEach(([key, value]) => {
+        headers.set(key, value as string)
+      })
+      return new Response(error.body, {
+        status: error.status,
+        statusText: error.statusText,
+        headers
+      })
+    }
     
+    const origin = request.headers.get('Origin')
     return new Response(
       JSON.stringify({ success: false, error: '上传失败，请稍后重试' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders(origin)
+        } 
+      }
     )
   }
 }
