@@ -104,63 +104,70 @@ const getFileIcon = (type: string) => {
   }
   return icons[type] || 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
 }
+
+const goHome = () => {
+  // 使用 replace 避免路由历史问题，如果还是有问题就用 window.location
+  router.replace('/').catch(() => {
+    window.location.href = '/'
+  })
+}
 </script>
 
 <template>
-  <PageFrame class="min-h-screen flex flex-col items-center justify-center">
+  <div class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
     <div class="w-full max-w-md">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">文件提取</h1>
-        <p class="text-slate-400">提取码：<span class="font-mono text-white">{{ shareCode }}</span></p>
-      </div>
-
-      <!-- 加载状态 -->
-      <div v-if="isLoading" class="bg-white/5 border border-white/10 rounded-2xl p-12">
-        <LoadingSpinner size="lg" text="正在验证提取码..." />
-      </div>
-
-      <!-- 错误状态 -->
-      <div v-else-if="error" class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
-        <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p class="text-red-400 mb-6">{{ error }}</p>
-        <BaseButton variant="primary" @click="router.push('/')">返回首页</BaseButton>
-      </div>
-
-      <!-- 文件信息 -->
-      <div v-else-if="fileInfo" class="bg-white/5 border border-white/10 rounded-2xl p-8">
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-blue-500/20 rounded-2xl">
-            <svg class="w-12 h-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(fileInfo.type)" />
-            </svg>
-          </div>
-          <h2 class="text-xl font-bold text-white mb-2">{{ fileInfo.name }}</h2>
+      <PageFrame>
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-white mb-2">文件提取</h1>
+          <p class="text-slate-400">提取码：<span class="font-mono text-white">{{ shareCode }}</span></p>
         </div>
 
-        <div class="space-y-3 mb-6">
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-slate-400">文件大小</span>
-            <span class="text-white font-mono">{{ fileInfo.size }}</span>
-          </div>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-slate-400">上传时间</span>
-            <span class="text-white">{{ fileInfo.uploadTime }}</span>
-          </div>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-slate-400">文件类型</span>
-            <span class="text-white uppercase">{{ fileInfo.type }}</span>
-          </div>
+        <!-- 加载状态 -->
+        <div v-if="isLoading" class="bg-white/5 border border-white/10 rounded-2xl p-12">
+          <LoadingSpinner size="lg" text="正在验证提取码..." />
         </div>
 
-        <div class="flex gap-3">
-          <BaseButton variant="glass" class="flex-1" @click="router.push('/')">返回首页</BaseButton>
-          <BaseButton variant="primary" class="flex-1" @click="handleDownload">下载文件</BaseButton>
+        <!-- 错误状态 -->
+        <div v-else-if="error" class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
+          <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-red-400 mb-6">{{ error }}</p>
+          <BaseButton variant="primary" @click="goHome">返回首页</BaseButton>
         </div>
-      </div>
-    </div>
 
+        <!-- 文件信息 -->
+        <div v-else-if="fileInfo" class="bg-white/5 border border-white/10 rounded-2xl p-8">
+          <div class="text-center mb-6">
+            <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-blue-500/20 rounded-2xl">
+              <svg class="w-12 h-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(fileInfo.type)" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-bold text-white mb-2">{{ fileInfo.name }}</h2>
+          </div>
+
+          <div class="space-y-3 mb-6">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400">文件大小</span>
+              <span class="text-white font-mono">{{ fileInfo.size }}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400">上传时间</span>
+              <span class="text-white">{{ fileInfo.uploadTime }}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-slate-400">文件类型</span>
+              <span class="text-white uppercase">{{ fileInfo.type }}</span>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <BaseButton variant="glass" class="flex-1" @click="goHome">返回首页</BaseButton>
+            <BaseButton variant="primary" class="flex-1" @click="handleDownload">下载文件</BaseButton>
+          </div>
+        </div>
+      </PageFrame>
     <!-- 下载确认 -->
     <BaseModal :show="showDownloadModal" title="下载文件" width="max-w-sm" @close="showDownloadModal = false">
       <div class="text-center py-4">
@@ -177,6 +184,6 @@ const getFileIcon = (type: string) => {
         </div>
       </div>
     </BaseModal>
-  </PageFrame>
+  </div>
 </template>
 

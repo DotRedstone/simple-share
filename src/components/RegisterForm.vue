@@ -71,54 +71,64 @@ const handleRegister = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleRegister" class="space-y-6">
-    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
+  <form @submit.prevent="handleRegister" class="space-y-4 sm:space-y-6 min-w-0">
+    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
       {{ error }}
     </div>
 
-    <BaseInput
-      v-model="username"
-      label="用户名"
-      placeholder="请输入用户名（至少3位）"
-      id="username"
-      :disabled="isLoading"
-    />
-
-    <BaseInput
-      v-model="email"
-      label="邮箱"
-      type="email"
-      placeholder="请输入邮箱地址"
-      id="email"
-      :disabled="isLoading"
-    />
-
-    <BaseInput
-      v-model="password"
-      label="密码"
-      type="password"
-      placeholder="请输入密码（至少6位）"
-      id="password"
-      :disabled="isLoading"
-    />
-
-    <BaseInput
-      v-model="confirmPassword"
-      label="确认密码"
-      type="password"
-      placeholder="请再次输入密码"
-      id="confirmPassword"
-      :disabled="isLoading"
-    />
-
-    <div class="text-sm text-slate-400 text-center">
-      已有账号？
-      <a href="#" @click.prevent="$emit('switch-to-login')" class="text-blue-400 hover:underline">立即登录</a>
+    <div class="min-w-0">
+      <BaseInput
+        v-model="username"
+        label="用户名"
+        placeholder="请输入用户名（至少3位）"
+        id="username"
+        :disabled="isLoading"
+      />
     </div>
 
-    <BaseButton type="submit" variant="primary" class="w-full !py-3" :loading="isLoading" :disabled="isLoading">
-      注册
-    </BaseButton>
+    <div class="min-w-0">
+      <BaseInput
+        v-model="email"
+        label="邮箱"
+        type="email"
+        placeholder="请输入邮箱地址"
+        id="email"
+        :disabled="isLoading"
+      />
+    </div>
+
+    <div class="min-w-0">
+      <BaseInput
+        v-model="password"
+        label="密码"
+        type="password"
+        placeholder="请输入密码（至少6位）"
+        id="password"
+        :disabled="isLoading"
+      />
+    </div>
+
+    <div class="min-w-0">
+      <BaseInput
+        v-model="confirmPassword"
+        label="确认密码"
+        type="password"
+        placeholder="请再次输入密码"
+        id="confirmPassword"
+        :disabled="isLoading"
+      />
+    </div>
+
+    <div class="text-xs sm:text-sm text-slate-400 text-center min-w-0 break-words">
+      已有账号？
+      <a href="#" @click.prevent="$emit('switch-to-login')" class="text-blue-400 hover:underline whitespace-nowrap" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即登录</a>
+    </div>
+
+    <div class="min-w-0 w-full">
+      <BaseButton type="submit" variant="primary" class="w-full !py-2.5 sm:!py-3 min-w-0" :loading="isLoading" :disabled="isLoading">
+        注册
+      </BaseButton>
+    </div>
   </form>
 </template>
 

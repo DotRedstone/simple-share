@@ -89,14 +89,15 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
-    // 生成 token
+    // 生成 token（根据 remember 参数设置不同的过期时间）
     const token = await generateToken(
       {
         userId: user.id,
         email: user.email,
         role: user.role
       },
-      env.JWT_SECRET
+      env.JWT_SECRET,
+      remember
     )
 
     // 记录日志

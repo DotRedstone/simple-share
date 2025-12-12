@@ -1,13 +1,16 @@
 import { SignJWT, jwtVerify } from 'jose'
 import type { JwtPayload } from '../types'
 
-export async function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string): Promise<string> {
+export async function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string, remember?: boolean): Promise<string> {
   const secretKey = new TextEncoder().encode(secret)
+  
+  // 如果 remember 为 true，token 有效期 30 天，否则 7 天
+  const expirationTime = remember ? '30d' : '7d'
   
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime(expirationTime)
     .sign(secretKey)
 
   return token

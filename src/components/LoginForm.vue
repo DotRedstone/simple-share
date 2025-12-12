@@ -51,40 +51,48 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleLogin" class="space-y-4 sm:space-y-6">
-    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
+  <form @submit.prevent="handleLogin" class="space-y-4 sm:space-y-6 min-w-0">
+    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
       {{ error }}
     </div>
 
-    <BaseInput
-        v-model="username"
-        label="用户名"
-        placeholder="请输入用户名"
-        id="username"
-        :disabled="isLoading"
-    />
-
-    <BaseInput
-        v-model="password"
-        label="密码"
-        type="password"
-        placeholder="请输入密码"
-        id="password"
-        :disabled="isLoading"
-    />
-
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-      <BaseCheckbox v-model="remember" label="记住我" :disabled="isLoading" />
-      <a href="#" @click.prevent="$emit('forgot')" class="text-sm text-blue-400 hover:underline" :class="{ 'opacity-50 pointer-events-none': isLoading }">忘记密码?</a>
+    <div class="min-w-0">
+      <BaseInput
+          v-model="username"
+          label="用户名"
+          placeholder="请输入用户名"
+          id="username"
+          :disabled="isLoading"
+      />
     </div>
 
-    <BaseButton type="submit" variant="primary" class="w-full !py-2.5 sm:!py-3" :loading="isLoading" :disabled="isLoading">
-      登录
-    </BaseButton>
+    <div class="min-w-0">
+      <BaseInput
+          v-model="password"
+          label="密码"
+          type="password"
+          placeholder="请输入密码"
+          id="password"
+          :disabled="isLoading"
+      />
+    </div>
 
-    <div class="text-xs sm:text-sm text-slate-400 text-center pt-2">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 min-w-0">
+      <div class="min-w-0 flex-shrink-0">
+        <BaseCheckbox v-model="remember" label="记住我" :disabled="isLoading" />
+      </div>
+      <a href="#" @click.prevent="$emit('forgot')" class="text-xs sm:text-sm text-blue-400 hover:underline whitespace-nowrap flex-shrink-0" :class="{ 'opacity-50 pointer-events-none': isLoading }">忘记密码?</a>
+    </div>
+
+    <div class="min-w-0 w-full">
+      <BaseButton type="submit" variant="primary" class="w-full !py-2.5 sm:!py-3 min-w-0" :loading="isLoading" :disabled="isLoading">
+        登录
+      </BaseButton>
+    </div>
+
+    <div class="text-xs sm:text-sm text-slate-400 text-center pt-2 min-w-0 break-words">
       还没有账号？
-      <a href="#" @click.prevent="$emit('switch-to-register')" class="text-blue-400 hover:underline" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即注册</a>
+      <a href="#" @click.prevent="$emit('switch-to-register')" class="text-blue-400 hover:underline whitespace-nowrap" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即注册</a>
     </div>
   </form>
 </template>

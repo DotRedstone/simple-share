@@ -22,7 +22,7 @@ const emit = defineEmits<{
   <button
       :type="type"
       :disabled="disabled || loading"
-      class="relative flex items-center justify-center px-6 py-3 rounded-xl font-medium transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+      class="relative flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden min-w-0 max-w-full"
       :class="{
       'bg-white text-slate-900 hover:bg-gray-100 shadow-lg shadow-white/10': variant === 'primary',
       'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/30 backdrop-blur-md': variant === 'glass',
@@ -37,7 +37,7 @@ const emit = defineEmits<{
       </svg>
     </span>
 
-    <span :class="{ 'opacity-0': loading }" class="flex items-center gap-2">
+    <span :class="{ 'opacity-0': loading }" class="flex items-center gap-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">
       <slot />
     </span>
   </button>

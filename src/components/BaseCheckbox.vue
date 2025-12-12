@@ -11,8 +11,8 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <label class="inline-flex items-center cursor-pointer group" :class="{ 'opacity-50 cursor-not-allowed': disabled }">
-    <div class="relative">
+  <label class="inline-flex items-center cursor-pointer group min-w-0" :class="{ 'opacity-50 cursor-not-allowed': disabled }">
+    <div class="relative flex-shrink-0">
       <input
           type="checkbox"
           class="peer sr-only"
@@ -25,7 +25,7 @@ const emit = defineEmits<{
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
       </svg>
     </div>
-    <span v-if="label" class="ml-3 text-sm text-white/70 group-hover:text-white transition-colors select-none">
+    <span v-if="label" class="ml-2 sm:ml-3 text-xs sm:text-sm text-white/70 group-hover:text-white transition-colors select-none min-w-0 break-words">
       {{ label }}
     </span>
   </label>
