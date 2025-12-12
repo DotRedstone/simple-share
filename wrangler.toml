@@ -28,17 +28,6 @@ binding = "ASSETS"
 [vars]
 JWT_SECRET = "dev-jwt-secret-change-in-production"
 R2_PUBLIC_URL = "https://your-r2-domain.com"
-# Auth0 配置（可选）
-# AUTH0_DOMAIN = ""
-# AUTH0_CLIENT_ID = ""
-# AUTH0_CLIENT_SECRET = ""
-# 直接 OAuth 配置（可选，如果使用 Auth0 则不需要）
-# WECHAT_CLIENT_ID = ""
-# WECHAT_CLIENT_SECRET = ""
-# GITHUB_CLIENT_ID = ""
-# GITHUB_CLIENT_SECRET = ""
-# GOOGLE_CLIENT_ID = ""
-# GOOGLE_CLIENT_SECRET = ""
 
 # 生产环境配置
 [env.production]
@@ -58,15 +47,4 @@ name = "simple-share"
 [env.production.vars]
 JWT_SECRET = "your-jwt-secret-key-change-in-production"
 R2_PUBLIC_URL = "https://your-r2-domain.com"
-# Auth0 配置（可选）
-# AUTH0_DOMAIN = ""
-# AUTH0_CLIENT_ID = ""
-# AUTH0_CLIENT_SECRET = ""
-# 直接 OAuth 配置（可选）
-# WECHAT_CLIENT_ID = ""
-# WECHAT_CLIENT_SECRET = ""
-# GITHUB_CLIENT_ID = ""
-# GITHUB_CLIENT_SECRET = ""
-# GOOGLE_CLIENT_ID = ""
-# GOOGLE_CLIENT_SECRET = ""
 

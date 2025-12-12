@@ -34,25 +34,6 @@
 | `JWT_SECRET` | JWT 签名密钥（至少 32 字符） | `your-super-secret-jwt-key-at-least-32-chars` |
 | `R2_PUBLIC_URL` | R2 公共访问 URL（可选） | `https://your-r2-domain.com` |
 
-#### Auth0 配置（如果使用 Auth0）
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|--------|
-| `AUTH0_DOMAIN` | Auth0 域名 | `your-tenant.auth0.com` |
-| `AUTH0_CLIENT_ID` | Auth0 Client ID | `your-auth0-client-id` |
-| `AUTH0_CLIENT_SECRET` | Auth0 Client Secret | `your-auth0-client-secret` |
-
-#### 直接 OAuth 配置（如果不用 Auth0）
-
-| 变量名 | 说明 | 示例值 |
-|--------|------|--------|
-| `WECHAT_CLIENT_ID` | 微信 AppID（可选） | `your-wechat-appid` |
-| `WECHAT_CLIENT_SECRET` | 微信 AppSecret（可选） | `your-wechat-secret` |
-| `GITHUB_CLIENT_ID` | GitHub Client ID（可选） | `your-github-client-id` |
-| `GITHUB_CLIENT_SECRET` | GitHub Client Secret（可选） | `your-github-secret` |
-| `GOOGLE_CLIENT_ID` | Google Client ID（可选） | `your-google-client-id` |
-| `GOOGLE_CLIENT_SECRET` | Google Client Secret（可选） | `your-google-secret` |
-
 ### 4. 保存配置
 
 1. 添加完所有变量后，点击 **Save** 按钮
@@ -66,9 +47,9 @@
 2. 查看 **Environment Variables** 部分
 3. 确认所有变量都已正确添加
 
-### 方法 2：通过 API 测试
+### 方法 2：通过应用测试
 
-部署后，访问你的 Worker URL，如果环境变量配置正确，OAuth 登录按钮应该会显示。
+部署后，访问你的 Worker URL，如果环境变量配置正确，应用应该能正常运行。
 
 ## 常见问题
 
@@ -118,4 +99,3 @@
 
 - [Cloudflare Workers 环境变量文档](https://developers.cloudflare.com/workers/configuration/environment-variables/)
 - [Wrangler 配置文档](https://developers.cloudflare.com/workers/wrangler/configuration/)
-

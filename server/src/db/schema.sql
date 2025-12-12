@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS users (
   storage_quota REAL DEFAULT 50.0, -- GB
   storage_used REAL DEFAULT 0.0, -- GB
   group_id TEXT,
-  auth_provider TEXT DEFAULT 'local' CHECK(auth_provider IN ('local', 'google', 'github', 'wechat', 'phone')),
-  auth_provider_id TEXT,
   avatar_url TEXT,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
@@ -170,7 +168,6 @@ CREATE INDEX IF NOT EXISTS idx_storage_backends_enabled ON storage_backends(enab
 CREATE INDEX IF NOT EXISTS idx_files_storage_backend_id ON files(storage_backend_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
-CREATE INDEX IF NOT EXISTS idx_users_auth_provider ON users(auth_provider, auth_provider_id);
 CREATE INDEX IF NOT EXISTS idx_user_storage_backends_user_id ON user_storage_backends(user_id);
 CREATE INDEX IF NOT EXISTS idx_group_storage_allocations_group_id ON group_storage_allocations(group_id);
 CREATE INDEX IF NOT EXISTS idx_user_storage_backends_user_id ON user_storage_backends(user_id);

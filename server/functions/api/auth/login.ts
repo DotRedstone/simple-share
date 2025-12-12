@@ -45,17 +45,9 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     })
     
     if (!passwordHash) {
-      // OAuth 用户可能没有密码
-      if ((user as any).auth_provider && (user as any).auth_provider !== 'local') {
-        return new Response(
-          JSON.stringify({ success: false, error: '该账户使用第三方登录，请使用对应的登录方式' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
-        )
-      }
       console.error('No password hash found for user:', {
         userId: user.id,
         email: user.email,
-        authProvider: (user as any).auth_provider,
         userKeys: Object.keys(user as any)
       })
       return new Response(

@@ -5,17 +5,6 @@ export interface Env {
   FILES?: R2Bucket  // R2 bucket 现在是可选的
   JWT_SECRET: string
   R2_PUBLIC_URL?: string
-  // Auth0 配置
-  AUTH0_DOMAIN?: string
-  AUTH0_CLIENT_ID?: string
-  AUTH0_CLIENT_SECRET?: string
-  // 直接 OAuth 配置（备选）
-  WECHAT_CLIENT_ID?: string
-  WECHAT_CLIENT_SECRET?: string
-  GITHUB_CLIENT_ID?: string
-  GITHUB_CLIENT_SECRET?: string
-  GOOGLE_CLIENT_ID?: string
-  GOOGLE_CLIENT_SECRET?: string
 }
 
 export class Database {
@@ -29,7 +18,7 @@ export class Database {
   async getUserByEmail(email: string) {
     // 显式查询所有字段，确保 password_hash 字段被正确返回
     const result = await this.db.prepare(
-      'SELECT id, name, email, password_hash, phone, role, status, storage_quota, storage_used, group_id, auth_provider, auth_provider_id, avatar_url, created_at, updated_at FROM users WHERE email = ?'
+      'SELECT id, name, email, password_hash, phone, role, status, storage_quota, storage_used, group_id, avatar_url, created_at, updated_at FROM users WHERE email = ?'
     ).bind(email).first()
     
     if (result) {
@@ -51,8 +40,6 @@ export class Database {
     phone?: string
     role?: 'admin' | 'user'
     groupId?: string
-    authProvider?: string
-    authProviderId?: string
     avatarUrl?: string
   }) {
     const now = Date.now()
@@ -64,7 +51,7 @@ export class Database {
     
     await this.db
       .prepare(
-        'INSERT INTO users (id, name, email, password_hash, phone, role, group_id, auth_provider, auth_provider_id, avatar_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO users (id, name, email, password_hash, phone, role, group_id, avatar_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
       )
       .bind(
         user.id,
@@ -74,8 +61,6 @@ export class Database {
         user.phone || null,
         user.role || 'user',
         defaultGroupId,
-        user.authProvider || 'local',
-        user.authProviderId || null,
         user.avatarUrl || null,
         now,
         now

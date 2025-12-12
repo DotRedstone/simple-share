@@ -86,69 +86,8 @@ const switchToLogin = () => {
   showLogin.value = true
 }
 
-const handleOAuth = async (provider: 'wechat' | 'github' | 'google') => {
-  try {
-    const response = await fetch(`/api/auth/oauth?provider=${provider}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/oauth/callback')}`)
-    const data = await response.json()
-    if (data.success && data.authUrl) {
-      window.location.href = data.authUrl
-    } else {
-      loginError.value = data.error || 'OAuth 登录失败'
-    }
-  } catch (err) {
-    loginError.value = 'OAuth 登录失败，请稍后重试'
-  }
-}
-
-const handleAuth0 = async () => {
-  try {
-    const response = await fetch(`/api/auth/auth0?redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/auth0/callback')}`)
-    const data = await response.json()
-    if (data.success && data.authUrl) {
-      window.location.href = data.authUrl
-    } else {
-      loginError.value = data.error || 'Auth0 登录失败'
-    }
-  } catch (err) {
-    loginError.value = 'Auth0 登录失败，请稍后重试'
-  }
-}
-
-// 处理直接 OAuth 回调（非 Auth0）
-onMounted(async () => {
+onMounted(() => {
   authStore.initAuth()
-  
-  // 检查是否是直接 OAuth 回调（非 Auth0）
-  const url = new URL(window.location.href)
-  const code = url.searchParams.get('code')
-  const state = url.searchParams.get('state')
-  const provider = url.searchParams.get('provider') || localStorage.getItem('oauth_provider')
-  
-  // Auth0 回调由 Auth0Callback.vue 处理，这里只处理直接 OAuth
-  if (code && provider && !url.pathname.includes('/callback')) {
-    try {
-      const response = await fetch('/api/auth/oauth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, code, state })
-      })
-      const data = await response.json()
-      
-      if (data.success) {
-        if (data.data.token && data.data.user) {
-          authStore.login(data.data.user, data.data.token)
-          const isAdmin = data.data.user?.role === 'admin'
-          router.push(isAdmin ? '/admin' : '/dashboard')
-        }
-      } else {
-        loginError.value = data.error || 'OAuth 登录失败'
-        showLogin.value = true
-      }
-    } catch (err) {
-      loginError.value = 'OAuth 登录失败，请稍后重试'
-      showLogin.value = true
-    }
-  }
 })
 </script>
 
@@ -188,8 +127,6 @@ onMounted(async () => {
         @login="onLoginSuccess" 
         @forgot="showLogin = false" 
         @switch-to-register="switchToRegister"
-        @oauth="handleOAuth"
-        @auth0="handleAuth0"
       />
     </BaseModal>
 

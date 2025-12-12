@@ -83,8 +83,6 @@ CREATE TABLE IF NOT EXISTS users (
   storage_quota REAL DEFAULT 50.0,
   storage_used REAL DEFAULT 0.0,
   group_id TEXT,
-  auth_provider TEXT DEFAULT 'local' CHECK(auth_provider IN ('local', 'google', 'github', 'wechat', 'phone')),
-  auth_provider_id TEXT,
   avatar_url TEXT,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
