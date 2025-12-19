@@ -10,7 +10,9 @@ defineProps<{
 <template>
   <nav class="flex justify-between items-center shrink-0 pb-2">
     <div class="flex items-center gap-2">
-      <div class="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-lg">S</div>
+      <div class="w-6 h-6 rounded-lg overflow-hidden flex items-center justify-center shadow-lg">
+        <img src="/favicon-96x96.png" alt="SimpleShare" class="w-full h-full object-contain" />
+      </div>
       <span class="text-base font-bold text-white tracking-tight">SimpleShare</span>
     </div>
     <div v-if="onLoginClick || onRegisterClick" class="flex items-center gap-2">

@@ -23,12 +23,6 @@ const emit = defineEmits<{
   (e: 'logout'): void
 }>()
 
-const logoClasses = computed(() => {
-  return props.logoColor === 'red'
-    ? 'bg-gradient-to-br from-red-500 to-orange-500 shadow-lg shadow-red-500/20'
-    : 'bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg shadow-blue-500/20'
-})
-
 const getIcon = (iconName: string) => {
   const icons: Record<string, string> = {
     folder: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z',
@@ -54,8 +48,8 @@ const activeColor = computed(() => {
 <template>
   <aside class="w-full md:w-64 shrink-0 bg-slate-900/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden">
     <div class="h-16 md:h-20 flex items-center px-6 border-b border-white/5 shrink-0">
-      <div :class="logoClasses" class="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold mr-3">
-        {{ logo }}
+      <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center mr-3 shadow-lg">
+        <img src="/favicon-96x96.png" alt="SimpleShare" class="w-full h-full object-contain" />
       </div>
       <span class="font-bold text-lg text-white tracking-wide">
         <slot name="title">SimpleShare</slot>
