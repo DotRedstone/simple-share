@@ -45,9 +45,6 @@ export const useFileStore = defineStore('file', () => {
       case 'shares':
         return []
       
-      case 'trash':
-        return []
-      
       case 'all':
       default:
         return fileList
@@ -135,7 +132,7 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const setActiveTab = (tab: string) => {
-    activeTab.value = tab as 'all' | 'recent' | 'starred' | 'trash' | 'shares'
+    activeTab.value = tab as 'all' | 'recent' | 'starred' | 'shares'
     breadcrumbs.value = []
     searchQuery.value = ''
   }

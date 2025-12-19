@@ -18,7 +18,7 @@ const emit = defineEmits<{
 interface StorageBackend {
   id: string
   name: string
-  type: 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+  type: 'r2' | 's3' | 'webdav'
   enabled: boolean
   isDefault: boolean
   description?: string
@@ -36,7 +36,7 @@ const editingBackend = ref<StorageBackend | null>(null)
 // 表单数据
 const formData = ref({
   name: '',
-  type: 'r2' as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp',
+  type: 'r2' as 'r2' | 's3' | 'webdav',
   description: '',
   enabled: true,
   isDefault: false,
@@ -53,11 +53,7 @@ const formData = ref({
   webdavUrl: '',
   username: '',
   password: '',
-  basePath: '',
-  // FTP/SFTP 配置
-  host: '',
-  port: 21,
-  path: ''
+  basePath: ''
 })
 
 const storagePercentage = computed(() => {
@@ -127,11 +123,7 @@ const resetForm = () => {
     webdavUrl: '',
     username: '',
     password: '',
-    basePath: '',
-    // FTP/SFTP 配置
-    host: '',
-    port: 21,
-    path: ''
+    basePath: ''
   }
   editingBackend.value = null
 }
@@ -159,10 +151,7 @@ const openEditModal = (backend: StorageBackend) => {
     webdavUrl: backend.config.webdavUrl || '',
     username: backend.config.username || '',
     password: '', // 不显示密码
-    basePath: backend.config.basePath || '',
-    host: backend.config.host || '',
-    port: backend.config.port || 21,
-    path: backend.config.path || ''
+    basePath: backend.config.basePath || ''
   }
   showEditModal.value = true
 }
@@ -190,12 +179,6 @@ const buildConfig = () => {
     if (formData.value.basePath) {
       config.basePath = formData.value.basePath
     }
-  } else if (formData.value.type === 'ftp' || formData.value.type === 'sftp') {
-    config.host = formData.value.host
-    config.port = formData.value.port
-    config.path = formData.value.path
-    config.username = formData.value.username
-    config.password = formData.value.password
   }
   
   return config
@@ -430,8 +413,6 @@ onMounted(() => {
             <option value="r2">Cloudflare R2</option>
             <option value="s3">AWS S3</option>
             <option value="webdav">WebDAV (AList/OpenList)</option>
-            <option value="ftp">FTP</option>
-            <option value="sftp">SFTP</option>
           </select>
         </div>
 
@@ -519,44 +500,6 @@ onMounted(() => {
           />
           <div class="text-xs text-slate-400 mt-1">
             提示：适用于 AList、OpenList 等支持 WebDAV 的网盘挂载服务
-          </div>
-        </template>
-
-        <!-- FTP/SFTP 配置 -->
-        <template v-else-if="formData.type === 'ftp' || formData.type === 'sftp'">
-          <BaseInput
-            v-model="formData.host"
-            label="主机地址"
-            placeholder="ftp.example.com"
-            required
-          />
-          <BaseInput
-            v-model.number="formData.port"
-            label="端口"
-            type="number"
-            placeholder="21 (FTP) 或 22 (SFTP)"
-            required
-          />
-          <BaseInput
-            v-model="formData.username"
-            label="用户名"
-            placeholder="ftp-username"
-            required
-          />
-          <BaseInput
-            v-model="formData.password"
-            label="密码"
-            type="password"
-            placeholder="留空则不更新"
-            :required="!editingBackend"
-          />
-          <BaseInput
-            v-model="formData.path"
-            label="远程路径"
-            placeholder="/files 或留空使用根目录"
-          />
-          <div class="text-xs text-slate-400 mt-1">
-            注意：FTP/SFTP 功能需要额外的库支持，当前版本可能无法完全工作
           </div>
         </template>
 

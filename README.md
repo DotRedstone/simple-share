@@ -40,7 +40,7 @@
 3. 数据库名称：`simpleshare-db`
 4. 创建后，复制 `database_id`（格式类似：`fe372b0a-2da1-40aa-b3d8-1e5fcc72a43d`）
 
-#### 创建 R2 存储桶（可选）
+#### 创建 R2 存储桶（推荐）
 
 1. 在 Cloudflare 控制台左侧菜单，点击 **R2**
 2. 点击 **Create bucket**
@@ -55,7 +55,7 @@
    - Variable name: `DB`
    - Database: 选择 `simpleshare-db`
    - 点击 **Save**
-5. 在 **R2 Bucket bindings** 中点击 **Add binding**（可选）：
+5. 在 **R2 Bucket bindings** 中点击 **Add binding**（用于文件实际存储，推荐配置）：
    - Variable name: `FILES`
    - Bucket: 选择 `simpleshare-files`
    - 点击 **Save**
@@ -68,7 +68,22 @@
      - 生成方式：`openssl rand -hex 32`
 3. ⚠️ **重要**：确保选择 **Production** 环境（不是 Preview）
 
-### 6. 部署
+### 6. 初始化管理员账户
+
+项目不会自动创建管理员账号，你需要在部署后手动初始化一次 D1 数据库中的管理员：
+
+1. 本地安装并登录 Cloudflare Wrangler：
+   - 安装：`npm install -g wrangler`
+   - 登录：`wrangler login`
+2. 在本项目根目录执行（远程生产数据库）：
+   - `cd server`
+   - `npx wrangler d1 execute simpleshare-db --remote --file=./src/db/seed.sql`
+3. 执行完成后，会在 `users` 表中创建一个默认管理员：
+   - 登录邮箱：`admin@simpleshare.com`
+   - 登录密码：`admin123`
+4. 使用该账号登录后，建议尽快在数据库中修改密码或在生产环境前先编辑 `server/src/db/seed.sql`，替换为你自己的邮箱和密码哈希。
+
+### 7. 部署
 
 1. 点击 **Save and Deploy**
 2. 等待构建完成

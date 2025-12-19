@@ -67,7 +67,6 @@ const menuItems: MenuItem[] = [
   { id: 'recent', label: '最近上传', icon: 'clock' },
   { id: 'starred', label: '我的收藏', icon: 'star' },
   { id: 'shares', label: '我的分享', icon: 'share' },
-  { id: 'trash', label: '回收站', icon: 'trash' },
 ]
 
 const initFiles = async () => {
@@ -383,7 +382,6 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             <span v-if="activeTab === 'recent'">📅 显示最近7天上传的文件</span>
             <span v-else-if="activeTab === 'starred'">⭐ 显示已收藏的文件</span>
             <span v-else-if="activeTab === 'shares'">🔗 显示已分享的文件</span>
-            <span v-else-if="activeTab === 'trash'">🗑️ 回收站（暂无功能）</span>
           </div>
 
           <!-- 我的分享标签页 -->
@@ -403,7 +401,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             />
           </div>
 
-          <!-- 其他标签页（最近上传、我的收藏、我的分享、回收站） -->
+          <!-- 其他标签页（最近上传、我的收藏、我的分享） -->
           <FileListView
             v-else
             :files="currentFiles"
