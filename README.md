@@ -68,26 +68,17 @@
      - 生成方式：`openssl rand -hex 32`
 3. ⚠️ **重要**：确保选择 **Production** 环境（不是 Preview）
 
-### 6. 初始化管理员账户
-
-项目不会自动创建管理员账号，你需要在部署后手动初始化一次 D1 数据库中的管理员：
-
-1. 本地安装并登录 Cloudflare Wrangler：
-   - 安装：`npm install -g wrangler`
-   - 登录：`wrangler login`
-2. 在本项目根目录执行（远程生产数据库）：
-   - `cd server`
-   - `npx wrangler d1 execute simpleshare-db --remote --file=./src/db/seed.sql`
-3. 执行完成后，会在 `users` 表中创建一个默认管理员：
-   - 登录邮箱：`admin@simpleshare.com`
-   - 登录密码：`admin123`
-4. 使用该账号登录后，建议尽快在数据库中修改密码或在生产环境前先编辑 `server/src/db/seed.sql`，替换为你自己的邮箱和密码哈希。
-
-### 7. 部署
+### 6. 部署
 
 1. 点击 **Save and Deploy**
 2. 等待构建完成
 3. ✅ **完成！** Worker 会在首次请求时自动初始化数据库
+
+### 7. 管理员账号说明
+
+- 第一次成功注册的用户会自动成为 **管理员**（`admin` 角色），可以直接访问后台管理功能。
+- 后续注册的用户都是普通用户（`user` 角色）。
+- 数据库结构会在首次请求时自动创建，无需本地使用 Wrangler 远程执行 `seed.sql`。
 
 ## ✨ 功能特性
 

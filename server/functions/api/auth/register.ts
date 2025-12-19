@@ -34,15 +34,25 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
+    // 判断是否为系统中的第一个用户（第一个用户自动成为管理员）
+    const totalUsers = await db.db
+      .prepare('SELECT COUNT(*) as count FROM users')
+      .first<{ count: number }>()
+    const isFirstUser = !totalUsers || (totalUsers.count || 0) === 0
+
+    const userRole: 'admin' | 'user' = isFirstUser ? 'admin' : 'user'
+
     // 创建用户
     const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     const passwordHash = await hashPassword(password)
     
-    // 调试信息：打印密码哈希
+    // 调试信息：打印密码哈希和角色
     console.log('Register - Password hash created:', {
       passwordLength: password.length,
       hashLength: passwordHash.length,
-      hashPrefix: passwordHash.substring(0, 20) + '...'
+      hashPrefix: passwordHash.substring(0, 20) + '...',
+      role: userRole,
+      isFirstUser
     })
 
     await db.createUser({
@@ -50,7 +60,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       name: username,
       email: userEmail,
       passwordHash,
-      role: 'user'
+      role: userRole
     })
     
     // 验证用户是否创建成功
@@ -68,7 +78,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       {
         userId,
         email: userEmail,
-        role: 'user'
+        role: userRole
       },
       env.JWT_SECRET
     )
@@ -91,7 +101,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
             id: userId,
             name: username,
             email: userEmail,
-            role: 'user',
+            role: userRole,
             status: '活跃',
             storageQuota: 50,
             storageUsed: 0
