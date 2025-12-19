@@ -324,7 +324,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         :active-tab="activeTab"
         :username="username"
         user-role="高级账户"
-        logo="C"
+        logo="S"
         logo-color="blue"
         @tab-change="activeTab = $event"
         @logout="handleLogout"

@@ -221,8 +221,8 @@ onMounted(() => {
         :active-tab="activeTab"
         username="管理员"
         user-role="超级权限"
-        logo="A"
-        logo-color="red"
+        logo="S"
+        logo-color="blue"
         @tab-change="activeTab = $event"
         @logout="handleLogout"
       >

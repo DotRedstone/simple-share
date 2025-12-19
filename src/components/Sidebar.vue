@@ -14,7 +14,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   username: '用户',
   userRole: '高级账户',
-  logo: 'C',
+  logo: 'S',
   logoColor: 'blue'
 })
 
