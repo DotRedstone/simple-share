@@ -15,6 +15,7 @@ export const useAdminStore = defineStore('admin', () => {
     totalFiles: 0,
     totalSize: 0
   })
+  const adminFiles = ref<any[]>([])
 
   const formatSize = (gb: number) => {
     if (gb >= 1024) {
@@ -73,6 +74,13 @@ export const useAdminStore = defineStore('admin', () => {
     const response = await get<SystemLog[]>('/admin/logs')
     if (response.success && response.data) {
       logs.value = response.data
+    }
+  }
+
+  const fetchAdminFiles = async () => {
+    const response = await get<any[]>('/admin/files')
+    if (response.success && response.data) {
+      adminFiles.value = response.data
     }
   }
 
@@ -178,6 +186,7 @@ export const useAdminStore = defineStore('admin', () => {
     users,
     userGroups,
     logs,
+    adminFiles,
     storageStats,
     stats,
     addLog,
@@ -185,6 +194,7 @@ export const useAdminStore = defineStore('admin', () => {
     fetchUserGroups,
     fetchStorageStats,
     fetchLogs,
+    fetchAdminFiles,
     addUser,
     updateUser,
     deleteUser,

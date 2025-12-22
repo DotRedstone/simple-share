@@ -353,13 +353,82 @@ export class Database {
     const totalSize = await this.db.prepare('SELECT SUM(size_bytes) as total FROM files WHERE type != "folder"').first<{ total: number }>()
     const totalUsers = await this.db.prepare('SELECT COUNT(*) as count FROM users').first<{ count: number }>()
     const activeUsers = await this.db.prepare('SELECT COUNT(*) as count FROM users WHERE status = "活跃"').first<{ count: number }>()
+    const groupQuota = await this.db.prepare('SELECT SUM(storage_quota) as total FROM user_groups').first<{ total: number }>()
+    const r2Backends = await this.db.prepare('SELECT COUNT(*) as count FROM storage_backends WHERE type = "r2" AND enabled = 1').first<{ count: number }>()
 
     return {
       totalFiles: totalFiles?.count || 0,
-      totalSize: totalSize?.total || 0,
+      totalSize: totalSize?.total || 0, // bytes
       totalUsers: totalUsers?.count || 0,
-      activeUsers: activeUsers?.count || 0
+      activeUsers: activeUsers?.count || 0,
+      totalGroupQuota: groupQuota?.total || 0, // GB
+      r2Backends: r2Backends?.count || 0
     }
+  }
+
+  // 用户组存储分配相关
+  async getGroupStorageAllocationsByGroup(groupId: string) {
+    const result = await this.db.prepare(
+      `SELECT gsa.id,
+              gsa.group_id,
+              gsa.storage_backend_id,
+              gsa.quota_gb,
+              gsa.created_at,
+              gsa.updated_at,
+              sb.name            as backend_name,
+              sb.type            as backend_type,
+              sb.enabled         as backend_enabled
+       FROM group_storage_allocations gsa
+       JOIN storage_backends sb ON gsa.storage_backend_id = sb.id
+       WHERE gsa.group_id = ?
+       ORDER BY sb.name ASC`
+    ).bind(groupId).all()
+    return result.results as any[]
+  }
+
+  async createGroupStorageAllocation(allocation: {
+    id: string
+    groupId: string
+    storageBackendId: string
+    quotaGb: number
+  }) {
+    const now = Date.now()
+    await this.db.prepare(
+      `INSERT INTO group_storage_allocations
+       (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).bind(
+      allocation.id,
+      allocation.groupId,
+      allocation.storageBackendId,
+      allocation.quotaGb,
+      now,
+      now
+    ).run()
+  }
+
+  async updateGroupStorageAllocation(id: string, updates: Partial<{ quotaGb: number }>) {
+    const fields: string[] = []
+    const values: any[] = []
+
+    if (updates.quotaGb !== undefined) {
+      fields.push('quota_gb = ?')
+      values.push(updates.quotaGb)
+    }
+
+    if (fields.length === 0) return
+
+    fields.push('updated_at = ?')
+    values.push(Date.now())
+    values.push(id)
+
+    await this.db.prepare(
+      `UPDATE group_storage_allocations SET ${fields.join(', ')} WHERE id = ?`
+    ).bind(...values).run()
+  }
+
+  async deleteGroupStorageAllocation(id: string) {
+    await this.db.prepare('DELETE FROM group_storage_allocations WHERE id = ?').bind(id).run()
   }
 
   // 获取所有文件（管理员）

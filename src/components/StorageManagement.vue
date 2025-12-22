@@ -383,7 +383,7 @@ onMounted(() => {
                 删除
               </BaseButton>
             </div>
-          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -447,7 +447,7 @@ onMounted(() => {
           />
           <BaseInput
             v-model="formData.region"
-            label="区域"
+          label="区域"
             placeholder="us-east-1"
             required
           />
@@ -456,7 +456,7 @@ onMounted(() => {
             label="存储桶名称"
             placeholder="my-bucket"
             required
-          />
+        />
           <BaseInput
             v-model="formData.accessKeyId"
             label="Access Key ID"

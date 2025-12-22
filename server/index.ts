@@ -23,6 +23,8 @@ import { onRequestGet as adminUsersHandler, onRequestPost as adminUsersCreateHan
 import { onRequestPut as adminUsersUpdateHandler, onRequestDelete as adminUsersDeleteHandler } from './functions/api/admin/users/[id]'
 import { onRequestGet as adminGroupsHandler, onRequestPost as adminGroupsCreateHandler } from './functions/api/admin/groups'
 import { onRequestPut as adminGroupsUpdateHandler, onRequestDelete as adminGroupsDeleteHandler } from './functions/api/admin/groups/[id]'
+import { onRequestGet as adminGroupStorageHandler, onRequestPost as adminGroupStorageCreateHandler } from './functions/api/admin/groups/storage'
+import { onRequestPut as adminGroupStorageUpdateHandler, onRequestDelete as adminGroupStorageDeleteHandler } from './functions/api/admin/groups/storage/[id]'
 import { onRequestGet as adminFilesHandler } from './functions/api/admin/files'
 import { onRequestGet as adminStatsHandler } from './functions/api/admin/stats'
 import { onRequestGet as adminLogsHandler } from './functions/api/admin/logs'
@@ -70,6 +72,10 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   'admin/groups': {
     'GET': adminGroupsHandler,
     'POST': adminGroupsCreateHandler
+  },
+  'admin/groups/storage': {
+    'GET': adminGroupStorageHandler,
+    'POST': adminGroupStorageCreateHandler
   },
   'admin/files': {
     'GET': adminFilesHandler
@@ -142,8 +148,8 @@ export default {
             if (method === 'DELETE') {
               handler = sharesDeleteHandler
             }
-          } else if (apiPath.match(/^admin\/users\/\d+$/)) {
-            // admin/users/[id] 路由（必须是数字）
+          } else if (apiPath.match(/^admin\/users\/[^/]+$/)) {
+            // admin/users/[id] 路由（支持字符串ID）
             const id = apiPath.split('/')[2]
             params = { id }
             if (method === 'PUT') {
@@ -151,14 +157,29 @@ export default {
             } else if (method === 'DELETE') {
               handler = adminUsersDeleteHandler
             }
-          } else if (apiPath.match(/^admin\/groups\/\d+$/)) {
-            // admin/groups/[id] 路由（必须是数字）
-            const id = apiPath.split('/')[2]
-            params = { id }
-            if (method === 'PUT') {
-              handler = adminGroupsUpdateHandler
-            } else if (method === 'DELETE') {
-              handler = adminGroupsDeleteHandler
+          } else if (apiPath.match(/^admin\/groups\/[^/]+$/)) {
+            // admin/groups/... 路由（支持字符串ID）
+            const parts = apiPath.split('/')
+            const idOrSegment = parts[2]
+
+            if (idOrSegment === 'storage' && parts.length === 4) {
+              // admin/groups/storage/[id]
+              const id = parts[3]
+              params = { id }
+              if (method === 'PUT') {
+                handler = adminGroupStorageUpdateHandler
+              } else if (method === 'DELETE') {
+                handler = adminGroupStorageDeleteHandler
+              }
+            } else if (parts.length === 3) {
+              // admin/groups/[id]
+              const id = idOrSegment
+              params = { id }
+              if (method === 'PUT') {
+                handler = adminGroupsUpdateHandler
+              } else if (method === 'DELETE') {
+                handler = adminGroupsDeleteHandler
+              }
             }
           } else if (apiPath.match(/^admin\/storage\/[a-zA-Z0-9_-]+$/)) {
             // admin/storage/[id] 路由

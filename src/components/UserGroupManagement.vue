@@ -13,6 +13,7 @@ const emit = defineEmits<{
   (e: 'add', group: Omit<UserGroup, 'id'>): void
   (e: 'edit', id: string, group: Partial<UserGroup>): void
   (e: 'delete', id: string): void
+  (e: 'configure-storage', id: string): void
 }>()
 
 const showAddModal = ref(false)
@@ -94,6 +95,15 @@ const formatSize = (gb: number) => {
             <p v-if="group.description" class="text-xs text-slate-400 mt-1">{{ group.description }}</p>
           </div>
           <div class="flex gap-1">
+            <button
+              @click="emit('configure-storage', group.id)"
+              class="p-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10 hover:text-blue-300 transition-colors"
+              title="配置存储桶"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+              </svg>
+            </button>
             <button
               @click="openEditModal(group)"
               class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"

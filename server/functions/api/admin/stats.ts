@@ -12,21 +12,24 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
 
     const stats = await db.getStorageStats()
 
-    // 计算总存储（假设 1TB）
-    const totalStorage = 1024 // GB
-    const usedStorage = stats.totalSize / (1024 * 1024 * 1024) // 转换为 GB
-    const availableStorage = totalStorage - usedStorage
+    // 总存储：优先使用用户组配置的配额总和（GB），否则回退到 1TB
+    const totalStorage = stats.totalGroupQuota && stats.totalGroupQuota > 0 ? stats.totalGroupQuota : 1024 // GB
+    // 已用存储：根据文件表中 size_bytes 汇总，转换为 GB
+    const usedStorage = stats.totalSize / (1024 * 1024 * 1024)
+    const availableStorage = Math.max(totalStorage - usedStorage, 0)
+    const usedStorageRounded = Math.round(usedStorage * 100) / 100
+    const availableStorageRounded = Math.round(availableStorage * 100) / 100
 
     return new Response(
       JSON.stringify({
         success: true,
         data: {
           totalStorage,
-          usedStorage: Math.round(usedStorage * 100) / 100,
-          availableStorage: Math.round(availableStorage * 100) / 100,
-          r2Buckets: 1,
+          usedStorage: usedStorageRounded,
+          availableStorage: availableStorageRounded,
+          r2Buckets: stats.r2Backends || 0,
           totalFiles: stats.totalFiles,
-          totalSize: Math.round(usedStorage * 100) / 100,
+          totalSize: usedStorageRounded,
           totalUsers: stats.totalUsers,
           activeUsers: stats.activeUsers
         }
