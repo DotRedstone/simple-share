@@ -1,4 +1,4 @@
-name = "simple-share"
+name = "simple-share-exp"
 compatibility_date = "2024-01-01"
 main = "server/index.ts"
 compatibility_flags = ["nodejs_compat"]
