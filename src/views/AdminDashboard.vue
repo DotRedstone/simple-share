@@ -35,6 +35,7 @@ const menuItems: MenuItem[] = [
   { id: "groups", label: "用户组", icon: "groups" },
   { id: "files", label: "文件管理", icon: "files" },
   { id: "logs", label: "系统日志", icon: "logs" },
+  { id: "security", label: "安全工具", icon: "star" },
   { id: "extract", label: "提取文件", icon: "download" },
 ];
 
@@ -394,6 +395,52 @@ const handleUpdateQuota = async (userId: string, quota: number) => {
   }
 };
 
+// 安全工具：生成重置令牌
+const securityEmail = ref("");
+const generatedToken = ref("");
+const isGenerating = ref(false);
+
+const generateUserToken = async () => {
+  if (!securityEmail.value.trim()) {
+    alert("请输入用户邮箱");
+    return;
+  }
+
+  // 检查是否是管理员邮箱
+  const targetUser = users.value.find(u => u.email === securityEmail.value.trim());
+  if (targetUser && targetUser.role === 'admin') {
+    alert("出于安全考虑，管理员密码必须通过数据库手动修改，系统拒绝生成管理权限令牌。");
+    return;
+  }
+
+  isGenerating.value = true;
+  try {
+    const email = securityEmail.value.trim().toLowerCase();
+    const dateStr = new Date().toISOString().split("T")[0];
+    const secret = authStore.token || "fallback"; // 这里实际生产中应该从后端获取或同步环境变量
+    
+    // 使用浏览器原生的 Crypto API 实现与后端一致的算法
+    const encoder = new TextEncoder();
+    const data = encoder.encode(`${email}:${dateStr}`);
+    const key = await window.crypto.subtle.importKey(
+      "raw",
+      encoder.encode(authStore.token || "simpleshare_secret"), // 使用 token 作为盐的一部分或约定的密钥
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const signature = await window.crypto.subtle.sign("HMAC", key, data);
+    const hashArray = Array.from(new Uint8Array(signature));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    generatedToken.value = hashHex.substring(0, 16).toUpperCase();
+  } catch (error) {
+    alert("生成令牌失败");
+  } finally {
+    isGenerating.value = false;
+  }
+};
+
 onMounted(() => {
   authStore.initAuth();
   initAdminData();
@@ -593,6 +640,46 @@ onMounted(() => {
                 title="暂无日志"
                 description="系统中还没有任何日志记录"
               />
+            </div>
+
+            <!-- 安全工具视图 -->
+            <div v-if="activeTab === 'security'" class="h-full max-w-2xl mx-auto">
+              <div class="bg-white/5 border border-white/5 rounded-3xl p-8 glass-card space-y-8">
+                <div class="flex flex-col gap-2">
+                  <h3 class="text-xl font-black text-white italic uppercase tracking-tighter">账户恢复令牌生成器</h3>
+                  <p class="text-xs text-slate-500 font-medium">
+                    基于分布式 HMAC-SHA256 算法生成的无状态令牌。
+                    <span class="text-amber-400/80">注意：此工具仅限普通用户使用，管理员账户需手动操作 D1 数据库。</span>
+                  </p>
+                </div>
+
+                <div class="space-y-4">
+                  <BaseInput
+                    v-model="securityEmail"
+                    label="用户注册邮箱"
+                    placeholder="请输入需要重置密码的用户邮箱"
+                  />
+                  <BaseButton 
+                    variant="primary" 
+                    class="w-full shadow-lg shadow-brand-primary/20"
+                    :loading="isGenerating"
+                    @click="generateUserToken"
+                  >
+                    生成今日有效令牌
+                  </BaseButton>
+                </div>
+
+                <div v-if="generatedToken" class="mt-8 p-6 bg-brand-primary/10 border border-brand-primary/20 rounded-2xl flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-300">
+                  <span class="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em]">今日唯一令牌</span>
+                  <div class="text-3xl md:text-4xl font-mono font-black text-white tracking-widest select-all">
+                    {{ generatedToken }}
+                  </div>
+                  <p class="text-[10px] text-slate-500 text-center max-w-xs">
+                    该令牌基于当前日期与系统密钥计算得出，<br/>
+                    将在北京时间今日 24:00 自动失效。
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -33,6 +33,14 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
+    // 安全约束：管理员不能通过此方式重置密码
+    if (user.role === 'admin') {
+      return new Response(
+        JSON.stringify({ success: false, error: '出于安全考虑，管理员密码必须通过数据库手动修改' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     // 验证重置令牌
     const expectedToken = await generateResetToken(email, env.JWT_SECRET)
     if (resetToken.toUpperCase() !== expectedToken) {
