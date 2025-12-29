@@ -30,7 +30,7 @@ const shareCode = ref('')
 const activeOptionsMenu = ref<number | null>(null)
 const isLoading = ref(false)
 const selectedFiles = ref<number[]>([])
-const moveTargetFolder = ref<number | null | undefined>(null)
+const moveTargetFolder = ref<number | null>(null)
 
 const username = computed(() => authStore.user?.name || '用户')
 const viewMode = computed({
@@ -245,20 +245,51 @@ const handleMoveFiles = () => {
     alert('请先选择要移动的文件')
     return
   }
+  // 保存当前选中的文件，然后打开移动模式
   openMoveModal()
 }
 
 const confirmMoveFiles = async () => {
-  if (selectedFiles.value.length === 0) return
+  if (selectedFiles.value.length === 0) {
+    alert('请先选择要移动的文件')
+    return
+  }
+  
+  // 获取当前目录ID（面包屑最后一个，或null表示根目录）
+  const lastBreadcrumb = breadcrumbs.value.length > 0 
+    ? breadcrumbs.value[breadcrumbs.value.length - 1] 
+    : null
+  const currentFolderId = lastBreadcrumb?.id ?? null
   
   isLoading.value = true
   try {
-    const result = await fileStore.moveFiles(selectedFiles.value, moveTargetFolder.value ?? null)
+    const filesToMove = selectedFiles.value.length
+    const result = await fileStore.moveFiles(selectedFiles.value, currentFolderId)
     if (result.success) {
       selectedFiles.value = []
-      moveTargetFolder.value = null
-      await initFiles()
       showMoveModal.value = false
+      // 返回原目录
+      fileStore.navigateToRoot()
+      // 如果之前保存了目录，导航回去
+      if (moveTargetFolder.value !== null) {
+        const allFiles = fileStore.files
+        const findFolder = (files: typeof allFiles, folderId: number): FileItem | null => {
+          for (const file of files) {
+            if (file.id === folderId && file.type === 'folder') return file
+            if (file.children) {
+              const found = findFolder(file.children, folderId)
+              if (found) return found
+            }
+          }
+          return null
+        }
+        const savedFolder = findFolder(allFiles, moveTargetFolder.value)
+        if (savedFolder) {
+          fileStore.navigateToFolder(savedFolder)
+        }
+      }
+      await initFiles()
+      alert(`成功移动 ${filesToMove} 个文件`)
     } else {
       alert(result.error || '移动失败')
     }
@@ -269,9 +300,26 @@ const confirmMoveFiles = async () => {
   }
 }
 
-const openMoveModal = () => {
-  moveTargetFolder.value = null
+const openMoveModal = async () => {
+  // 保存当前目录，用于移动后返回
+  const lastBreadcrumb = breadcrumbs.value.length > 0 
+    ? breadcrumbs.value[breadcrumbs.value.length - 1] 
+    : null
+  moveTargetFolder.value = lastBreadcrumb?.id ?? null
+  // 重置到根目录，以便选择目标文件夹
+  fileStore.navigateToRoot()
+  // 确保加载了所有文件（包括文件夹）
+  await initFiles()
   showMoveModal.value = true
+}
+
+// 在移动模式下，点击文件夹应该进入该文件夹
+const handleMoveModeFolderClick = async (folder: FileItem) => {
+  if (showMoveModal.value && folder.type === 'folder') {
+    fileStore.navigateToFolder(folder)
+    // 导航后重新加载文件列表
+    await initFiles()
+  }
 }
 
 const handleFileAction = async (action: string | FileAction, file: FileItem) => {
@@ -516,53 +564,85 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
 
     <!-- 移动文件模态框 -->
     <BaseModal
+      v-if="showMoveModal"
       :show="showMoveModal"
-      title="移动文件"
-      width="max-w-md"
-      @close="showMoveModal = false"
+      title="选择目标文件夹"
+      width="max-w-2xl"
+      @close="() => { showMoveModal = false; fileStore.navigateToRoot() }"
     >
       <div class="space-y-4">
         <p class="text-sm text-slate-300">
-          已选择 {{ selectedFiles.length }} 个文件，选择目标文件夹：
+          已选择 <span class="font-semibold text-white">{{ selectedFiles.length }}</span> 个文件
         </p>
-        <div class="bg-white/5 border border-white/10 rounded-lg p-4 max-h-60 overflow-y-auto">
+        
+        <!-- 面包屑导航 -->
+        <div class="flex items-center gap-2 text-xs text-slate-400">
           <button
-            @click="moveTargetFolder = null"
-            :class="[
-              'w-full text-left px-3 py-2 rounded-lg mb-2 transition-colors',
-              moveTargetFolder === null
-                ? 'bg-blue-500/20 text-blue-300'
-                : 'text-slate-300 hover:bg-white/5'
-            ]"
+            @click="fileStore.navigateToRoot()"
+            class="hover:text-white px-2 py-1 rounded hover:bg-white/5"
           >
-            📁 根目录
+            根目录
           </button>
+          <template v-for="(crumb, index) in breadcrumbs" :key="crumb.id">
+            <span>/</span>
+            <button
+              @click="fileStore.navigateToBreadcrumb(index)"
+              class="hover:text-white px-2 py-1 rounded hover:bg-white/5 truncate max-w-[150px]"
+              :title="crumb.name"
+            >
+              {{ crumb.name }}
+            </button>
+          </template>
+        </div>
+
+        <!-- 文件夹列表 -->
+        <div class="bg-white/5 border border-white/10 rounded-lg p-4 max-h-96 overflow-y-auto">
+          <div v-if="currentFiles.filter(f => f.type === 'folder').length === 0 && breadcrumbs.length === 0" class="text-center text-slate-400 py-8">
+            <p>当前目录下没有文件夹</p>
+            <p class="text-xs mt-2">文件将移动到根目录</p>
+          </div>
           <div
-            v-for="folder in fileStore.files.filter(f => f.type === 'folder')"
+            v-for="folder in currentFiles.filter(f => f.type === 'folder')"
             :key="folder.id"
-            @click="moveTargetFolder = folder.id"
-            :class="[
-              'w-full text-left px-3 py-2 rounded-lg mb-2 transition-colors cursor-pointer',
-              moveTargetFolder === folder.id
-                ? 'bg-blue-500/20 text-blue-300'
-                : 'text-slate-300 hover:bg-white/5'
-            ]"
+            @click="handleMoveModeFolderClick(folder)"
+            class="w-full text-left px-4 py-3 rounded-lg mb-2 transition-colors cursor-pointer flex items-center gap-3 hover:bg-white/10 border border-transparent hover:border-white/10"
           >
-            📁 {{ folder.name }}
+            <svg class="w-5 h-5 text-yellow-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M2.165 19.551c.086.58.586 1.01 1.173 1.01h17.324c.587 0 1.087-.43 1.173-1.01l1.161-7.854c.099-.672-.42-1.282-1.096-1.282H2.099c-.676 0-1.195.61-1.096 1.282l1.162 7.854z" opacity=".4"></path>
+              <path d="M3.338 10.415h17.324c.969 0 1.713.874 1.571 1.833L21.071 20.1c-.086.58-.586 1.01-1.173 1.01H4.101c-.587 0-1.087-.43-1.173-1.01L1.767 12.248c-.142-.959.602-1.833 1.571-1.833z"></path>
+            </svg>
+            <span class="text-white font-medium flex-1">{{ folder.name }}</span>
+            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
           </div>
         </div>
-        <div class="flex justify-end gap-3">
-          <BaseButton variant="glass" @click="showMoveModal = false" :disabled="isLoading">取消</BaseButton>
+
+        <!-- 当前目录提示 -->
+        <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm">
+          <p class="text-blue-300">
+            <span class="font-semibold">当前目录：</span>
+            <span v-if="breadcrumbs.length === 0">根目录</span>
+            <span v-else>{{ breadcrumbs[breadcrumbs.length - 1]?.name }}</span>
+          </p>
+          <p class="text-blue-400/80 text-xs mt-1">文件将移动到此目录</p>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <BaseButton variant="glass" @click="() => { showMoveModal = false; fileStore.navigateToRoot() }" :disabled="isLoading">
+            取消
+          </BaseButton>
           <BaseButton 
             variant="primary" 
             @click="confirmMoveFiles" 
             :loading="isLoading" 
             :disabled="isLoading"
           >
-            确认移动
+            确认移动到当前目录
           </BaseButton>
         </div>
       </div>
     </BaseModal>
   </PageFrame>
 </template>
+
