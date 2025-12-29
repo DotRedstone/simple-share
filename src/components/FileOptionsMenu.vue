@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { FileItem, FileAction } from '../types'
 
 const props = defineProps<{
@@ -10,11 +11,12 @@ const emit = defineEmits<{
   (e: 'action', action: FileAction, file: FileItem): void
 }>()
 
-const isViolated = computed(() => 
-  props.file.size_bytes === 0 && 
-  props.file.type !== 'folder' && 
-  (props.file.name.includes('[违规已下架]') || props.file.status === '违规')
-)
+const isViolated = computed(() => {
+  const file = props.file as any;
+  return file.size_bytes === 0 && 
+    file.type !== 'folder' && 
+    (file.name.includes('[违规已下架]') || file.status === '违规');
+})
 
 const handleAction = (action: FileAction, file: FileItem) => {
   if (isViolated.value && action !== '删除') {

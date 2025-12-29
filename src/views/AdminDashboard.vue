@@ -225,12 +225,6 @@ const deleteUser = async (user: User) => {
   }
 };
 
-const viewFile = (file: any) => {
-  alert(
-    `文件详情:\n\n文件名: ${file.name}\n上传者: ${file.uploader}\n大小: ${file.size}\n上传日期: ${file.uploaded}`,
-  );
-};
-
 const deleteFile = async (file: any) => {
   if (confirm(`确定要删除文件 "${file.name}" 吗？此操作不可恢复。`)) {
     isLoading.value = true;

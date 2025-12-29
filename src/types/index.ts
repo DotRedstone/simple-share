@@ -13,6 +13,8 @@ export interface FileItem {
   storageKey?: string // R2存储的Key
   userId?: number
   downloadCount?: number
+  size_bytes?: number // 原始字节大小
+  status?: string // 文件状态，如 '正常', '违规'
 }
 
 // 用户相关类型
