@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import type { FileItem as FileItemType } from '../types'
 import FileOptionsMenu from './FileOptionsMenu.vue'
-import BaseCheckbox from './BaseCheckbox.vue'
 
 interface Props {
   file: FileItemType
@@ -23,10 +22,6 @@ const emit = defineEmits<{
   (e: 'action', action: string, file: FileItemType): void
   (e: 'select', selected: boolean): void
 }>()
-
-const handleCheckboxChange = (value: boolean) => {
-  emit('select', value)
-}
 
 const getFileIconColor = (type: string) => {
   const colors: Record<string, string> = {

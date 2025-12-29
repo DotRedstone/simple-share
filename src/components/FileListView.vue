@@ -2,7 +2,6 @@
 import type { FileItem } from '../types'
 import FileItemComponent from './FileItem.vue'
 import EmptyState from './EmptyState.vue'
-import BaseCheckbox from './BaseCheckbox.vue'
 
 interface Props {
   files: FileItem[]
@@ -21,10 +20,6 @@ const emit = defineEmits<{
   (e: 'select-all', selected: boolean): void
   (e: 'upload'): void
 }>()
-
-const handleSelectAll = (selected: boolean) => {
-  emit('select-all', selected)
-}
 </script>
 
 <template>
