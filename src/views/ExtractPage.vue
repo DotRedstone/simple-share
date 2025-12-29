@@ -156,65 +156,71 @@ const goHome = () => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
-    <div class="w-full max-w-md">
+  <div class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 bg-slate-950 dark:bg-slate-950 light:bg-slate-50 relative overflow-hidden">
+    <!-- 装饰背景 -->
+    <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+      <div class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary blur-[120px]"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
       <PageFrame>
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-white mb-2">文件提取</h1>
-          <p class="text-slate-400">提取码：<span class="font-mono text-white">{{ shareCode }}</span></p>
+          <h1 class="text-3xl font-black text-white dark:text-white light:text-slate-900 mb-2 tracking-tight uppercase italic">文件提取</h1>
+          <p class="text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">提取码：<span class="font-mono text-white dark:text-white light:text-brand-primary font-bold">{{ shareCode }}</span></p>
         </div>
 
         <!-- 加载状态 -->
-        <div v-if="isLoading" class="bg-white/5 border border-white/10 rounded-2xl p-12">
+        <div v-if="isLoading" class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-3xl p-12 shadow-xl">
           <LoadingSpinner size="lg" text="正在验证提取码..." />
         </div>
 
         <!-- 错误状态 -->
-        <div v-else-if="error" class="bg-red-500/10 border border-red-500/30 rounded-2xl p-8 text-center">
+        <div v-else-if="error" class="bg-red-500/10 border border-red-500/30 rounded-3xl p-8 text-center shadow-xl">
           <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p class="text-red-400 mb-6">{{ error }}</p>
-          <BaseButton variant="primary" @click="goHome">返回首页</BaseButton>
+          <p class="text-red-400 mb-6 font-bold">{{ error }}</p>
+          <BaseButton variant="primary" @click="goHome" class="w-full">返回首页</BaseButton>
         </div>
 
         <!-- 文件信息 -->
-        <div v-else-if="fileInfo" class="bg-white/5 border border-white/10 rounded-2xl p-8">
-          <div class="text-center mb-6">
-            <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-blue-500/20 rounded-2xl">
-              <svg class="w-12 h-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div v-else-if="fileInfo" class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-3xl p-6 md:p-8 shadow-2xl">
+          <div class="text-center mb-8">
+            <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center bg-brand-primary/20 rounded-2xl shadow-inner">
+              <svg class="w-12 h-12 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(fileInfo.type)" />
               </svg>
             </div>
-            <h2 class="text-xl font-bold text-white mb-2">{{ fileInfo.name }}</h2>
+            <h2 class="text-xl font-black text-white dark:text-white light:text-slate-900 mb-1 truncate px-2">{{ fileInfo.name }}</h2>
+            <p class="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono uppercase tracking-widest">{{ fileInfo.type }} DOCUMENT</p>
           </div>
 
-          <div class="space-y-3 mb-6">
+          <div class="space-y-4 mb-8 bg-black/20 dark:bg-black/20 light:bg-slate-50 rounded-2xl p-4 border border-white/5 dark:border-white/5 light:border-slate-100">
             <div class="flex justify-between items-center text-sm">
-              <span class="text-slate-400">文件大小</span>
-              <span class="text-white font-mono">{{ fileInfo.size }}</span>
+              <span class="text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">文件大小</span>
+              <span class="text-white dark:text-white light:text-slate-900 font-mono font-bold">{{ fileInfo.size }}</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <span class="text-slate-400">上传时间</span>
-              <span class="text-white">{{ fileInfo.uploadTime }}</span>
-            </div>
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-slate-400">文件类型</span>
-              <span class="text-white uppercase">{{ fileInfo.type }}</span>
+              <span class="text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">上传时间</span>
+              <span class="text-white dark:text-white light:text-slate-900 font-medium">{{ new Date(fileInfo.uploadTime).toLocaleDateString() }}</span>
             </div>
           </div>
 
-          <div class="flex gap-3">
-            <BaseButton variant="glass" class="flex-1" @click="goHome">返回首页</BaseButton>
-            <BaseButton 
-              v-if="isAuthenticated" 
-              variant="glass" 
-              class="flex-1" 
-              @click="handleSave"
-            >
-              转存到我的文件
+          <div class="flex flex-col gap-3">
+            <BaseButton v-if="fileInfo.type !== 'folder'" variant="primary" class="w-full !py-3 shadow-lg shadow-brand-primary/20" @click="handleDownload">
+              立即下载
             </BaseButton>
-            <BaseButton v-if="fileInfo.type !== 'folder'" variant="primary" class="flex-1" @click="handleDownload">下载文件</BaseButton>
+            <div class="flex gap-3">
+              <BaseButton variant="glass" class="flex-1 !py-2.5 !text-xs" @click="goHome">返回首页</BaseButton>
+              <BaseButton 
+                v-if="isAuthenticated" 
+                variant="glass" 
+                class="flex-1 !py-2.5 !text-xs" 
+                @click="handleSave"
+              >
+                转存文件
+              </BaseButton>
+            </div>
           </div>
 
           <!-- 文件夹内容 -->

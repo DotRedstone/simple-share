@@ -72,7 +72,7 @@ const handleRegister = async () => {
 
 <template>
   <form @submit.prevent="handleRegister" class="space-y-4 sm:space-y-6 min-w-0">
-    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
+    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
       {{ error }}
     </div>
 
@@ -119,7 +119,7 @@ const handleRegister = async () => {
       />
     </div>
 
-    <div class="text-xs sm:text-sm text-slate-500 text-center pt-2 min-w-0 break-words font-medium">
+    <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-500 light:text-slate-400 text-center pt-2 min-w-0 break-words font-medium">
       已有账号？
       <a href="#" @click.prevent="$emit('switch-to-login')" class="text-brand-primary hover:text-brand-secondary transition-colors" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即登录</a>
     </div>

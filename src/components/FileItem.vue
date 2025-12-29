@@ -53,13 +53,13 @@ const isViolated = computed(() => {
   <tr
     v-if="viewMode === 'list'"
     @click.stop="emit('click', file)"
-    class="hover:bg-white/5 transition-colors group relative"
+    class="hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-slate-100/80 transition-colors group relative border-b border-transparent dark:border-transparent light:border-slate-200/60"
     :class="[
       file.type === 'folder' ? 'cursor-pointer' : '',
-      selected ? 'bg-brand-primary/10' : ''
+      selected ? 'bg-brand-primary/10 dark:bg-brand-primary/10 light:bg-brand-primary/5' : ''
     ]"
   >
-    <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0" :class="{ 'pl-6 md:pl-12': !enableSelect, 'opacity-60': isViolated }">
+    <td class="px-3 md:px-6 py-4 font-medium text-white dark:text-white light:text-slate-900 min-w-0" :class="{ 'pl-6 md:pl-12': !enableSelect, 'opacity-60': isViolated }">
       <div class="flex items-center gap-2 md:gap-3 min-w-0">
         <svg v-if="isViolated" class="w-5 h-5 md:w-6 md:h-6 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -73,13 +73,13 @@ const isViolated = computed(() => {
         </div>
       </div>
     </td>
-    <td class="px-3 md:px-6 py-4 font-mono text-xs md:text-sm hidden sm:table-cell whitespace-nowrap">{{ file.size }}</td>
-    <td class="px-3 md:px-6 py-4 text-xs md:text-sm hidden sm:table-cell whitespace-nowrap">{{ file.date }}</td>
+    <td class="px-3 md:px-6 py-4 font-mono text-xs md:text-sm text-slate-400 dark:text-slate-400 light:text-slate-500 hidden sm:table-cell whitespace-nowrap">{{ file.size }}</td>
+    <td class="px-3 md:px-6 py-4 text-xs md:text-sm text-slate-500 dark:text-slate-500 light:text-slate-400 hidden sm:table-cell whitespace-nowrap">{{ file.date }}</td>
     <td class="px-3 md:px-6 py-4 text-right">
       <div class="relative options-menu-container inline-block">
         <button
           @click.stop="$emit('action', 'options', file)"
-          class="p-1.5 md:p-2 rounded-full text-slate-400 hover:bg-black/20 hover:text-white active:bg-black/30 transition-colors touch-manipulation"
+          class="p-1.5 md:p-2 rounded-full text-slate-400 hover:bg-black/20 dark:hover:bg-black/20 light:hover:bg-slate-200 hover:text-white dark:hover:text-white light:hover:text-slate-900 active:bg-black/30 transition-colors touch-manipulation"
           aria-label="文件选项"
         >
           <svg class="w-5 h-5 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -97,9 +97,9 @@ const isViolated = computed(() => {
     @click.stop="emit('click', file)"
     :class="[
       file.type === 'folder' ? 'cursor-pointer' : '',
-      selected ? 'bg-brand-primary/20 border-brand-primary/50' : 'bg-white/5 border-white/5'
+      selected ? 'bg-brand-primary/20 dark:bg-brand-primary/20 light:bg-brand-primary/10 border-brand-primary/50' : 'bg-white/5 dark:bg-white/5 light:bg-white border-white/5 dark:border-white/5 light:border-slate-200 shadow-sm'
     ]"
-    class="group relative hover:bg-white/10 hover:border-white/20 rounded-2xl p-4 transition-all flex flex-col items-center justify-between aspect-[4/5] border"
+    class="group relative hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-50 hover:border-white/20 dark:hover:border-white/20 light:hover:border-slate-300 rounded-2xl p-4 transition-all flex flex-col items-center justify-between aspect-[4/5] border"
   >
     <div class="flex-1 flex items-center justify-center w-full text-center" :class="{'opacity-50': isViolated}">
       <svg v-if="isViolated" class="w-16 h-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,13 +115,13 @@ const isViolated = computed(() => {
       </svg>
     </div>
     <div class="w-full text-center mt-3">
-      <p class="text-sm font-medium truncate" :class="isViolated ? 'text-red-400' : 'text-slate-200'">{{ file.name }}</p>
-      <p class="text-[10px] font-mono mt-0.5" :class="isViolated ? 'text-red-500' : 'text-slate-500'">{{ isViolated ? '违规已下架' : file.size }}</p>
+      <p class="text-sm font-medium truncate" :class="[isViolated ? 'text-red-400' : 'text-slate-200 dark:text-slate-200 light:text-slate-900']">{{ file.name }}</p>
+      <p class="text-[10px] font-mono mt-0.5" :class="[isViolated ? 'text-red-500' : 'text-slate-500 dark:text-slate-500 light:text-slate-400']">{{ isViolated ? '违规已下架' : file.size }}</p>
     </div>
     <div class="absolute top-2 right-2 options-menu-container z-10">
       <button
         @click.stop="$emit('action', 'options', file)"
-        class="p-1.5 md:p-2 rounded-full text-slate-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-black/20 hover:text-white active:bg-black/30 transition-all touch-manipulation"
+        class="p-1.5 md:p-2 rounded-full text-slate-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-black/20 dark:hover:bg-black/20 light:hover:bg-slate-200 hover:text-white dark:hover:text-white light:hover:text-slate-900 active:bg-black/30 transition-all touch-manipulation"
         aria-label="文件选项"
       >
         <svg class="w-4 h-4 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -132,4 +132,3 @@ const isViolated = computed(() => {
     </div>
   </div>
 </template>
-

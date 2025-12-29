@@ -1,5 +1,5 @@
 /* === 1. Google Fonts === */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* === 2. Tailwind CSS v4 === */
 @import "tailwindcss";
@@ -7,22 +7,42 @@
 @theme {
   --color-brand-primary: #6366f1;
   --color-brand-secondary: #a855f7;
+  
   --color-surface-950: #030712;
   --color-surface-900: #111827;
   --color-surface-800: #1f2937;
   
-  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-/* === 3. 全局基础设置 === */
+/* === 3. 全局基础设置与主题变量 === */
 :root {
+    --bg-main: #030712;
+    --bg-surface: rgba(17, 24, 39, 0.7);
+    --text-main: #f9fafb;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.05);
+    --glass-blur: 12px;
+    
     font-family: var(--font-sans);
     line-height: 1.5;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     height: 100%;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root.light {
+    --bg-main: #f8fafc;
+    --bg-surface: rgba(255, 255, 255, 0.8);
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: rgba(0, 0, 0, 0.05);
+    --color-surface-950: #f8fafc;
+    --color-surface-900: #ffffff;
+    --color-surface-800: #f1f5f9;
 }
 
 html, body, #app {
@@ -33,8 +53,8 @@ html, body, #app {
 
 body {
     width: 100%;
-    background-color: var(--color-surface-950);
-    color: #f9fafb;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     overflow-x: hidden;
     position: relative;
 }
@@ -48,10 +68,16 @@ body::before {
     width: 100%;
     height: 100%;
     background: 
-        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
     pointer-events: none;
     z-index: -1;
+}
+
+:root.light body::before {
+    background: 
+        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
 }
 
 /* === 4. 滚动条美化 === */
@@ -87,10 +113,14 @@ body::before {
 
 /* === 5. 玻璃拟态卡片 === */
 .glass-card {
-    background: rgba(17, 24, 39, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    background: var(--bg-surface);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+}
+
+:root.light .glass-card {
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 /* === 6. 动画 === */

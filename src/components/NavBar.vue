@@ -14,14 +14,14 @@ defineProps<{
         <img src="/favicon-96x96.png" alt="SimpleShare" class="w-7 h-7 object-contain" />
       </div>
       <div class="flex flex-col">
-        <span class="text-lg font-bold text-white tracking-tighter leading-none">SimpleShare</span>
-        <span class="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Cloud Transfer</span>
+        <span class="text-lg font-bold text-white dark:text-white light:text-slate-900 tracking-tighter leading-none">SimpleShare</span>
+        <span class="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono tracking-widest uppercase">Cloud Transfer</span>
       </div>
     </div>
-    <div v-if="onLoginClick || onRegisterClick" class="flex items-center gap-3">
+    <div v-if="onLoginClick || onRegisterClick" class="flex items-center gap-2 sm:gap-3">
       <button 
         v-if="onRegisterClick" 
-        class="text-sm font-semibold text-slate-400 hover:text-white transition-colors px-4 py-2"
+        class="text-sm font-semibold text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900 transition-colors px-2 sm:px-4 py-2"
         @click="onRegisterClick"
       >
         注册

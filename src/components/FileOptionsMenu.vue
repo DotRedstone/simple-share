@@ -27,11 +27,11 @@ const handleAction = (action: FileAction, file: FileItem) => {
 </script>
 
 <template>
-  <div v-if="show" class="absolute right-0 mt-2 w-auto min-w-[140px] bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 py-1">
+  <div v-if="show" class="absolute right-0 mt-2 w-auto min-w-[140px] bg-slate-800 dark:bg-slate-800 light:bg-white border border-slate-700 dark:border-slate-700 light:border-slate-200 rounded-lg shadow-xl z-50 py-1 overflow-hidden">
     <button
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('分享', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100"
       :class="{'opacity-20 cursor-not-allowed': isViolated}"
       :disabled="isViolated"
       title="分享"
@@ -43,7 +43,7 @@ const handleAction = (action: FileAction, file: FileItem) => {
     <button
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('管理分享', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100"
       :class="{'opacity-20 cursor-not-allowed': isViolated}"
       :disabled="isViolated"
       title="管理分享"
@@ -56,7 +56,7 @@ const handleAction = (action: FileAction, file: FileItem) => {
     <button
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('下载', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100"
       :class="{'opacity-20 cursor-not-allowed': isViolated}"
       :disabled="isViolated"
       title="下载"
@@ -67,7 +67,7 @@ const handleAction = (action: FileAction, file: FileItem) => {
     </button>
     <button
       @click.stop="handleAction('收藏', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100"
       :class="{'opacity-20 cursor-not-allowed': isViolated}"
       :disabled="isViolated"
       :title="file.starred ? '取消收藏' : '添加到收藏'"
@@ -78,7 +78,7 @@ const handleAction = (action: FileAction, file: FileItem) => {
     </button>
     <button
       @click.stop="handleAction('重命名', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100"
       :class="{'opacity-20 cursor-not-allowed': isViolated}"
       :disabled="isViolated"
       title="重命名"
@@ -89,7 +89,7 @@ const handleAction = (action: FileAction, file: FileItem) => {
     </button>
     <button
       @click.stop="handleAction('移动', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 dark:text-slate-300 light:text-slate-600 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100"
       :class="{'opacity-20 cursor-not-allowed': isViolated}"
       :disabled="isViolated"
       title="移动"
@@ -98,10 +98,10 @@ const handleAction = (action: FileAction, file: FileItem) => {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
       </svg>
     </button>
-    <div class="my-1 h-[1px] bg-slate-700"></div>
+    <div class="my-1 h-[1px] bg-slate-700 dark:bg-slate-700 light:bg-slate-200"></div>
     <button
       @click.stop="handleAction('删除', file)"
-      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-400 hover:bg-slate-700 hover:text-red-300"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-400 dark:text-red-400 light:text-red-500 hover:bg-slate-700 dark:hover:bg-slate-700 light:hover:bg-slate-100 hover:text-red-300 dark:hover:text-red-300 light:hover:text-red-600"
       title="删除"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,5 +109,6 @@ const handleAction = (action: FileAction, file: FileItem) => {
       </svg>
     </button>
   </div>
+</template>
 </template>
 

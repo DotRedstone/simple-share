@@ -41,22 +41,22 @@ const getSortIcon = (field: string) => {
 <template>
   <div v-if="files.length > 0" class="w-full h-full">
     <div v-if="viewMode === 'list'" class="overflow-x-auto -mx-4 md:mx-0">
-      <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
-        <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
+      <table class="w-full text-left text-sm text-slate-400 dark:text-slate-400 light:text-slate-500 min-w-[600px]">
+        <thead class="bg-black/20 dark:bg-black/20 light:bg-slate-100/50 text-xs uppercase font-bold tracking-wider">
           <tr>
-            <th class="px-3 md:px-6 py-4 cursor-pointer hover:text-white transition-colors" :class="{ 'pl-6 md:pl-12': !enableMultiSelect }" @click="emit('sort', 'name')">
+            <th class="px-3 md:px-6 py-4 cursor-pointer hover:text-white dark:hover:text-white light:hover:text-slate-900 transition-colors" :class="{ 'pl-6 md:pl-12': !enableMultiSelect }" @click="emit('sort', 'name')">
               名称 {{ getSortIcon('name') }}
             </th>
-            <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'size_bytes')">
+            <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell cursor-pointer hover:text-white dark:hover:text-white light:hover:text-slate-900 transition-colors" @click="emit('sort', 'size_bytes')">
               大小 {{ getSortIcon('size_bytes') }}
             </th>
-            <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'created_at')">
+            <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell cursor-pointer hover:text-white dark:hover:text-white light:hover:text-slate-900 transition-colors" @click="emit('sort', 'created_at')">
               修改日期 {{ getSortIcon('created_at') }}
             </th>
             <th class="px-3 md:px-6 py-4 w-20 text-right"></th>
           </tr>
         </thead>
-      <tbody class="divide-y divide-white/5">
+      <tbody class="divide-y divide-white/5 dark:divide-white/5 light:divide-slate-200">
         <FileItemComponent
           v-for="file in files"
           :key="file.id"

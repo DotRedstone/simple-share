@@ -287,19 +287,19 @@ onMounted(() => {
   <div class="space-y-6">
     <!-- 存储概览 -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+      <div class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-slate-400 uppercase">总存储</span>
+          <span class="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 uppercase font-bold tracking-wider">总存储</span>
           <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
           </svg>
         </div>
-        <p class="text-2xl font-mono text-white">{{ formatSize(stats.totalStorage) }}</p>
+        <p class="text-2xl font-mono text-white dark:text-white light:text-slate-900">{{ formatSize(stats.totalStorage) }}</p>
       </div>
 
-      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+      <div class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-slate-400 uppercase">已用存储</span>
+          <span class="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 uppercase font-bold tracking-wider">已用存储</span>
           <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
@@ -307,9 +307,9 @@ onMounted(() => {
         <p class="text-2xl font-mono text-purple-400">{{ formatSize(stats.usedStorage) }}</p>
       </div>
 
-      <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+      <div class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-slate-400 uppercase">可用存储</span>
+          <span class="text-xs text-slate-400 dark:text-slate-400 light:text-slate-500 uppercase font-bold tracking-wider">可用存储</span>
           <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -319,102 +319,105 @@ onMounted(() => {
     </div>
 
     <!-- 存储使用进度 -->
-    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+    <div class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-6 shadow-sm">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-bold text-white">存储使用情况</h3>
-        <span class="text-sm text-slate-400">{{ storagePercentage }}%</span>
+        <h3 class="text-lg font-bold text-white dark:text-white light:text-slate-900">存储使用情况</h3>
+        <span class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-500 font-mono">{{ storagePercentage }}%</span>
       </div>
-      <div class="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+      <div class="w-full bg-slate-700 dark:bg-slate-700 light:bg-slate-200 rounded-full h-3 overflow-hidden">
         <div
-          class="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
+          class="h-full bg-gradient-to-r from-brand-primary to-brand-secondary transition-all duration-500 shadow-[0_0_12px_rgba(99,102,241,0.4)]"
           :style="{ width: storagePercentage + '%' }"
         ></div>
       </div>
-      <div class="flex justify-between items-center mt-2 text-xs text-slate-500">
+      <div class="flex justify-between items-center mt-2 text-xs text-slate-500 dark:text-slate-500 light:text-slate-400 font-medium">
         <span>{{ formatSize(stats.usedStorage) }} 已使用</span>
         <span>{{ formatSize(stats.availableStorage) }} 可用</span>
       </div>
     </div>
 
     <!-- 存储后端列表 -->
-    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-white">存储后端</h3>
-        <BaseButton variant="primary" @click="openAddModal">
+    <div class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-bold text-white dark:text-white light:text-slate-900">存储后端</h3>
+        <BaseButton variant="primary" @click="openAddModal" class="!py-2 !px-4">
           <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          添加存储后端
+          <span class="text-sm">添加</span>
         </BaseButton>
       </div>
 
-      <div v-if="isLoading" class="text-center py-8 text-slate-400">加载中...</div>
-      <div v-else-if="storageBackends.length === 0" class="text-center py-8 text-slate-400">
+      <div v-if="isLoading" class="text-center py-12">
+        <LoadingSpinner size="md" text="加载中..." />
+      </div>
+      <div v-else-if="storageBackends.length === 0" class="text-center py-12 text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">
         暂无存储后端，点击上方按钮添加
       </div>
-      <div v-else class="space-y-3">
+      <div v-else class="space-y-4">
         <div
           v-for="backend in storageBackends"
           :key="backend.id"
-          class="bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-colors"
+          class="bg-white/5 dark:bg-white/5 light:bg-slate-50/50 border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-4 md:p-6 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-100/50 transition-all duration-300"
         >
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex-1 min-w-0">
-              <div class="flex flex-wrap items-center gap-2 mb-2">
-                <span :class="['font-bold text-[10px] uppercase tracking-wider', getTypeColor(backend.type)]">
+              <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span :class="['font-black text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-md bg-white/5 dark:bg-white/5 light:bg-slate-200/50', getTypeColor(backend.type)]">
                   {{ getTypeLabel(backend.type) }}
                 </span>
-                <span class="text-white font-bold truncate max-w-[150px] sm:max-w-none">{{ backend.name }}</span>
+                <span class="text-white dark:text-white light:text-slate-900 font-bold text-base truncate">{{ backend.name }}</span>
                 <div class="flex gap-1.5">
                   <span
                     v-if="backend.isDefault"
-                    class="text-[10px] font-black uppercase tracking-widest bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20"
+                    class="text-[10px] font-black uppercase tracking-widest bg-brand-primary/20 text-brand-primary px-2 py-0.5 rounded-full border border-brand-primary/20"
                   >
                     默认
                   </span>
                   <span
                     v-if="!backend.enabled"
-                    class="text-[10px] font-black uppercase tracking-widest bg-slate-500/20 text-slate-300 px-2 py-0.5 rounded border border-slate-500/20"
+                    class="text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20"
                   >
                     已禁用
                   </span>
                 </div>
               </div>
-              <p v-if="backend.description" class="text-sm text-slate-400 mb-2">
+              <p v-if="backend.description" class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-500 mb-3 font-medium">
                 {{ backend.description }}
               </p>
-              <div class="text-xs text-slate-500">
-                创建于 {{ new Date(backend.createdAt * 1000).toLocaleString() }}
+              <div class="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono">
+                <span>{{ new Date(backend.createdAt * 1000).toLocaleDateString() }}</span>
                 <template v-if="backend.config.quotaGb">
-                  · 配额 {{ backend.config.quotaGb }} GB
+                  <span class="w-1 h-1 rounded-full bg-slate-700 dark:bg-slate-700 light:bg-slate-300"></span>
+                  <span>配额 {{ backend.config.quotaGb }} GB</span>
                 </template>
               </div>
             </div>
-            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
               <BaseButton
                 variant="glass"
-                class="!py-1 !px-2 !text-[10px] whitespace-nowrap"
+                class="flex-1 sm:flex-none !py-2 !px-3 !text-xs whitespace-nowrap"
                 @click="toggleEnabled(backend)"
               >
                 {{ backend.enabled ? '禁用' : '启用' }}
               </BaseButton>
               <BaseButton
                 variant="glass"
-                class="!py-1 !px-2 !text-[10px] whitespace-nowrap"
+                class="flex-1 sm:flex-none !py-2 !px-3 !text-xs whitespace-nowrap"
                 @click="openEditModal(backend)"
               >
                 编辑
               </BaseButton>
-                <BaseButton
-                  variant="glass"
-                  class="!py-1 !px-2 !text-[10px] text-red-400 whitespace-nowrap"
-                  @click="handleDelete(backend)"
-                  :disabled="backend.isDefault || backend.id === 'system_r2'"
-                >
-                  删除
-                </BaseButton>
+              <BaseButton
+                variant="glass"
+                class="flex-1 sm:flex-none !py-2 !px-3 !text-xs text-red-400 dark:text-red-400 light:text-red-500 whitespace-nowrap"
+                @click="handleDelete(backend)"
+                :disabled="backend.isDefault || backend.id === 'system_r2'"
+              >
+                删除
+              </BaseButton>
             </div>
-        </div>
+          </div>
         </div>
       </div>
     </div>

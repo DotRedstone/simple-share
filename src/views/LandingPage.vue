@@ -92,8 +92,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex items-center justify-center p-6 md:p-12">
-    <div class="w-full max-w-4xl">
+  <div class="min-h-screen w-full flex items-center justify-center p-6 md:p-12 bg-slate-950 dark:bg-slate-950 light:bg-slate-50 relative overflow-hidden">
+    <!-- 装饰背景 -->
+    <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+      <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary blur-[120px]"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-brand-secondary blur-[120px]"></div>
+    </div>
+
+    <div class="w-full max-w-4xl relative z-10">
       <PageFrame>
         <div class="flex flex-col gap-8">
           <NavBar
@@ -105,6 +111,8 @@ onMounted(() => {
         </div>
       </PageFrame>
     </div>
+    
+    <div class="pb-24"></div>
 
     <!-- 提取加载状态 -->
     <BaseModal v-if="isExtracting" :show="isExtracting" title="正在查找文件..." width="max-w-sm" :close-on-click-outside="false">

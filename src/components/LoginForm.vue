@@ -141,7 +141,7 @@ const handleResetPassword = async () => {
         </BaseButton>
       </div>
 
-      <div class="text-xs sm:text-sm text-slate-500 text-center pt-4 min-w-0 break-words font-medium">
+      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-500 light:text-slate-400 text-center pt-4 min-w-0 break-words font-medium">
         还没有账号？
         <a href="#" @click.prevent="$emit('switch-to-register')" class="text-brand-primary hover:text-brand-secondary transition-colors" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即注册</a>
       </div>
@@ -149,10 +149,10 @@ const handleResetPassword = async () => {
 
     <!-- 重置密码表单 -->
     <form v-else @submit.prevent="handleResetPassword" class="space-y-4 sm:space-y-6 min-w-0">
-      <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
+      <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
         {{ error }}
       </div>
-      <div v-if="resetSuccess" class="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 break-words min-w-0">
+      <div v-if="resetSuccess" class="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 dark:text-green-400 light:text-green-600 break-words min-w-0">
         {{ resetSuccess }}
       </div>
 
@@ -174,7 +174,7 @@ const handleResetPassword = async () => {
             id="resetToken"
             :disabled="isLoading"
         />
-        <p class="mt-1 text-[10px] text-slate-500">提示：请联系管理员获取今日有效令牌</p>
+        <p class="mt-1 text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400">提示：请联系管理员获取今日有效令牌</p>
       </div>
 
       <div class="min-w-0">
@@ -194,7 +194,7 @@ const handleResetPassword = async () => {
         </BaseButton>
       </div>
 
-      <div class="text-xs sm:text-sm text-slate-500 text-center pt-4 min-w-0 break-words font-medium">
+      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-500 light:text-slate-400 text-center pt-4 min-w-0 break-words font-medium">
         记起密码了？
         <a href="#" @click.prevent="mode = 'login'; error = ''" class="text-brand-primary hover:text-brand-secondary transition-colors" :class="{ 'opacity-50 pointer-events-none': isLoading }">返回登录</a>
       </div>

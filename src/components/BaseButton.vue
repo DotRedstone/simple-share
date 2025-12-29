@@ -25,8 +25,8 @@ const emit = defineEmits<{
     class="relative flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
     :class="{
       'bg-brand-primary text-white hover:bg-brand-primary/90 shadow-lg shadow-brand-primary/20': variant === 'primary',
-      'bg-white/10 border border-white/10 text-white hover:bg-white/20 hover:border-white/20 backdrop-blur-sm': variant === 'glass',
-      'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:border-red-500/30': variant === 'danger'
+      'bg-white/10 dark:bg-white/10 light:bg-slate-200/50 border border-white/10 dark:border-white/10 light:border-slate-300/50 text-white dark:text-white light:text-slate-700 hover:bg-white/20 dark:hover:bg-white/20 light:hover:bg-slate-200 hover:border-white/20 dark:hover:border-white/20 light:hover:border-slate-400 backdrop-blur-sm': variant === 'glass',
+      'bg-red-500/10 border border-red-500/20 text-red-400 dark:text-red-400 light:text-red-600 hover:bg-red-500/20 hover:border-red-500/30': variant === 'danger'
     }"
       @click="(e) => emit('click', e)"
   >

@@ -373,22 +373,22 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         @logout="handleLogout"
       />
 
-      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full">
-        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 bg-surface-900/40 backdrop-blur-md">
-          <div class="flex-1 min-w-0">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50">
+        <header class="h-auto py-4 md:h-28 shrink-0 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 dark:bg-surface-900/40 dark:backdrop-blur-md light:bg-white light:border-slate-200">
+          <div class="flex-1 min-w-0 w-full md:w-auto">
             <SearchBar v-model="searchQuery" />
           </div>
-          <div class="flex items-center gap-4 shrink-0">
+          <div class="flex items-center gap-2 sm:gap-4 shrink-0 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             <!-- 批量操作按钮组 -->
             <template v-if="activeTab === 'all' && selectedFiles.length > 0">
-              <div class="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+              <div class="flex items-center gap-1 sm:gap-2 bg-white/5 dark:bg-white/5 p-1 rounded-xl border border-white/10 light:bg-slate-100 light:border-slate-200">
                 <!-- 针对单选的操作 -->
                 <template v-if="selectedFiles.length === 1">
                   <BaseButton
                     variant="glass"
                     @click="handleBatchShare"
                     title="分享"
-                    class="!p-2 text-slate-300 hover:text-white"
+                    class="!p-2 text-slate-300 dark:text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900"
                   >
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.368a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
@@ -398,7 +398,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
                     variant="glass"
                     @click="handleSingleRename"
                     title="重命名"
-                    class="!p-2 text-slate-300 hover:text-white"
+                    class="!p-2 text-slate-300 dark:text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900"
                   >
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L14.732 5.232z" />
@@ -410,7 +410,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
                   variant="glass"
                   @click="handleBatchStar"
                   title="收藏/取消收藏"
-                  class="!p-2 text-slate-300 hover:text-yellow-400"
+                  class="!p-2 text-slate-300 dark:text-slate-300 hover:text-yellow-400 light:text-slate-600 light:hover:text-yellow-600"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -421,7 +421,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
                   variant="glass"
                   @click="handleBatchDownload"
                   title="下载文件"
-                  class="!p-2 text-slate-300 hover:text-white"
+                  class="!p-2 text-slate-300 dark:text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -432,27 +432,27 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
                   variant="glass"
                   @click="handleMoveFiles"
                   title="移动"
-                  class="!p-2 text-slate-300 hover:text-white"
+                  class="!p-2 text-slate-300 dark:text-slate-300 hover:text-white light:text-slate-600 light:hover:text-slate-900"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                   </svg>
                 </BaseButton>
 
-                <div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+                <div class="w-[1px] h-4 bg-white/10 dark:bg-white/10 mx-1 light:bg-slate-200"></div>
 
                 <BaseButton
                   variant="glass"
                   @click="handleBatchDelete"
                   title="删除"
-                  class="!p-2 text-red-400 hover:text-red-300"
+                  class="!p-2 text-red-400 dark:text-red-400 hover:text-red-300 light:text-red-500 light:hover:text-red-600"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </BaseButton>
               </div>
-              <div class="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
+              <div class="h-8 w-[1px] bg-white/10 dark:bg-white/10 mx-2 hidden sm:block light:bg-slate-200"></div>
             </template>
 
             <ViewModeToggle v-model="viewMode" />
@@ -461,12 +461,12 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               v-if="activeTab === 'all'"
               variant="glass"
               @click="handleCreateFolder"
-              class="shadow-xl !px-3 sm:!px-5"
+              class="shadow-xl !px-3 sm:!px-5 light:bg-white light:text-slate-700 light:border-slate-200"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
               </svg>
-              <span class="hidden sm:inline ml-2 text-sm">新建文件夹</span>
+              <span class="hidden sm:inline ml-2 text-sm">新建</span>
             </BaseButton>
 
             <BaseButton
@@ -478,17 +478,17 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
               </svg>
-              <span class="hidden sm:inline ml-2 text-sm">上传文件</span>
+              <span class="hidden sm:inline ml-2 text-sm">上传</span>
             </BaseButton>
           </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar relative z-0 bg-surface-950/20">
-          <div v-if="combinedLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-20 flex items-center justify-center">
+        <div class="flex-1 overflow-y-auto custom-scrollbar relative z-0 bg-surface-950/20 dark:bg-surface-950/20 light:bg-transparent">
+          <div v-if="combinedLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-20 flex items-center justify-center dark:bg-slate-900/50 light:bg-white/50">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <div class="min-h-full flex flex-col p-6 md:p-12 space-y-4 md:space-y-6">
+          <div class="min-h-full flex flex-col p-4 md:p-12 space-y-4 md:space-y-6 pb-24 md:pb-32">
             <!-- 在全部文件标签页显示面包屑（包括根目录） -->
             <div v-if="activeTab === 'all'" class="shrink-0">
               <Breadcrumb

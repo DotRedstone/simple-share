@@ -519,14 +519,14 @@ onMounted(() => {
         />
 
       <main
-        class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full"
+        class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50"
       >
         <header
-          class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 bg-surface-900/40 backdrop-blur-md"
+          class="h-auto py-4 md:h-28 shrink-0 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 dark:bg-surface-900/40 dark:backdrop-blur-md light:bg-white light:border-slate-200"
         >
           <div class="flex flex-col min-w-0">
             <h1
-              class="text-2xl md:text-3xl font-black text-white tracking-tighter truncate"
+              class="text-xl md:text-3xl font-black text-white dark:text-white light:text-slate-900 tracking-tighter truncate"
             >
               {{ pageTitle }}
             </h1>
@@ -536,40 +536,42 @@ onMounted(() => {
               Management System / {{ activeTab }}
             </p>
           </div>
-          <BaseButton
-            v-if="activeTab === 'users'"
-            variant="primary"
-            @click="openCreateUser"
-            class="shadow-xl shadow-brand-primary/20"
-          >
-            <svg
-              class="w-4 h-4 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div class="flex items-center gap-4 shrink-0 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+            <BaseButton
+              v-if="activeTab === 'users'"
+              variant="primary"
+              @click="openCreateUser"
+              class="shadow-xl shadow-brand-primary/20 !px-4"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="3"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            添加用户
-          </BaseButton>
+              <svg
+                class="w-4 h-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="3"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              添加用户
+            </BaseButton>
+          </div>
         </header>
 
         <div
-          class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 relative z-0 bg-surface-950/20"
+          class="flex-1 overflow-y-auto custom-scrollbar relative z-0 bg-surface-950/20 dark:bg-surface-950/20 light:bg-transparent"
         >
           <div
             v-if="isLoading"
-            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center"
+            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center dark:bg-slate-900/50 light:bg-white/50"
           >
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <div class="min-h-full">
+          <div class="min-h-full p-4 md:p-12 pb-24 md:pb-32">
             <!-- 仪表盘视图 -->
             <div v-if="activeTab === 'dashboard'" class="space-y-8">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

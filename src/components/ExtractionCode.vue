@@ -42,7 +42,7 @@ const handleInput = () => {
 
 <template>
   <form @submit.prevent="handleSubmit" class="w-full group">
-    <div class="relative flex items-center p-1 bg-surface-900/50 border border-white/10 rounded-2xl focus-within:border-brand-primary/50 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all duration-300">
+    <div class="relative flex items-center p-1 bg-surface-900/50 dark:bg-surface-900/50 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-2xl focus-within:border-brand-primary/50 focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all duration-300 shadow-xl dark:shadow-none">
       <div class="pl-4 text-slate-500">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 15V17M12 7V13M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke-linecap="round" stroke-linejoin="round"/>
@@ -51,19 +51,22 @@ const handleInput = () => {
       <input
         v-model="code"
         type="text"
-        placeholder="输入 4-8 位提取码"
+        placeholder="输入提取码"
         maxlength="8"
         @input="handleInput"
-        class="flex-1 bg-transparent border-none py-4 px-3 text-lg font-bold tracking-widest text-white placeholder:text-slate-600 placeholder:font-normal placeholder:tracking-normal outline-none"
+        class="flex-1 bg-transparent border-none py-4 px-3 text-lg font-bold tracking-widest text-white dark:text-white light:text-slate-900 placeholder:text-slate-600 dark:placeholder:text-slate-600 light:placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal outline-none"
       />
       <BaseButton
         type="submit"
         variant="primary"
         :loading="isLoading"
         :disabled="!isValid || isLoading"
-        class="!rounded-xl shadow-lg"
+        class="!rounded-xl shadow-lg !px-4 sm:!px-8"
       >
-        立即提取
+        <span class="hidden sm:inline">立即提取</span>
+        <svg class="sm:hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
       </BaseButton>
     </div>
     <div class="h-6 mt-2 overflow-hidden text-center">

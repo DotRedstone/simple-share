@@ -33,7 +33,7 @@ const iconPaths: Record<string, string> = {
       <div class="absolute inset-0 bg-brand-primary/10 blur-3xl rounded-full"></div>
       <svg
         v-if="iconPaths[icon]"
-        class="w-24 h-24 text-slate-700 relative z-10 animate-pulse"
+        class="w-24 h-24 text-slate-700 dark:text-slate-700 light:text-slate-200 relative z-10 animate-pulse"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -41,8 +41,8 @@ const iconPaths: Record<string, string> = {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="iconPaths[icon]" />
       </svg>
     </div>
-    <h3 class="text-2xl font-black text-white mb-3 tracking-tight">{{ title }}</h3>
-    <p class="text-base text-slate-500 mb-8 max-w-sm text-center leading-relaxed font-medium">{{ description }}</p>
+    <h3 class="text-2xl font-black text-white dark:text-white light:text-slate-900 mb-3 tracking-tight">{{ title }}</h3>
+    <p class="text-base text-slate-500 dark:text-slate-500 light:text-slate-400 mb-8 max-w-sm text-center leading-relaxed font-medium">{{ description }}</p>
     <BaseButton v-if="actionLabel" variant="primary" size="lg" @click="emit('action')" class="shadow-2xl shadow-brand-primary/20">
       {{ actionLabel }}
     </BaseButton>
