@@ -46,6 +46,12 @@ const searchQuery = computed({
   set: (val) => { fileStore.searchQuery = val }
 })
 const breadcrumbs = computed(() => fileStore.breadcrumbs)
+// 移动模态框中的文件列表（只显示文件夹）
+const moveModalFiles = computed(() => {
+  return fileStore.currentFiles.filter(f => f.type === 'folder')
+})
+
+// 主界面的文件列表
 const currentFiles = computed(() => {
   if (activeTab.value === 'shares') {
     const shares = shareStore.getUserShares()
@@ -61,10 +67,6 @@ const currentFiles = computed(() => {
       return null
     }
     return shares.map(share => findFile(allFiles, share.fileId)).filter(f => f !== null) as FileItem[]
-  }
-  // 在移动模式下，只显示文件夹
-  if (showMoveModal.value) {
-    return fileStore.currentFiles.filter(f => f.type === 'folder')
   }
   return fileStore.currentFiles
 })
@@ -111,6 +113,7 @@ onBeforeUnmount(() => {
 
 watch(() => activeTab.value, () => {
   activeOptionsMenu.value = null
+  selectedFiles.value = [] // 切换标签页时清空选择
   initFiles() // 切换标签页时重新加载文件
 })
 
@@ -132,9 +135,15 @@ const closeOptionsMenu = (event?: MouseEvent) => {
 }
 
 const handleFileClick = (file: FileItem) => {
+  // 如果在移动模态框中，使用移动模式的处理
+  if (showMoveModal.value) {
+    handleMoveModeFolderClick(file)
+    return
+  }
   // 只有在全部文件标签页且是文件夹时才能进入
   if (activeTab.value === 'all' && file.type === 'folder') {
     fileStore.navigateToFolder(file)
+    initFiles()
   }
 }
 
@@ -272,8 +281,13 @@ const confirmMoveFiles = async () => {
     if (result.success) {
       // 先关闭模态框
       showMoveModal.value = false
+      
+      // 清空选中的文件
+      selectedFiles.value = []
+      
       // 返回原目录
       fileStore.navigateToRoot()
+      
       // 如果之前保存了目录，导航回去
       if (moveTargetFolder.value !== null) {
         // 重新加载所有文件
@@ -294,10 +308,9 @@ const confirmMoveFiles = async () => {
           fileStore.navigateToFolder(savedFolder)
         }
       }
+      
       // 刷新文件列表
       await initFiles()
-      // 清空选中的文件
-      selectedFiles.value = []
       moveTargetFolder.value = null
       alert(`成功移动 ${filesToMove} 个文件`)
     } else {
@@ -316,7 +329,9 @@ const openMoveModal = async () => {
     ? breadcrumbs.value[breadcrumbs.value.length - 1] 
     : null
   moveTargetFolder.value = lastBreadcrumb?.id ?? null
-  // 重置到根目录，以便选择目标文件夹
+  
+  // 在移动模态框中，我们需要一个独立的面包屑状态
+  // 先重置到根目录，以便选择目标文件夹
   fileStore.navigateToRoot()
   // 确保加载了所有文件（包括文件夹）
   await initFiles()
@@ -327,42 +342,41 @@ const openMoveModal = async () => {
 const handleMoveModeFolderClick = async (folder: FileItem) => {
   if (showMoveModal.value && folder.type === 'folder') {
     fileStore.navigateToFolder(folder)
-    // 导航后重新加载文件列表
+    // 导航后重新加载文件列表（只加载文件夹）
     await initFiles()
   }
 }
 
 // 关闭移动模态框
-const handleCloseMoveModal = () => {
+const handleCloseMoveModal = async () => {
   showMoveModal.value = false
-  // 返回根目录
+  
+  // 返回根目录（清理移动模态框中的导航状态）
   fileStore.navigateToRoot()
+  
   // 如果之前保存了目录，导航回去
   if (moveTargetFolder.value !== null) {
     // 重新加载所有文件
-    fileStore.fetchFiles(null).then(() => {
-      const allFiles = fileStore.files
-      const findFolder = (files: typeof allFiles, folderId: number): FileItem | null => {
-        for (const file of files) {
-          if (file.id === folderId && file.type === 'folder') return file
-          if (file.children) {
-            const found = findFolder(file.children, folderId)
-            if (found) return found
-          }
+    await fileStore.fetchFiles(null)
+    const allFiles = fileStore.files
+    const findFolder = (files: typeof allFiles, folderId: number): FileItem | null => {
+      for (const file of files) {
+        if (file.id === folderId && file.type === 'folder') return file
+        if (file.children) {
+          const found = findFolder(file.children, folderId)
+          if (found) return found
         }
-        return null
       }
-      const savedFolder = findFolder(allFiles, moveTargetFolder.value!)
-      if (savedFolder) {
-        fileStore.navigateToFolder(savedFolder)
-        initFiles()
-      } else {
-        initFiles()
-      }
-    })
-  } else {
-    initFiles()
+      return null
+    }
+    const savedFolder = findFolder(allFiles, moveTargetFolder.value)
+    if (savedFolder) {
+      fileStore.navigateToFolder(savedFolder)
+    }
   }
+  
+  // 刷新文件列表
+  await initFiles()
   moveTargetFolder.value = null
 }
 
@@ -422,6 +436,11 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
           const result = await fileStore.deleteFile(file.id)
           if (!result.success) {
             alert(result.error || '删除失败')
+          } else {
+            // 从选中列表中移除
+            selectedFiles.value = selectedFiles.value.filter(id => id !== file.id)
+            // 刷新文件列表
+            await initFiles()
           }
         } catch (error) {
           alert('删除失败，请稍后重试')
@@ -641,12 +660,12 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
 
         <!-- 文件夹列表 -->
         <div class="bg-white/5 border border-white/10 rounded-lg p-4 max-h-96 overflow-y-auto">
-          <div v-if="currentFiles.filter(f => f.type === 'folder').length === 0 && breadcrumbs.length === 0" class="text-center text-slate-400 py-8">
+          <div v-if="moveModalFiles.length === 0 && breadcrumbs.length === 0" class="text-center text-slate-400 py-8">
             <p>当前目录下没有文件夹</p>
             <p class="text-xs mt-2">文件将移动到根目录</p>
           </div>
           <div
-            v-for="folder in currentFiles.filter(f => f.type === 'folder')"
+            v-for="folder in moveModalFiles"
             :key="folder.id"
             @click="handleMoveModeFolderClick(folder)"
             class="w-full text-left px-4 py-3 rounded-lg mb-2 transition-colors cursor-pointer flex items-center gap-3 hover:bg-white/10 border border-transparent hover:border-white/10"
