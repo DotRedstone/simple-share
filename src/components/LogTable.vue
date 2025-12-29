@@ -1,9 +1,20 @@
 <script setup lang="ts">
 import type { SystemLog } from '../types'
 
-defineProps<{
+const props = defineProps<{
   logs: SystemLog[]
+  sortBy?: string
+  order?: 'ASC' | 'DESC'
 }>()
+
+const emit = defineEmits<{
+  (e: 'sort', field: string): void
+}>()
+
+const getSortIcon = (field: string) => {
+  if (props.sortBy !== field) return '↕'
+  return props.order === 'ASC' ? '↑' : '↓'
+}
 </script>
 
 <template>
@@ -11,11 +22,19 @@ defineProps<{
     <table class="w-full text-left font-mono text-sm text-slate-400">
       <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
         <tr>
-          <th class="px-6 py-3 whitespace-nowrap">时间戳</th>
-          <th class="px-6 py-3 whitespace-nowrap min-w-[120px]">操作</th>
-          <th class="px-6 py-3 whitespace-nowrap">用户</th>
+          <th class="px-6 py-3 whitespace-nowrap cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'created_at')">
+            时间戳 {{ getSortIcon('created_at') }}
+          </th>
+          <th class="px-6 py-3 whitespace-nowrap min-w-[120px] cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'action')">
+            操作 {{ getSortIcon('action') }}
+          </th>
+          <th class="px-6 py-3 whitespace-nowrap cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'user_name')">
+            用户 {{ getSortIcon('user_name') }}
+          </th>
           <th class="px-6 py-3 hidden md:table-cell">详情</th>
-          <th class="px-6 py-3 text-right whitespace-nowrap">状态</th>
+          <th class="px-6 py-3 text-right whitespace-nowrap cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'status')">
+            状态 {{ getSortIcon('status') }}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-white/5">

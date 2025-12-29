@@ -42,8 +42,8 @@ export const useAdminStore = defineStore('admin', () => {
     })
   }
 
-  const fetchUsers = async () => {
-    const response = await get<User[]>('/admin/users')
+  const fetchUsers = async (sortBy: string = 'created_at', order: string = 'DESC') => {
+    const response = await get<User[]>(`/admin/users?sortBy=${sortBy}&order=${order}`)
     if (response.success && response.data) {
       users.value = response.data
     }
@@ -70,8 +70,8 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const fetchLogs = async () => {
-    const response = await get<SystemLog[]>('/admin/logs')
+  const fetchLogs = async (limit: number = 100, sortBy: string = 'created_at', order: string = 'DESC') => {
+    const response = await get<SystemLog[]>(`/admin/logs?limit=${limit}&sortBy=${sortBy}&order=${order}`)
     if (response.success && response.data) {
       logs.value = response.data
     }

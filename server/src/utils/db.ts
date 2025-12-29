@@ -187,8 +187,12 @@ export class Database {
     await this.db.prepare('DELETE FROM users WHERE id = ?').bind(id).run()
   }
 
-  async getAllUsers() {
-    const result = await this.db.prepare('SELECT * FROM users ORDER BY created_at DESC').all()
+  async getAllUsers(sortBy: string = 'created_at', order: string = 'DESC') {
+    const validSortFields = ['name', 'email', 'role', 'status', 'storage_quota', 'storage_used', 'created_at']
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at'
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC'
+    
+    const result = await this.db.prepare(`SELECT * FROM users ORDER BY ${sortField} ${sortOrder}`).all()
     return result.results as any[]
   }
 
@@ -355,8 +359,12 @@ export class Database {
       .run()
   }
 
-  async getLogs(limit: number = 100) {
-    const result = await this.db.prepare('SELECT * FROM system_logs ORDER BY created_at DESC LIMIT ?').bind(limit).all()
+  async getLogs(limit: number = 100, sortBy: string = 'created_at', order: string = 'DESC') {
+    const validSortFields = ['action', 'user_name', 'status', 'created_at', 'ip']
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at'
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC'
+
+    const result = await this.db.prepare(`SELECT * FROM system_logs ORDER BY ${sortField} ${sortOrder} LIMIT ?`).bind(limit).all()
     return result.results as any[]
   }
 

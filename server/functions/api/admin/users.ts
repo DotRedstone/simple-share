@@ -8,8 +8,11 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
 
   try {
     await requireAdmin(request, env)
+    const url = new URL(request.url)
+    const sortBy = url.searchParams.get('sortBy') || 'created_at'
+    const order = url.searchParams.get('order') || 'DESC'
 
-    const users = await db.getAllUsers()
+    const users = await db.getAllUsers(sortBy, order)
 
     const formattedUsers = users.map(user => ({
       id: user.id,

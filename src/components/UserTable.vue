@@ -5,13 +5,21 @@ import UserStorageQuota from './UserStorageQuota.vue'
 const props = defineProps<{
   users: User[]
   groups?: Array<{ id: string; name: string }>
+  sortBy?: string
+  order?: 'ASC' | 'DESC'
 }>()
 
 const emit = defineEmits<{
   (e: 'edit', user: User): void
   (e: 'delete', user: User): void
   (e: 'update-quota', userId: string, quota: number): void
+  (e: 'sort', field: string): void
 }>()
+
+const getSortIcon = (field: string) => {
+  if (props.sortBy !== field) return '↕'
+  return props.order === 'ASC' ? '↑' : '↓'
+}
 
 const getGroupName = (groupId?: string) => {
   if (!groupId || !props.groups) return '-'
@@ -26,10 +34,18 @@ const getGroupName = (groupId?: string) => {
       <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
         <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
           <tr>
-            <th class="px-3 md:px-6 py-4">用户</th>
-            <th class="px-3 md:px-6 py-4 hidden md:table-cell">用户组</th>
-            <th class="px-3 md:px-6 py-4 hidden lg:table-cell">存储</th>
-            <th class="px-3 md:px-6 py-4">状态</th>
+            <th class="px-3 md:px-6 py-4 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'name')">
+              用户 {{ getSortIcon('name') }}
+            </th>
+            <th class="px-3 md:px-6 py-4 hidden md:table-cell cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'group_id')">
+              用户组 {{ getSortIcon('group_id') }}
+            </th>
+            <th class="px-3 md:px-6 py-4 hidden lg:table-cell cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'storage_used')">
+              存储 {{ getSortIcon('storage_used') }}
+            </th>
+            <th class="px-3 md:px-6 py-4 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'status')">
+              状态 {{ getSortIcon('status') }}
+            </th>
             <th class="px-3 md:px-6 py-4 text-right">操作</th>
           </tr>
         </thead>

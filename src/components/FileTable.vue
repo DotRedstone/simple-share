@@ -48,6 +48,9 @@ const getSortIcon = (field: string) => {
             <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'name')">
               文件名 {{ getSortIcon('name') }}
             </th>
+            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'type')">
+              类型 {{ getSortIcon('type') }}
+            </th>
             <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'user_id')">
               上传者 {{ getSortIcon('user_id') }}
             </th>
@@ -55,7 +58,7 @@ const getSortIcon = (field: string) => {
               大小 {{ getSortIcon('size_bytes') }}
             </th>
             <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'created_at')">
-              上传日期 {{ getSortIcon('created_at') }}
+              上传时间 {{ getSortIcon('created_at') }}
             </th>
             <th class="px-8 py-5 hidden md:table-cell">状态</th>
             <th class="px-8 py-5 text-right">操作</th>
@@ -74,6 +77,9 @@ const getSortIcon = (field: string) => {
                   <span v-if="file.status === '违规'" class="text-[10px] text-red-500 font-medium">管理员下架</span>
                 </div>
               </div>
+            </td>
+            <td class="px-8 py-5">
+              <span class="px-2.5 py-1 rounded-md bg-surface-800 text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ file.type }}</span>
             </td>
             <td class="px-8 py-5">
               <span class="px-2.5 py-1 rounded-md bg-surface-800 text-[11px] font-bold text-slate-400">{{ file.uploader }}</span>

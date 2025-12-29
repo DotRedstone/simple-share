@@ -79,16 +79,42 @@ const formatSize = (gb: number) => {
 };
 
 const sortBy = ref('created_at');
-const order = ref<'ASC' | 'DESC'>('DESC');
+const filesOrder = ref<'ASC' | 'DESC'>('DESC');
+
+const userSortBy = ref('created_at');
+const userOrder = ref<'ASC' | 'DESC'>('DESC');
+
+const logSortBy = ref('created_at');
+const logOrder = ref<'ASC' | 'DESC'>('DESC');
 
 const handleSort = (field: string) => {
   if (sortBy.value === field) {
-    order.value = order.value === 'ASC' ? 'DESC' : 'ASC';
+    filesOrder.value = filesOrder.value === 'ASC' ? 'DESC' : 'ASC';
   } else {
     sortBy.value = field;
-    order.value = 'DESC';
+    filesOrder.value = 'DESC';
   }
-  adminStore.fetchAdminFiles(100, sortBy.value, order.value);
+  adminStore.fetchAdminFiles(100, sortBy.value, filesOrder.value);
+};
+
+const handleUserSort = (field: string) => {
+  if (userSortBy.value === field) {
+    userOrder.value = userOrder.value === 'ASC' ? 'DESC' : 'ASC';
+  } else {
+    userSortBy.value = field;
+    userOrder.value = 'DESC';
+  }
+  adminStore.fetchUsers(userSortBy.value, userOrder.value);
+};
+
+const handleLogSort = (field: string) => {
+  if (logSortBy.value === field) {
+    logOrder.value = logOrder.value === 'ASC' ? 'DESC' : 'ASC';
+  } else {
+    logSortBy.value = field;
+    logOrder.value = 'DESC';
+  }
+  adminStore.fetchLogs(100, logSortBy.value, logOrder.value);
 };
 
 const handleTakedown = async (file: any) => {
@@ -98,7 +124,7 @@ const handleTakedown = async (file: any) => {
   try {
     const res = await api.post('/admin/files/takedown', { fileId: file.id });
     if (res.success) {
-      await adminStore.fetchAdminFiles(100, sortBy.value, order.value);
+      await adminStore.fetchAdminFiles(100, sortBy.value, filesOrder.value);
     } else {
       alert(res.error || '下架失败');
     }
@@ -113,7 +139,9 @@ const initAdminData = async () => {
   isLoading.value = true;
   try {
     await adminStore.initData();
-    await adminStore.fetchAdminFiles(100, sortBy.value, order.value);
+    await adminStore.fetchAdminFiles(100, sortBy.value, filesOrder.value);
+    await adminStore.fetchUsers(userSortBy.value, userOrder.value);
+    await adminStore.fetchLogs(100, logSortBy.value, logOrder.value);
   } catch (error) {
     // 初始化失败，静默处理
   } finally {
@@ -617,6 +645,9 @@ onMounted(() => {
                 v-if="users.length > 0"
                 :users="users"
                 :groups="userGroups.map((g) => ({ id: g.id, name: g.name }))"
+                :sort-by="userSortBy"
+                :order="userOrder"
+                @sort="handleUserSort"
                 @edit="editUser"
                 @delete="deleteUser"
                 @update-quota="handleUpdateQuota"
@@ -648,7 +679,7 @@ onMounted(() => {
                 v-if="files.length > 0"
                 :files="files"
                 :sort-by="sortBy"
-                :order="order"
+                :order="filesOrder"
                 @sort="handleSort"
                 @takedown="handleTakedown"
                 @delete="deleteFile"
@@ -663,7 +694,13 @@ onMounted(() => {
 
             <!-- 系统日志视图 -->
             <div v-if="activeTab === 'logs'" class="h-full">
-              <LogTable v-if="logs.length > 0" :logs="logs" />
+              <LogTable 
+                v-if="logs.length > 0" 
+                :logs="logs" 
+                :sort-by="logSortBy"
+                :order="logOrder"
+                @sort="handleLogSort"
+              />
               <EmptyState
                 v-else
                 icon="search"
