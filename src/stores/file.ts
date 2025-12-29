@@ -24,7 +24,7 @@ export const useFileStore = defineStore('file', () => {
 
   const getFilesByTab = (fileList: FileItem[]): FileItem[] => {
     switch (activeTab.value) {
-      case 'recent':
+      case 'recent': {
         const allFilesFlat = getAllFilesFlat(fileList)
         const sevenDaysAgo = new Date()
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
@@ -38,7 +38,7 @@ export const useFileStore = defineStore('file', () => {
             }
           })
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      
+      }
       case 'starred':
         return getAllFilesFlat(fileList).filter(f => f.starred)
       
@@ -50,6 +50,23 @@ export const useFileStore = defineStore('file', () => {
         return fileList
     }
   }
+
+  const findFileById = (fileList: FileItem[], id: number): FileItem | null => {
+    for (const file of fileList) {
+      if (file.id === id) return file
+      if (file.children) {
+        const found = findFileById(file.children, id)
+        if (found) return found
+      }
+    }
+    return null
+  }
+
+  const currentFolderId = computed(() => {
+    return breadcrumbs.value.length > 0 
+      ? breadcrumbs.value[breadcrumbs.value.length - 1].id 
+      : null
+  })
 
   const currentFiles = computed(() => {
     let filesToShow: FileItem[] = []
@@ -313,6 +330,7 @@ export const useFileStore = defineStore('file', () => {
     viewMode,
     activeTab,
     currentFiles,
+    currentFolderId,
     navigateToFolder,
     navigateToBreadcrumb,
     navigateToRoot,
@@ -322,6 +340,7 @@ export const useFileStore = defineStore('file', () => {
     setFiles,
     setActiveTab,
     fetchFiles,
+    findFileById,
     uploadFile,
     createFolder,
     deleteFile,
