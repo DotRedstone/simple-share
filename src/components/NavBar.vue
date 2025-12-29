@@ -8,26 +8,27 @@ defineProps<{
 </script>
 
 <template>
-  <nav class="flex justify-between items-center shrink-0 pb-2">
-    <div class="flex items-center gap-2">
-      <div class="w-6 h-6 rounded-lg overflow-hidden flex items-center justify-center shadow-lg">
-        <img src="/favicon-96x96.png" alt="SimpleShare" class="w-full h-full object-contain" />
+  <nav class="flex justify-between items-center py-4 px-1">
+    <div class="flex items-center gap-3 group cursor-pointer">
+      <div class="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center glass-card group-hover:scale-110 transition-transform duration-300">
+        <img src="/favicon-96x96.png" alt="SimpleShare" class="w-7 h-7 object-contain" />
       </div>
-      <span class="text-base font-bold text-white tracking-tight">SimpleShare</span>
+      <div class="flex flex-col">
+        <span class="text-lg font-bold text-white tracking-tighter leading-none">SimpleShare</span>
+        <span class="text-[10px] text-slate-500 font-mono tracking-widest uppercase">Cloud Transfer</span>
+      </div>
     </div>
-    <div v-if="onLoginClick || onRegisterClick" class="flex items-center gap-2">
-      <BaseButton 
+    <div v-if="onLoginClick || onRegisterClick" class="flex items-center gap-3">
+      <button 
         v-if="onRegisterClick" 
-        variant="glass" 
-        class="!px-3 !py-1 !text-xs hidden sm:inline-flex" 
+        class="text-sm font-semibold text-slate-400 hover:text-white transition-colors px-4 py-2"
         @click="onRegisterClick"
       >
         注册
-      </BaseButton>
+      </button>
       <BaseButton 
         v-if="onLoginClick" 
         variant="primary" 
-        class="!px-3 !py-1 !text-xs" 
         @click="onLoginClick"
       >
         登录

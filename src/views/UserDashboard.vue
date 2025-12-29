@@ -386,61 +386,56 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         <template #title>SimpleShare</template>
       </Sidebar>
 
-      <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900/20 relative min-w-0">
-        <header class="h-16 md:h-20 shrink-0 border-b border-white/5 flex items-center justify-between px-3 md:px-4 lg:px-8 gap-2 overflow-hidden">
+      <main class="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
+        <header class="h-24 md:h-32 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
           <div class="flex-1 min-w-0">
             <SearchBar v-model="searchQuery" />
           </div>
-          <div class="flex items-center gap-2 md:gap-3 shrink-0">
+          <div class="flex items-center gap-4 shrink-0">
             <ViewModeToggle v-model="viewMode" />
+            <div class="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
+            
             <BaseButton
               v-if="activeTab === 'all' && selectedFiles.length > 0"
               variant="glass"
-              class="!py-1.5 !px-2 md:!px-3 !text-xs"
               @click="handleMoveFiles"
               title="移动选中文件"
             >
-              <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              <span class="hidden sm:inline">移动 ({{ selectedFiles.length }})</span>
+              <span>{{ selectedFiles.length }}</span>
             </BaseButton>
-            <BaseButton
-              v-if="activeTab === 'all' && selectedFiles.length > 0"
-              variant="glass"
-              class="!py-1.5 !px-2 md:!px-3 !text-xs text-red-400"
-              @click="selectedFiles = []"
-              title="取消选择"
-            >
-              <span class="hidden sm:inline">取消</span>
-            </BaseButton>
+
             <BaseButton
               v-if="activeTab === 'all'"
               variant="glass"
-              class="!py-1.5 !px-2 md:!px-3 !text-xs hidden sm:inline-flex"
               @click="handleCreateFolder"
-              title="新建文件夹"
+              class="shadow-xl"
             >
-              <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
               </svg>
-              <span class="hidden md:inline">新建文件夹</span>
+              <span class="hidden sm:inline">新建文件夹</span>
+              <span class="sm:hidden">文件夹</span>
             </BaseButton>
-            <BaseButton 
-              v-if="activeTab === 'all'" 
-              variant="primary" 
-              class="!py-1.5 !px-2 md:!px-3 !text-xs" 
+
+            <BaseButton
+              v-if="activeTab === 'all'"
+              variant="primary"
               @click="showUpload = true"
+              class="shadow-xl shadow-brand-primary/20"
             >
-              <span class="hidden sm:inline">上传</span>
-              <svg class="w-4 h-4 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
               </svg>
+              <span class="hidden sm:inline">上传文件</span>
+              <span class="sm:hidden">上传</span>
             </BaseButton>
           </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-4 lg:p-8 scrollbar-thin scrollbar-thumb-slate-700 relative min-h-0">
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 pt-0 relative z-0">
           <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>

@@ -92,10 +92,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
-    <div class="w-full max-w-lg">
+  <div class="min-h-screen w-full flex items-center justify-center p-6 md:p-12">
+    <div class="w-full max-w-4xl">
       <PageFrame>
-        <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-8">
           <NavBar
             :on-login-click="() => showLogin = true"
             :on-register-click="() => showRegister = true"

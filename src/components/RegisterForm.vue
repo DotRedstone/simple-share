@@ -119,13 +119,13 @@ const handleRegister = async () => {
       />
     </div>
 
-    <div class="text-xs sm:text-sm text-slate-400 text-center min-w-0 break-words">
+    <div class="text-xs sm:text-sm text-slate-500 text-center pt-2 min-w-0 break-words font-medium">
       已有账号？
-      <a href="#" @click.prevent="$emit('switch-to-login')" class="text-blue-400 hover:underline whitespace-nowrap" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即登录</a>
+      <a href="#" @click.prevent="$emit('switch-to-login')" class="text-brand-primary hover:text-brand-secondary transition-colors" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即登录</a>
     </div>
 
-    <div class="min-w-0 w-full">
-      <BaseButton type="submit" variant="primary" class="w-full !py-2.5 sm:!py-3 min-w-0" :loading="isLoading" :disabled="isLoading">
+    <div class="min-w-0 w-full pt-2">
+      <BaseButton type="submit" variant="primary" class="w-full shadow-xl shadow-brand-primary/20" :loading="isLoading" :disabled="isLoading">
         注册
       </BaseButton>
     </div>

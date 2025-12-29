@@ -1,83 +1,104 @@
-/* === 1. Google Fonts (保持在第一行) === */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+/* === 1. Google Fonts === */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* === 2. Tailwind CSS v4 核心引入 (关键修改) === */
-/* v4 版本不再使用 @tailwind base 等指令，而是使用标准 import */
+/* === 2. Tailwind CSS v4 === */
 @import "tailwindcss";
 
+@theme {
+  --color-brand-primary: #6366f1;
+  --color-brand-secondary: #a855f7;
+  --color-surface-950: #030712;
+  --color-surface-900: #111827;
+  --color-surface-800: #1f2937;
+  
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 /* === 3. 全局基础设置 === */
-/* 注意：v4 会自动处理很多 reset，但在 @layer base 中定义更安全，这里直接写也没问题 */
 :root {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font-sans);
     line-height: 1.5;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-html {
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
 body {
     margin: 0;
     padding: 0;
     width: 100%;
-    min-width: 320px;
     min-height: 100vh;
-    max-width: 100vw;
+    background-color: var(--color-surface-950);
+    color: #f9fafb;
     overflow-x: hidden;
-    overflow-y: auto;
-    background-color: #0f172a;
     position: relative;
-    -webkit-overflow-scrolling: touch;
 }
 
-#app {
+/* 渐变背景光效 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-    position: relative;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(168, 85, 247, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
 }
 
-/* === 4. 自定义动画类 === */
-
-/* 全屏流光渐变背景 */
-.bg-gradient-animate {
-    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+/* === 4. 滚动条美化 === */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-/* 漂浮模糊球 (Blob) 动画 */
-.animate-blob {
-    animation: blob 7s infinite;
-}
-.animation-delay-2000 {
-    animation-delay: 2s;
-}
-.animation-delay-4000 {
-    animation-delay: 4s;
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
-@keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
-/* 页面切换过渡 */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* === 5. 玻璃拟态卡片 === */
+.glass-card {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* === 6. 动画 === */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.3s ease;
@@ -85,33 +106,4 @@ body {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
-}
-
-/* === 5. 玻璃拟态卡片 (修复 @apply 问题) === */
-/* 在 v4 中，建议直接将 @theme 配置或引用导入，或者直接使用 import "tailwindcss" 后再 apply */
-.glass-panel {
-    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl;
-}
-
-.glass-input {
-    @apply bg-white/10 border border-white/10 text-white placeholder-white/50 focus:bg-white/20 focus:border-white/30 focus:ring-0 transition-all outline-none;
-}
-
-
-/* === 6. 新增：登录框专用弹入动画 (只执行一次) === */
-@keyframes popUp {
-    0% {
-        opacity: 0;
-        transform: scale(0.95) translateY(10px); /* 初始状态：稍微缩小，且位置偏下 */
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);       /* 结束状态：正常大小，位置回正 */
-    }
-}
-
-.animate-pop-up {
-    /* forwards 表示动画结束后保持在最后一帧，不会重置 */
-    /* cubic-bezier 提供类似 iOS 的丝滑回弹手感 */
-    animation: popUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

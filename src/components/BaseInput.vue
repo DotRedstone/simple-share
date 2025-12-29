@@ -12,9 +12,9 @@ const emit = defineEmits(['update:modelValue'])
 
 <template>
   <div class="w-full min-w-0">
-    <label v-if="label" :for="id" class="block text-sm font-medium text-slate-400 mb-2 break-words min-w-0">{{ label }}</label>
-    <div class="relative min-w-0">
-      <span v-if="$slots.icon" class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+    <label v-if="label" :for="id" class="block text-sm font-semibold text-slate-400 mb-1.5 px-1">{{ label }}</label>
+    <div class="relative min-w-0 group">
+      <span v-if="$slots.icon" class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none text-slate-500 group-focus-within:text-brand-primary transition-colors">
         <slot name="icon" />
       </span>
 
@@ -24,8 +24,8 @@ const emit = defineEmits(['update:modelValue'])
           :value="modelValue"
           @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
           :placeholder="placeholder"
-          class="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-3 md:px-4 text-sm md:text-base text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder:text-slate-600 min-w-0 max-w-full"
-          :class="{ 'pl-9 md:pl-10': $slots.icon }"
+          class="w-full bg-surface-900/50 border border-white/5 rounded-xl py-2.5 px-4 text-white focus:border-brand-primary/50 focus:ring-4 focus:ring-brand-primary/10 outline-none transition-all placeholder:text-slate-600 min-w-0"
+          :class="{ 'pl-11': $slots.icon }"
       />
     </div>
   </div>

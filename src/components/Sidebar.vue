@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { MenuItem } from '../types'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
   logoColor?: 'blue' | 'red'
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   username: '用户',
   userRole: '高级账户',
   logo: 'S',
@@ -44,72 +44,65 @@ const getIcon = (iconName: string) => {
   }
   return icons[iconName] || ''
 }
-
-const activeColor = computed(() => {
-  return props.logoColor === 'red' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-})
 </script>
 
 <template>
   <aside 
     :class="[
-      'shrink-0 bg-slate-900/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden transition-all duration-300',
-      isCollapsed ? 'md:w-16' : 'w-full md:w-64'
+      'shrink-0 bg-surface-900/80 backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden transition-all duration-300',
+      isCollapsed ? 'md:w-20' : 'w-full md:w-72'
     ]"
   >
-    <div class="h-16 md:h-20 flex items-center px-3 md:px-6 border-b border-white/5 shrink-0 relative">
-      <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center mr-3 shadow-lg shrink-0">
-        <img src="/favicon-96x96.png" alt="SimpleShare" class="w-full h-full object-contain" />
+    <div class="h-16 md:h-24 flex items-center px-4 md:px-8 shrink-0 relative">
+      <div class="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center mr-4 shadow-xl shrink-0 glass-card">
+        <img src="/favicon-96x96.png" alt="SimpleShare" class="w-7 h-7 object-contain" />
       </div>
-      <span v-if="!isCollapsed" class="font-bold text-lg text-white tracking-wide">
-        <slot name="title">SimpleShare</slot>
-      </span>
+      <div v-if="!isCollapsed" class="flex flex-col min-w-0">
+        <span class="font-black text-xl text-white tracking-tighter leading-none italic uppercase">Simple</span>
+        <span class="text-[10px] text-brand-primary font-mono tracking-[0.2em] uppercase">Control</span>
+      </div>
       <button
         @click="toggleCollapse"
-        class="absolute right-2 md:right-4 p-1.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-colors hidden md:block"
-        title="收起/展开"
+        class="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-brand-primary rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform z-20 hidden md:flex"
       >
-        <svg v-if="!isCollapsed" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-        </svg>
-        <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-        </svg>
+        <svg v-if="!isCollapsed" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 19l-7-7 7-7" stroke-width="3" /></svg>
+        <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" stroke-width="3" /></svg>
       </button>
     </div>
 
-    <div class="p-2 md:p-4 space-x-1 md:space-x-0 md:space-y-1 flex md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide -mx-2 md:mx-0">
+    <div class="p-4 space-x-2 md:space-x-0 md:space-y-2 flex md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide">
       <button
         v-for="item in menuItems"
         :key="item.id"
         @click="emit('tab-change', item.id)"
         :class="[
-          'flex-shrink-0 md:w-full flex items-center rounded-xl text-sm font-medium transition-all',
-          isCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3',
-          activeTab === item.id ? activeColor : 'text-slate-400 hover:bg-white/5 hover:text-white'
+          'flex-shrink-0 md:w-full flex items-center rounded-2xl text-sm font-bold transition-all duration-300',
+          isCollapsed ? 'justify-center w-12 h-12 px-0' : 'gap-4 px-5 py-4',
+          activeTab === item.id ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' : 'text-slate-500 hover:text-white hover:bg-white/5'
         ]"
         :title="isCollapsed ? item.label : ''"
       >
-        <svg v-if="getIcon(item.icon)" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg v-if="getIcon(item.icon)" class="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getIcon(item.icon)" />
         </svg>
-        <span v-if="!isCollapsed" class="truncate">{{ item.label }}</span>
+        <span v-if="!isCollapsed" class="truncate tracking-tight">{{ item.label }}</span>
       </button>
     </div>
 
-    <div class="hidden md:block p-3 md:p-6 shrink-0 space-y-4 mt-auto">
-      <div class="pt-4 border-t border-white/5 flex items-center" :class="isCollapsed ? 'justify-center' : 'justify-between'">
-        <div v-if="!isCollapsed" class="flex items-center gap-3 overflow-hidden flex-1">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 shrink-0"></div>
-          <div class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-white truncate">{{ username }}</span>
-            <span class="text-[10px] text-slate-500 truncate">{{ userRole }}</span>
+    <div class="p-4 md:p-8 shrink-0">
+      <div class="bg-white/5 rounded-3xl p-4 flex items-center gap-4 border border-white/5" :class="isCollapsed ? 'flex-col justify-center' : ''">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-primary to-brand-secondary p-[2px] shrink-0">
+          <div class="w-full h-full rounded-[14px] bg-surface-900 flex items-center justify-center text-white font-black text-sm uppercase">
+            {{ username?.[0] || 'U' }}
           </div>
         </div>
-        <div v-else class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 shrink-0"></div>
+        <div v-if="!isCollapsed" class="flex flex-col min-w-0 flex-1">
+          <span class="text-sm font-bold text-white truncate">{{ username }}</span>
+          <span class="text-[10px] text-slate-500 truncate font-mono uppercase">{{ userRole }}</span>
+        </div>
         <button 
           @click="emit('logout')" 
-          class="text-slate-500 hover:text-red-400 transition-colors shrink-0 p-1"
+          class="text-slate-500 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-xl"
           :title="isCollapsed ? '退出登录' : ''"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

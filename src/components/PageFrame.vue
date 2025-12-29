@@ -21,20 +21,15 @@ withDefaults(defineProps<Props>(), {
     :class="fullScreen ? 'min-h-screen flex flex-col' : ''"
   >
     <div
-        class="relative w-full bg-slate-900/60 backdrop-blur-2xl border border-white/10 shadow-2xl flex flex-col transition-all duration-300"
+        class="relative w-full glass-card flex flex-col transition-all duration-300 overflow-hidden"
         :class="[
-          fullScreen ? 'flex-1 rounded-none border-x-0 border-t-0' : 'rounded-xl',
-          allowOverflow ? '' : 'overflow-hidden'
+          fullScreen ? 'flex-1 rounded-none border-x-0 border-t-0 border-b-0' : 'rounded-[2.5rem]',
         ]"
     >
-      <div class="absolute top-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-[60px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-
-      <div class="absolute bottom-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[60px] translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
-
       <div 
         class="relative z-10 flex flex-col" 
         :class="[
-          { 'p-4 sm:p-6': !noPadding },
+          { 'p-6 sm:p-10': !noPadding },
           fullScreen ? 'flex-1 min-h-0' : ''
         ]"
       >

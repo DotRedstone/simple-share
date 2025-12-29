@@ -384,23 +384,26 @@ onMounted(() => {
         <template #title>管理面板</template>
       </Sidebar>
 
-      <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900/20 relative min-w-0 max-w-full">
-        <header class="h-16 md:h-20 shrink-0 border-b border-white/5 flex items-center justify-between px-3 md:px-4 lg:px-8 gap-2 overflow-hidden">
-          <h1 class="text-lg md:text-xl font-bold text-white truncate">{{ pageTitle }}</h1>
+      <main class="flex-1 flex flex-col h-full overflow-hidden relative min-w-0 max-w-full">
+        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
+          <div class="flex flex-col">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tighter">{{ pageTitle }}</h1>
+            <p class="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em]">Management System / {{ activeTab }}</p>
+          </div>
           <BaseButton
             v-if="activeTab === 'users'"
             variant="primary"
-            class="!py-1.5 !px-3 !text-xs"
             @click="openCreateUser"
+            class="shadow-xl shadow-brand-primary/20"
           >
-            <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
             </svg>
             添加用户
           </BaseButton>
         </header>
 
-        <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-4 lg:p-8 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent relative">
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 pt-0 relative z-0">
           <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>

@@ -22,11 +22,11 @@ const emit = defineEmits<{
   <button
       :type="type"
       :disabled="disabled || loading"
-      class="relative flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden min-w-0 max-w-full"
-      :class="{
-      'bg-white text-slate-900 hover:bg-gray-100 shadow-lg shadow-white/10': variant === 'primary',
-      'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/30 backdrop-blur-md': variant === 'glass',
-      'bg-red-500/20 border border-red-500/30 text-red-200 hover:bg-red-500/30 hover:border-red-500/50': variant === 'danger'
+    class="relative flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+    :class="{
+      'bg-brand-primary text-white hover:bg-brand-primary/90 shadow-lg shadow-brand-primary/20': variant === 'primary',
+      'bg-white/10 border border-white/10 text-white hover:bg-white/20 hover:border-white/20 backdrop-blur-sm': variant === 'glass',
+      'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 hover:border-red-500/30': variant === 'danger'
     }"
       @click="(e) => emit('click', e)"
   >
