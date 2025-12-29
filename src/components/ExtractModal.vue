@@ -4,10 +4,8 @@ import { useRouter } from 'vue-router'
 import BaseModal from './BaseModal.vue'
 import BaseInput from './BaseInput.vue'
 import BaseButton from './BaseButton.vue'
-import LoadingSpinner from './LoadingSpinner.vue'
-import { useShareStore } from '../stores'
 
-const props = defineProps<{
+defineProps<{
   show: boolean
 }>()
 
@@ -16,7 +14,6 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
-const shareStore = useShareStore()
 
 const extractCode = ref('')
 const isLoading = ref(false)
