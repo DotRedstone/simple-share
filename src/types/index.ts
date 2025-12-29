@@ -89,5 +89,5 @@ export const FileActionType = {
 export type FileActionType = typeof FileActionType[keyof typeof FileActionType]
 
 // 对应旧的字符串类型（保持兼容性）
-export type FileAction = '分享' | '下载' | '重命名' | '删除' | '收藏' | '管理分享' | 'options'
+export type FileAction = '分享' | '下载' | '重命名' | '移动' | '删除' | '收藏' | '管理分享' | 'options'
 

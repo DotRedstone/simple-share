@@ -18,6 +18,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     }
 
     // 验证目标文件夹（如果指定）
+    let targetFolderPath = '/'
     if (targetFolderId !== null && targetFolderId !== undefined) {
       const targetFolder = await db.getFileById(targetFolderId)
       if (!targetFolder || targetFolder.type !== 'folder') {
@@ -32,6 +33,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
           { status: 403, headers: { 'Content-Type': 'application/json' } }
         )
       }
+      targetFolderPath = targetFolder.path
     }
 
     // 移动每个文件
@@ -44,11 +46,24 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
         continue // 跳过不属于当前用户的文件
       }
 
-      // 更新文件的parent_id和path
+      // 防止将文件夹移动到自身或其子文件夹中
+      if (file.type === 'folder' && targetFolderId !== null && targetFolderId !== undefined) {
+        if (targetFolderId === fileId || targetFolderPath.startsWith(file.path + '/')) {
+          continue // 跳过非法移动
+        }
+      }
+
+      // 如果目标文件夹就是当前父文件夹，跳过
+      if (file.parent_id === targetFolderId) {
+        continue
+      }
+
+      // 更新文件的 parent_id 和 path
       const newPath = targetFolderId 
-        ? (await db.getFileById(targetFolderId))?.path + '/' + file.name
+        ? targetFolderPath + '/' + file.name
         : '/' + file.name
 
+      // 更新当前文件
       await db.db.prepare(
         'UPDATE files SET parent_id = ?, path = ?, updated_at = ? WHERE id = ?'
       ).bind(
@@ -57,6 +72,21 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
         Date.now(),
         fileId
       ).run()
+
+      // 如果是文件夹，递归更新所有子项的路径
+      if (file.type === 'folder') {
+        const oldPathPrefix = file.path + '/'
+        const newPathPrefix = newPath + '/'
+        
+        await db.db.prepare(
+          "UPDATE files SET path = ? || substr(path, ?), updated_at = ? WHERE path LIKE ?"
+        ).bind(
+          newPathPrefix,
+          oldPathPrefix.length + 1,
+          Date.now(),
+          oldPathPrefix + '%'
+        ).run()
+      }
     }
 
     // 记录日志

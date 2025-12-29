@@ -66,6 +66,15 @@ const handleAction = (action: FileAction, file: FileItem) => {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L14.732 5.232z" />
       </svg>
     </button>
+    <button
+      @click.stop="handleAction('移动', file)"
+      class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      title="移动"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+    </button>
     <div class="my-1 h-[1px] bg-slate-700"></div>
     <button
       @click.stop="handleAction('删除', file)"

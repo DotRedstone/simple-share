@@ -255,6 +255,10 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         await initFiles()
       }
       break
+    case '移动':
+      selectedFiles.value = [file.id]
+      showMoveModal.value = true
+      break
     case '删除':
       if (await deleteFile(file)) {
         selectedFiles.value = selectedFiles.value.filter(id => id !== file.id)
