@@ -131,6 +131,7 @@ export default {
           { status: 503, headers: { 'Content-Type': 'application/json' } }
         )
       }
+      try {
         const apiPath = url.pathname.replace('/api/', '')
         const method = request.method
         
