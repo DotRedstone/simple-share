@@ -3,11 +3,15 @@ name = "simple-share"
 main = "server/index.ts"
 compatibility_date = "2024-04-03"
 
+# 静态资源托管配置：让 Worker 自动服务前端构建产物
+assets = { directory = "./dist", binding = "ASSETS" }
+
 [vars]
-# 生产环境环境变量请在 Cloudflare Dashboard 中进行配置
+# JWT_SECRET 已由系统逻辑自动处理
 
 [env.production]
 name = "simple-share"
+assets = { directory = "./dist", binding = "ASSETS" }
 
 [env.production.vars]
-# 预留生产环境配置槽位
+# 生产环境配置

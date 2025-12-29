@@ -1,13 +1,13 @@
 /**
  * SimpleShare Server Entry
- * 基于 Cloudflare Workers 的全栈网盘系统后端
+ * 处理 API 路由与静态资源服务
  */
 
 import { corsHeaders, handleOptions } from './src/utils/cors'
 import { ensureDatabaseInitialized } from './src/utils/init'
 import type { Env } from './src/utils/db'
 
-// 核心功能处理函数导入
+// API 处理器导入
 import { onRequestPost as loginHandler } from './functions/api/auth/login'
 import { onRequestPost as registerHandler } from './functions/api/auth/register'
 import { onRequestPost as resetPasswordHandler } from './functions/api/auth/reset-password'
@@ -38,12 +38,9 @@ import { onRequestGet as userStorageHandler, onRequestPost as userStorageCreateH
 import { onRequestPut as userStorageUpdateHandler, onRequestDelete as userStorageDeleteHandler } from './functions/api/user/storage/[id]'
 
 export interface WorkerEnv extends Env {
-  ASSETS?: {
-    fetch: (request: Request) => Promise<Response>
-  }
+  ASSETS?: { fetch: (request: Request) => Promise<Response> }
 }
 
-// 静态路由表定义
 const apiRoutes: Record<string, Record<string, (context: any) => Promise<Response>>> = {
   'auth/login': { 'POST': loginHandler },
   'auth/register': { 'POST': registerHandler },
@@ -63,7 +60,8 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   'admin/files': { 'GET': adminFilesHandler },
   'admin/stats': { 'GET': adminStatsHandler },
   'admin/logs': { 'GET': adminLogsHandler },
-  'admin/storage': { 'GET': adminStorageHandler, 'POST': adminStorageCreateHandler }
+  'admin/storage': { 'GET': adminStorageHandler, 'POST': adminStorageCreateHandler },
+  'user/storage': { 'GET': userStorageHandler, 'POST': userStorageCreateHandler }
 }
 
 export default {
@@ -71,80 +69,81 @@ export default {
     const url = new URL(request.url)
     const origin = request.headers.get('Origin') || ''
     
-    // 初始化数据库环境
     if (env.DB) {
-      try {
-        await ensureDatabaseInitialized(env.DB)
-      } catch (error) {
-        console.error('Core init failure:', error)
-      }
+      try { await ensureDatabaseInitialized(env.DB) } catch (e) {}
     }
     
-    // 跨域预检请求处理
-    if (request.method === 'OPTIONS') {
-      return handleOptions()
-    }
+    if (request.method === 'OPTIONS') return handleOptions()
 
-    // API 路由网关
+    // API 路由
     if (url.pathname.startsWith('/api/')) {
-      if (!env.DB) {
-        return new Response(JSON.stringify({ success: false, error: 'Database binding required' }), { status: 503 })
-      }
+      if (!env.DB) return new Response(JSON.stringify({ success: false, error: 'DB not bound' }), { status: 503 })
 
       try {
         const apiPath = url.pathname.replace('/api/', '')
         const method = request.method
-        let handler: ((context: any) => Promise<Response>) | null = null
-        let params: Record<string, string> = {}
-        
-        // 匹配静态路由
-        const staticRoute = apiRoutes[apiPath]
-        if (staticRoute && staticRoute[method]) {
-          handler = staticRoute[method]
+        let handler: any = null
+        let params: any = {}
+
+        // 1. 静态路由匹配
+        if (apiRoutes[apiPath] && apiRoutes[apiPath][method]) {
+          handler = apiRoutes[apiPath][method]
         } else {
-          // 动态路径参数解析逻辑
+          // 2. 动态路由正则匹配
           if (apiPath.startsWith('extract/')) {
-            params = { code: apiPath.replace('extract/', '') }
-            handler = extractHandler
+            params = { code: apiPath.split('/')[1] }; handler = extractHandler
           } else if (apiPath.match(/^files\/\d+$/)) {
             params = { id: apiPath.split('/')[1] }
             if (method === 'PUT') handler = filesUpdateHandler
             else if (method === 'DELETE') handler = filesDeleteHandler
+          } else if (apiPath.match(/^shares\/[a-zA-Z0-9_-]+$/)) {
+            params = { id: apiPath.split('/')[1] }
+            if (method === 'DELETE') handler = sharesDeleteHandler
           } else if (apiPath.match(/^admin\/users\/[^/]+$/)) {
             params = { id: apiPath.split('/')[2] }
             if (method === 'PUT') handler = adminUsersUpdateHandler
             else if (method === 'DELETE') handler = adminUsersDeleteHandler
-          } else if (apiPath.match(/^admin\/storage\/[a-zA-Z0-9_-]+$/)) {
+          } else if (apiPath.match(/^admin\/groups\/storage\/[^/]+$/)) {
+            params = { id: apiPath.split('/')[3] }
+            if (method === 'PUT') handler = adminGroupStorageUpdateHandler
+            else if (method === 'DELETE') handler = adminGroupStorageDeleteHandler
+          } else if (apiPath.match(/^admin\/groups\/[^/]+$/)) {
+            params = { id: apiPath.split('/')[2] }
+            if (method === 'PUT') handler = adminGroupsUpdateHandler
+            else if (method === 'DELETE') handler = adminGroupsDeleteHandler
+          } else if (apiPath.match(/^admin\/storage\/[^/]+$/)) {
             params = { id: apiPath.split('/')[2] }
             if (method === 'PUT') handler = adminStorageUpdateHandler
             else if (method === 'DELETE') handler = adminStorageDeleteHandler
+          } else if (apiPath.match(/^user\/storage\/[^/]+$/)) {
+            params = { id: apiPath.split('/')[2] }
+            if (method === 'PUT') handler = userStorageUpdateHandler
+            else if (method === 'DELETE') handler = userStorageDeleteHandler
           }
-          // ... 其他动态匹配
         }
-        
+
         if (handler) {
-          const context = { request, env, params, next: () => fetch(request, env, ctx) }
-          const response = await handler(context)
-          const headers = new Headers(response.headers)
+          const res = await handler({ request, env, params, next: () => fetch(request, env, ctx) })
+          const headers = new Headers(res.headers)
           Object.entries(corsHeaders(origin)).forEach(([k, v]) => headers.set(k, v as string))
-          return new Response(response.body, { status: response.status, headers })
+          return new Response(res.body, { status: res.status, headers })
         }
-        
-        return new Response(JSON.stringify({ success: false, error: 'Endpoint not found' }), { status: 404 })
-      } catch (error: any) {
-        return new Response(JSON.stringify({ success: false, error: 'Internal Error', details: error.message }), { status: 500 })
+        return new Response(JSON.stringify({ success: false, error: 'API Not Found' }), { status: 404 })
+      } catch (e: any) {
+        return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 })
       }
     }
 
-    // SPA 静态资源转发处理
+    // 静态资源服务 (SPA 支持)
     if (env.ASSETS) {
-      const assetResponse = await env.ASSETS.fetch(request)
-      if (assetResponse.status !== 404) return assetResponse
+      const res = await env.ASSETS.fetch(request)
+      if (res.status !== 404) return res
+      // SPA Fallback: 非文件路径请求返回 index.html
       if (url.pathname === '/' || !url.pathname.includes('.')) {
         return env.ASSETS.fetch(new Request(new URL('/index.html', request.url)))
       }
     }
-    
+
     return new Response('Resource Not Found', { status: 404 })
   }
 }
