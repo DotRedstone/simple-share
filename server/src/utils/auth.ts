@@ -2,8 +2,11 @@ import { SignJWT, jwtVerify } from 'jose'
 import type { JwtPayload } from '../types'
 
 // 默认密钥回退，确保即使不设置环境变量系统也能运行
+// 使用一个固定的、足够长的随机安全字符串，确保在生产环境冷启动时 Token 不会失效
+const DEFAULT_SECRET = 'ss_v1_f8e9d2c1b0a3948576e5d4c3b2a10928374655463728190a9b8c7d6e5f4e3d2c1';
+
 const getSecret = (secret?: string) => {
-  return new TextEncoder().encode(secret || 'simpleshare-default-secret-key-2025-please-change-in-prod')
+  return new TextEncoder().encode(secret || DEFAULT_SECRET)
 }
 
 export async function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string, remember?: boolean): Promise<string> {
@@ -65,7 +68,7 @@ export async function generateResetToken(email: string, secret: string, version:
   
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(secret || 'simpleshare-default-secret-key-2025-please-change-in-prod'),
+    new TextEncoder().encode(secret || DEFAULT_SECRET),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
