@@ -6,7 +6,7 @@ compatibility_date = "2024-04-03"
 [[d1_databases]]
 binding = "DB"
 database_name = "simpleshare-db"
-database_id = "49954cc4-6599-448f-9a10-252c42bc707b"
+database_id = "5f0e0656-b9a3-433e-97e2-5322a7058f40"
 
 [[r2_buckets]]
 binding = "FILES"
@@ -21,7 +21,7 @@ name = "simple-share"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "simpleshare-db"
-database_id = "49954cc4-6599-448f-9a10-252c42bc707b"
+database_id = "5f0e0656-b9a3-433e-97e2-5322a7058f40"
 
 [[env.production.r2_buckets]]
 binding = "FILES"
