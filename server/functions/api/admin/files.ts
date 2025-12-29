@@ -11,24 +11,24 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     await requireAdmin(request, env)
 
     const url = new URL(request.url)
-    12|    const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')!) : 100
-    13|    const sortBy = url.searchParams.get('sortBy') || 'f.created_at'
-    14|    const order = url.searchParams.get('order') || 'DESC'
-    15|
-    16|    // 获取所有文件
-    17|    const result = await db.db.prepare(`SELECT f.*, u.name as uploader_name, u.email as uploader_email FROM files f LEFT JOIN users u ON f.user_id = u.id WHERE f.type != "folder" ORDER BY ${sortBy} ${order} LIMIT ?`).bind(limit).all()
-    18|    const files = result.results as any[]
-    19|
-    20|    const formattedFiles = files.map(file => ({
-    21|      id: file.id, // 使用原始 ID
-    22|      name: file.name,
-    23|      uploader: file.uploader_name || file.uploader_email || '未知',
-    24|      size: file.size_bytes === 0 ? '已下架' : formatFileSize(file.size_bytes),
-    25|      size_bytes: file.size_bytes, // 传回原始字节用于前端排序
-    26|      uploaded: new Date(file.created_at).toISOString().split('T')[0],
-    27|      type: file.type,
-    28|      status: file.size_bytes === 0 ? '违规' : '正常'
-    29|    }))
+    const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')!) : 100
+    const sortBy = url.searchParams.get('sortBy') || 'f.created_at'
+    const order = url.searchParams.get('order') || 'DESC'
+
+    // 获取所有文件
+    const result = await db.db.prepare(`SELECT f.*, u.name as uploader_name, u.email as uploader_email FROM files f LEFT JOIN users u ON f.user_id = u.id WHERE f.type != "folder" ORDER BY ${sortBy} ${order} LIMIT ?`).bind(limit).all()
+    const files = result.results as any[]
+
+    const formattedFiles = files.map(file => ({
+      id: file.id, // 使用原始 ID
+      name: file.name,
+      uploader: file.uploader_name || file.uploader_email || '未知',
+      size: file.size_bytes === 0 ? '已下架' : formatFileSize(file.size_bytes),
+      size_bytes: file.size_bytes, // 传回原始字节用于前端排序
+      uploaded: new Date(file.created_at).toISOString().split('T')[0],
+      type: file.type,
+      status: file.size_bytes === 0 ? '违规' : '正常'
+    }))
 
     return new Response(
       JSON.stringify({
@@ -46,4 +46,3 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     )
   }
 }
-
