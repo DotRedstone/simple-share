@@ -1,8 +1,13 @@
 import { SignJWT, jwtVerify } from 'jose'
 import type { JwtPayload } from '../types'
 
+// 默认密钥回退，确保即使不设置环境变量系统也能运行
+const getSecret = (secret?: string) => {
+  return new TextEncoder().encode(secret || 'simpleshare-default-secret-key-2025-please-change-in-prod')
+}
+
 export async function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string, remember?: boolean): Promise<string> {
-  const secretKey = new TextEncoder().encode(secret)
+  const secretKey = getSecret(secret)
   
   // 如果 remember 为 true，token 有效期 30 天，否则 7 天
   const expirationTime = remember ? '30d' : '7d'
@@ -18,7 +23,7 @@ export async function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, se
 
 export async function verifyToken(token: string, secret: string): Promise<JwtPayload | null> {
   try {
-    const secretKey = new TextEncoder().encode(secret)
+    const secretKey = getSecret(secret)
     const { payload } = await jwtVerify(token, secretKey)
     return payload as JwtPayload
   } catch (error) {
@@ -60,7 +65,7 @@ export async function generateResetToken(email: string, secret: string, version:
   
   const key = await crypto.subtle.importKey(
     'raw',
-    encoder.encode(secret),
+    new TextEncoder().encode(secret || 'simpleshare-default-secret-key-2025-please-change-in-prod'),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']

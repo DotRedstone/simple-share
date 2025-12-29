@@ -94,6 +94,29 @@ export class Database {
         now,
         now
       ).run()
+
+      // 自动为默认用户组分配该存储桶
+      await this.ensureDefaultGroups()
+      
+      // 分配给普通用户组 (1GB)
+      try {
+        await this.createGroupStorageAllocation({
+          id: `alloc_user_r2_${Date.now()}`,
+          groupId: 'user_group',
+          storageBackendId: 'system_r2',
+          quotaGb: 1.0
+        })
+      } catch (e) {}
+
+      // 分配给管理员组 (1000GB)
+      try {
+        await this.createGroupStorageAllocation({
+          id: `alloc_admin_r2_${Date.now()}`,
+          groupId: 'admin_group',
+          storageBackendId: 'system_r2',
+          quotaGb: 1000.0
+        })
+      } catch (e) {}
     }
   }
 
