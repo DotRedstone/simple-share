@@ -49,6 +49,12 @@ export async function ensureDatabaseInitialized(db: D1Database): Promise<boolean
         const dbInstance = new Database(db)
         await dbInstance.ensureDefaultGroups()
         
+        // 确保至少有一个默认存储后端（如果环境中有绑定）
+        // 注意：这里需要传递 context.env，但 ensureDatabaseInitialized 的签名不包含 env
+        // 我们可以在 API handler 中调用，或者修改此函数签名。
+        // 既然我们已经在 api/admin/storage.ts 中调用了，且那是管理员查看的地方，
+        // 应该已经足够。但在上传等地方如果没有任何后端，可能也会需要。
+        
         console.log('数据库初始化完成')
       }
       

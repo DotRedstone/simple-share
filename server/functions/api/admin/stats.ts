@@ -12,8 +12,12 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
 
     const stats = await db.getStorageStats()
 
-    // 总存储：优先使用用户组配置的配额总和（GB），否则回退到 1TB
-    const totalStorage = stats.totalGroupQuota && stats.totalGroupQuota > 0 ? stats.totalGroupQuota : 1024 // GB
+    // 总存储：优先使用所有启用后端的总配额之和（GB）
+    // 如果没有设置后端配额，回退到 1TB
+    const totalStorage = stats.totalBackendQuota && stats.totalBackendQuota > 0 
+      ? stats.totalBackendQuota 
+      : 1024 // GB
+    
     // 已用存储：根据文件表中 size_bytes 汇总，转换为 GB
     const usedStorage = stats.totalSize / (1024 * 1024 * 1024)
     const availableStorage = Math.max(totalStorage - usedStorage, 0)

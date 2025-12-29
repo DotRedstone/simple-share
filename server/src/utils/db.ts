@@ -71,6 +71,29 @@ export class Database {
     await this.db.prepare('UPDATE user_groups SET current_users = current_users + 1 WHERE id = ?').bind(defaultGroupId).run()
   }
 
+  async ensureDefaultStorageBackend(env: Env) {
+    // 检查是否已经有存储后端
+    const existing = await this.db.prepare('SELECT COUNT(*) as count FROM storage_backends').first<{ count: number }>()
+    
+    // 如果没有任何后端且有环境变量绑定，自动创建一个内置 R2 后端
+    if (existing?.count === 0 && env.FILES) {
+      const now = Date.now()
+      await this.db.prepare(
+        'INSERT INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      ).bind(
+        'system_r2',
+        '内置 R2 存储',
+        'r2',
+        JSON.stringify({ bucket: 'env.FILES', quotaGb: 10 }), // 初始默认 10GB
+        '通过 Worker 绑定的内置 Cloudflare R2 存储',
+        1,
+        1, // 设为默认
+        now,
+        now
+      ).run()
+    }
+  }
+
   async ensureDefaultGroups() {
     // 确保默认用户组存在
     const adminGroup = await this.db.prepare('SELECT * FROM user_groups WHERE id = ?').bind('admin_group').first()
@@ -355,6 +378,20 @@ export class Database {
     const activeUsers = await this.db.prepare('SELECT COUNT(*) as count FROM users WHERE status = "活跃"').first<{ count: number }>()
     const groupQuota = await this.db.prepare('SELECT SUM(storage_quota) as total FROM user_groups').first<{ total: number }>()
     const r2Backends = await this.db.prepare('SELECT COUNT(*) as count FROM storage_backends WHERE type = "r2" AND enabled = 1').first<{ count: number }>()
+    
+    // 获取所有启用后端的总配额
+    const backends = await this.db.prepare('SELECT config FROM storage_backends WHERE enabled = 1').all()
+    let totalBackendQuota = 0
+    if (backends.results) {
+      for (const row of backends.results) {
+        try {
+          const config = JSON.parse((row as any).config)
+          if (config.quotaGb && config.quotaGb > 0) {
+            totalBackendQuota += config.quotaGb
+          }
+        } catch (e) {}
+      }
+    }
 
     return {
       totalFiles: totalFiles?.count || 0,
@@ -362,7 +399,8 @@ export class Database {
       totalUsers: totalUsers?.count || 0,
       activeUsers: activeUsers?.count || 0,
       totalGroupQuota: groupQuota?.total || 0, // GB
-      r2Backends: r2Backends?.count || 0
+      r2Backends: r2Backends?.count || 0,
+      totalBackendQuota: totalBackendQuota // GB
     }
   }
 

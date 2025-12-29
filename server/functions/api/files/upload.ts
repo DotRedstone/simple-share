@@ -11,6 +11,9 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
 
   try {
     const user = await requireAuth(request, env)
+    
+    // 确保至少有一个默认存储后端
+    await db.ensureDefaultStorageBackend(env)
 
     const formData = await request.formData()
     const file = formData.get('file') as File

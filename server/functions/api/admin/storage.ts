@@ -15,6 +15,9 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       )
     }
 
+    // 确保至少有一个默认存储后端
+    await db.ensureDefaultStorageBackend(env)
+
     const backends = await db.getAllStorageBackends()
     const formattedBackends = backends.map(backend => ({
       id: backend.id,
