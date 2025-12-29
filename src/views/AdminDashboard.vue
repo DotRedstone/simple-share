@@ -417,14 +417,14 @@ const generateUserToken = async () => {
   try {
     const email = securityEmail.value.trim().toLowerCase();
     const dateStr = new Date().toISOString().split("T")[0];
-    const secret = authStore.token || "fallback"; // 这里实际生产中应该从后端获取或同步环境变量
+    const secret = authStore.token || "simpleshare_secret"; 
     
     // 使用浏览器原生的 Crypto API 实现与后端一致的算法
     const encoder = new TextEncoder();
     const data = encoder.encode(`${email}:${dateStr}`);
     const key = await window.crypto.subtle.importKey(
       "raw",
-      encoder.encode(authStore.token || "simpleshare_secret"), // 使用 token 作为盐的一部分或约定的密钥
+      encoder.encode(secret), 
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign"]
