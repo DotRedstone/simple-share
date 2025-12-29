@@ -25,6 +25,7 @@ export interface User {
   storageQuota?: number // 存储配额（GB）
   storageUsed?: number // 已用存储（GB）
   groupId?: string // 所属用户组ID
+  updatedAt?: number // 最后更新时间戳
 }
 
 // 用户组类型

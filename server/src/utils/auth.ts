@@ -50,13 +50,13 @@ export function getAuthToken(request: Request): string | null {
 }
 
 /**
- * 生成无状态重置令牌 (基于 Email + 日期 + 密钥)
- * 这种令牌不需要存储在数据库，当天有效
+ * 生成无状态重置令牌 (基于 Email + 日期 + 密钥 + 用户版本)
+ * 这种令牌不需要存储在数据库，当天有效，且使用一次即失效（因为版本会变）
  */
-export async function generateResetToken(email: string, secret: string): Promise<string> {
+export async function generateResetToken(email: string, secret: string, version: string | number): Promise<string> {
   const dateStr = new Date().toISOString().split('T')[0] // YYYY-MM-DD
   const encoder = new TextEncoder()
-  const data = encoder.encode(`${email.toLowerCase()}:${dateStr}`)
+  const data = encoder.encode(`${email.toLowerCase()}:${dateStr}:${version}`)
   
   const key = await crypto.subtle.importKey(
     'raw',

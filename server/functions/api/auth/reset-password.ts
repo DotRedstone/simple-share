@@ -41,8 +41,8 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
-    // 验证重置令牌
-    const expectedToken = await generateResetToken(email, env.JWT_SECRET)
+    // 验证重置令牌 (带上用户当前的 updated_at 作为版本)
+    const expectedToken = await generateResetToken(email, env.JWT_SECRET, user.updated_at)
     if (resetToken.toUpperCase() !== expectedToken) {
       return new Response(
         JSON.stringify({ success: false, error: '重置令牌无效或已过期' }),

@@ -417,14 +417,16 @@ const generateUserToken = async () => {
   try {
     const email = securityEmail.value.trim().toLowerCase();
     const dateStr = new Date().toISOString().split("T")[0];
-    const secret = authStore.token || "simpleshare_secret"; 
+    
+    // 获取目标用户的版本号（updatedAt）
+    const version = targetUser ? (targetUser.updatedAt || 0) : 0;
     
     // 使用浏览器原生的 Crypto API 实现与后端一致的算法
     const encoder = new TextEncoder();
-    const data = encoder.encode(`${email}:${dateStr}`);
+    const data = encoder.encode(`${email}:${dateStr}:${version}`);
     const key = await window.crypto.subtle.importKey(
       "raw",
-      encoder.encode(secret), 
+      encoder.encode(authStore.token || "simpleshare_secret"), 
       { name: "HMAC", hash: "SHA-256" },
       false,
       ["sign"]
