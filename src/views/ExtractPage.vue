@@ -46,13 +46,16 @@ const fetchFileInfo = async (code: string) => {
         size: data.data.size,
         uploadTime: data.data.uploadTime || data.data.created_at,
         type: data.data.type,
-        downloadUrl: data.data.downloadUrl || data.data.url
+        downloadUrl: data.data.downloadUrl || data.data.url,
+        children: data.data.children
       }
       // 从downloadUrl中提取fileId
-      const url = new URL(data.data.downloadUrl, window.location.origin)
-      const id = url.searchParams.get('id')
-      if (id) {
-        fileId.value = parseInt(id)
+      if (data.data.downloadUrl) {
+        const url = new URL(data.data.downloadUrl, window.location.origin)
+        const id = url.searchParams.get('id')
+        if (id) {
+          fileId.value = parseInt(id)
+        }
       }
       // 增加访问计数
       const share = await shareStore.getShareByCode(code)
@@ -211,7 +214,45 @@ const goHome = () => {
             >
               转存到我的文件
             </BaseButton>
-            <BaseButton variant="primary" class="flex-1" @click="handleDownload">下载文件</BaseButton>
+            <BaseButton v-if="fileInfo.type !== 'folder'" variant="primary" class="flex-1" @click="handleDownload">下载文件</BaseButton>
+          </div>
+
+          <!-- 文件夹内容 -->
+          <div v-if="fileInfo.type === 'folder' && fileInfo.children" class="mt-8 border-t border-white/10 pt-6">
+            <h3 class="text-sm font-semibold text-slate-400 mb-4 flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              文件夹内容 ({{ fileInfo.children.length }} 个项目)
+            </h3>
+            <div class="space-y-2">
+              <div
+                v-for="child in fileInfo.children"
+                :key="child.id"
+                class="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group"
+              >
+                <div class="flex items-center gap-3 min-w-0">
+                  <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(child.type)" />
+                  </svg>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-sm font-medium text-white truncate" :title="child.name">{{ child.name }}</span>
+                    <span class="text-[10px] text-slate-500 font-mono">{{ child.size }}</span>
+                  </div>
+                </div>
+                <a
+                  v-if="child.type !== 'folder'"
+                  :href="child.downloadUrl"
+                  download
+                  class="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
+                  title="下载"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </PageFrame>

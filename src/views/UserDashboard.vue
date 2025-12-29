@@ -27,6 +27,7 @@ const {
   isLoading: isActionLoading, 
   downloadFile, 
   deleteFile, 
+  deleteFiles,
   renameFile, 
   toggleStar,
   createFolder,
@@ -214,6 +215,17 @@ const handleMoveFiles = () => {
   showMoveModal.value = true
 }
 
+const handleBatchDelete = async () => {
+  if (selectedFiles.value.length === 0) {
+    alert('请先选择要删除的文件')
+    return
+  }
+  if (await deleteFiles(selectedFiles.value)) {
+    selectedFiles.value = []
+    await initFiles()
+  }
+}
+
 const onMoveSuccess = async () => {
   showMoveModal.value = false
   selectedFiles.value = []
@@ -231,10 +243,6 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
 
   switch (action) {
     case '分享':
-      if (file.type === 'folder') {
-        alert('文件夹暂不支持分享功能')
-        return
-      }
       currentShareFile.value = file
       shareCode.value = ''
       showShare.value = true
@@ -290,6 +298,18 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             <ViewModeToggle v-model="viewMode" />
             <div class="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
             
+            <BaseButton
+              v-if="activeTab === 'all' && selectedFiles.length > 0"
+              variant="glass"
+              @click="handleBatchDelete"
+              title="删除选中项目"
+              class="!px-3 sm:!px-5 text-red-400 hover:text-red-300"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </BaseButton>
+
             <BaseButton
               v-if="activeTab === 'all' && selectedFiles.length > 0"
               variant="glass"

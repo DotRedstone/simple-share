@@ -39,6 +39,25 @@ export function useFileActions() {
     }
   }
 
+  const deleteFiles = async (fileIds: number[]) => {
+    if (!confirm(`确定要删除选中的 ${fileIds.length} 个项目吗？此操作不可恢复。`)) return false
+    
+    isLoading.value = true
+    try {
+      const result = await fileStore.deleteFiles(fileIds)
+      if (!result.success) {
+        alert(result.error || '批量删除失败')
+        return false
+      }
+      return true
+    } catch (error) {
+      alert('批量删除失败，请稍后重试')
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const renameFile = async (file: FileItem) => {
     const newName = prompt(`重命名 "${file.name}":`, file.name)
     if (!newName || newName.trim() === '' || newName === file.name) return false

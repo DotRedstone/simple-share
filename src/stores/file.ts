@@ -188,6 +188,23 @@ export const useFileStore = defineStore('file', () => {
     return { success: false, error: response.error || '删除失败' }
   }
 
+  const deleteFiles = async (fileIds: number[]) => {
+    try {
+      const response = await post('/files/batch-delete', { fileIds })
+      if (response.success) {
+        // 刷新列表
+        const parentId = breadcrumbs.value.length > 0 
+          ? breadcrumbs.value[breadcrumbs.value.length - 1]?.id 
+          : null
+        await fetchFiles(parentId)
+        return { success: true, message: response.message }
+      }
+      return { success: false, error: response.error || '批量删除失败' }
+    } catch (error) {
+      return { success: false, error: '网络错误' }
+    }
+  }
+
   const renameFile = async (fileId: number, newName: string) => {
     const response = await put(`/files/${fileId}`, { name: newName })
     if (response.success) {

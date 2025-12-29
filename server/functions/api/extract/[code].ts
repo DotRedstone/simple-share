@@ -59,6 +59,19 @@ export async function onRequestGet(context: { env: Env; request: Request; params
     // 增加访问计数
     await db.incrementShareAccess(shareCode)
 
+    // 如果是文件夹，获取其下的子项目
+    let children = []
+    if (file.type === 'folder') {
+      const childFiles = await db.getFilesByUserId(file.user_id, file.id)
+      children = childFiles.map(cf => ({
+        id: cf.id,
+        name: cf.name,
+        size: cf.type === 'folder' ? '-' : formatFileSize(cf.size_bytes),
+        type: cf.type,
+        downloadUrl: cf.type === 'folder' ? null : `/api/files/download?id=${cf.id}&shareCode=${shareCode}`
+      }))
+    }
+
     // 记录日志
     await db.createLog({
       action: '提取文件',
@@ -78,7 +91,8 @@ export async function onRequestGet(context: { env: Env; request: Request; params
           size: formatFileSize(file.size_bytes),
           uploadTime: new Date(file.created_at).toISOString(),
           type: file.type,
-          downloadUrl: `/api/files/download?id=${file.id}&shareCode=${shareCode}`
+          downloadUrl: file.type === 'folder' ? null : `/api/files/download?id=${file.id}&shareCode=${shareCode}`,
+          children: children.length > 0 ? children : undefined
         }
       }),
       { 
