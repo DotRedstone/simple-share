@@ -11,9 +11,7 @@ interface Props {
   selectedFiles?: number[]
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  selectedFiles: () => []
-})
+const { files, viewMode, activeOptionsMenu, selectedFiles = [] } = defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'file-click', file: FileItem): void
