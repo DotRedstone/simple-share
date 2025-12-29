@@ -9,11 +9,13 @@ interface Props {
   viewMode: 'list' | 'grid'
   showOptions?: boolean
   selected?: boolean
+  enableSelect?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showOptions: false,
-  selected: false
+  selected: false,
+  enableSelect: true
 })
 
 const emit = defineEmits<{
@@ -49,13 +51,13 @@ const iconColor = computed(() => getFileIconColor(props.file.type))
     class="hover:bg-white/5 transition-colors group"
     :class="file.type === 'folder' ? 'cursor-pointer' : ''"
   >
-    <td class="px-3 md:px-6 py-4 w-12" @click.stop>
+    <td v-if="enableSelect" class="px-3 md:px-6 py-4 w-12" @click.stop>
       <BaseCheckbox
         :model-value="selected"
         @update:model-value="handleCheckboxChange"
       />
     </td>
-    <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0" :class="{ 'bg-blue-500/10': selected }">
+    <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0" :class="{ 'bg-blue-500/10': selected, 'pl-6 md:pl-12': !enableSelect }">
       <div class="flex items-center gap-2 md:gap-3 min-w-0">
         <svg class="w-5 h-5 md:w-6 md:h-6 shrink-0" :class="iconColor" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
@@ -91,7 +93,7 @@ const iconColor = computed(() => getFileIconColor(props.file.type))
     ]"
     class="group relative hover:bg-white/10 hover:border-white/20 rounded-2xl p-4 transition-all flex flex-col items-center justify-between aspect-[4/5]"
   >
-    <div class="absolute top-2 left-2 z-10" @click.stop>
+    <div v-if="enableSelect" class="absolute top-2 left-2 z-10" @click.stop>
       <BaseCheckbox
         :model-value="selected"
         @update:model-value="handleCheckboxChange"

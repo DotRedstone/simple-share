@@ -9,9 +9,10 @@ interface Props {
   viewMode: 'list' | 'grid'
   activeOptionsMenu: number | null
   selectedFiles?: number[]
+  enableMultiSelect?: boolean
 }
 
-const { files, viewMode, activeOptionsMenu, selectedFiles = [] } = defineProps<Props>()
+const { files, viewMode, activeOptionsMenu, selectedFiles = [], enableMultiSelect = true } = defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'file-click', file: FileItem): void
@@ -32,13 +33,13 @@ const handleSelectAll = (selected: boolean) => {
       <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
         <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
           <tr>
-            <th class="px-3 md:px-6 py-4 w-12">
+            <th v-if="enableMultiSelect" class="px-3 md:px-6 py-4 w-12">
               <BaseCheckbox
                 :model-value="selectedFiles.length === files.length && files.length > 0"
                 @update:model-value="handleSelectAll"
               />
             </th>
-            <th class="px-3 md:px-6 py-4">名称</th>
+            <th class="px-3 md:px-6 py-4" :class="{ 'pl-6 md:pl-12': !enableMultiSelect }">名称</th>
             <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell">大小</th>
             <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell">修改日期</th>
             <th class="px-3 md:px-6 py-4 w-20 text-right"></th>
@@ -51,10 +52,11 @@ const handleSelectAll = (selected: boolean) => {
           :file="file"
           :view-mode="viewMode"
           :show-options="activeOptionsMenu === file.id"
-          :selected="selectedFiles.includes(file.id)"
+          :selected="enableMultiSelect && selectedFiles.includes(file.id)"
+          :enable-select="enableMultiSelect"
           @click="emit('file-click', $event)"
           @action="(action, f) => emit('file-action', action, f)"
-          @select="(selected) => emit('file-select', file.id, selected)"
+          @select="enableMultiSelect ? (selected: boolean) => emit('file-select', file.id, selected) : undefined"
         />
       </tbody>
       </table>
@@ -66,10 +68,11 @@ const handleSelectAll = (selected: boolean) => {
         :file="file"
         :view-mode="viewMode"
         :show-options="activeOptionsMenu === file.id"
-        :selected="selectedFiles.includes(file.id)"
+        :selected="enableMultiSelect && selectedFiles.includes(file.id)"
+        :enable-select="enableMultiSelect"
         @click="emit('file-click', $event)"
         @action="(action, f) => emit('file-action', action, f)"
-        @select="(selected) => emit('file-select', file.id, selected)"
+        @select="enableMultiSelect ? (selected: boolean) => emit('file-select', file.id, selected) : undefined"
       />
     </div>
   </div>

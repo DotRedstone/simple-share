@@ -372,7 +372,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
 
 <template>
   <PageFrame no-padding :allow-overflow="false" :full-screen="true">
-    <div class="absolute inset-0 flex flex-col md:flex-row overflow-hidden max-w-full">
+    <div class="flex flex-col md:flex-row h-full w-full overflow-hidden relative">
       <Sidebar
         :menu-items="menuItems"
         :active-tab="activeTab"
@@ -386,8 +386,8 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         <template #title>SimpleShare</template>
       </Sidebar>
 
-      <main class="flex-1 flex flex-col h-full overflow-hidden relative min-w-0">
-        <header class="h-24 md:h-32 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
           <div class="flex-1 min-w-0">
             <SearchBar v-model="searchQuery" />
           </div>
@@ -400,90 +400,96 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               variant="glass"
               @click="handleMoveFiles"
               title="移动选中文件"
+              class="!px-3 sm:!px-5"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              <span>{{ selectedFiles.length }}</span>
+              <span class="ml-2 text-xs sm:text-sm">{{ selectedFiles.length }}</span>
             </BaseButton>
 
             <BaseButton
               v-if="activeTab === 'all'"
               variant="glass"
               @click="handleCreateFolder"
-              class="shadow-xl"
+              class="shadow-xl !px-3 sm:!px-5"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
               </svg>
-              <span class="hidden sm:inline">新建文件夹</span>
-              <span class="sm:hidden">文件夹</span>
+              <span class="hidden sm:inline ml-2 text-sm">新建文件夹</span>
             </BaseButton>
 
             <BaseButton
               v-if="activeTab === 'all'"
               variant="primary"
               @click="showUpload = true"
-              class="shadow-xl shadow-brand-primary/20"
+              class="shadow-xl shadow-brand-primary/20 !px-3 sm:!px-5"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
               </svg>
-              <span class="hidden sm:inline">上传文件</span>
-              <span class="sm:hidden">上传</span>
+              <span class="hidden sm:inline ml-2 text-sm">上传文件</span>
             </BaseButton>
           </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 pt-0 relative z-0">
-          <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
+        <div class="flex-1 overflow-y-auto custom-scrollbar relative z-0">
+          <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-20 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <!-- 在全部文件标签页显示面包屑（包括根目录） -->
-          <Breadcrumb
-            v-if="activeTab === 'all'"
-            :breadcrumbs="breadcrumbs"
-            @navigate="navigateToBreadcrumb"
-            @navigate-root="() => fileStore.navigateToRoot()"
-          />
-
-          <!-- 标签页提示 -->
-          <div v-if="activeTab !== 'all' && breadcrumbs.length === 0" class="mb-4 text-sm text-slate-400">
-            <span v-if="activeTab === 'recent'">📅 显示最近7天上传的文件</span>
-            <span v-else-if="activeTab === 'starred'">⭐ 显示已收藏的文件</span>
-            <span v-else-if="activeTab === 'shares'">🔗 显示已分享的文件</span>
-          </div>
-
-          <!-- 我的分享标签页 -->
-          <div v-if="activeTab === 'shares'" class="space-y-4">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="text-lg font-bold text-white">我的分享</h3>
-              <BaseButton variant="primary" class="!py-1.5 !px-3 !text-xs" @click="showShareList = true">
-                管理所有分享
-              </BaseButton>
+          <div class="p-6 md:p-12 space-y-4 md:space-y-6">
+            <!-- 在全部文件标签页显示面包屑（包括根目录） -->
+            <div v-if="activeTab === 'all'" class="shrink-0">
+              <Breadcrumb
+                :breadcrumbs="breadcrumbs"
+                @navigate="navigateToBreadcrumb"
+                @navigate-root="() => fileStore.navigateToRoot()"
+              />
             </div>
+
+            <!-- 标签页提示 -->
+            <div v-if="activeTab !== 'all'" class="shrink-0 text-sm text-slate-400">
+              <span v-if="activeTab === 'recent'">📅 显示最近7天上传的文件</span>
+              <span v-else-if="activeTab === 'starred'">⭐ 显示已收藏的文件</span>
+              <span v-else-if="activeTab === 'shares'">🔗 显示已分享的文件</span>
+            </div>
+
+            <!-- 我的分享标签页 -->
+            <div v-if="activeTab === 'shares'" class="space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">我的分享</h3>
+                <BaseButton variant="primary" class="!py-1.5 !px-3 !text-xs" @click="showShareList = true">
+                  管理所有分享
+                </BaseButton>
+              </div>
+              <FileListView
+                :files="currentFiles"
+                :view-mode="viewMode"
+                :active-options-menu="activeOptionsMenu"
+                :selected-files="selectedFiles"
+                @file-click="handleFileClick"
+                @file-action="handleFileAction"
+                @file-select="handleFileSelect"
+                @select-all="handleSelectAll"
+              />
+            </div>
+
+            <!-- 其他标签页（最近上传、我的收藏、全部文件） -->
             <FileListView
+              v-else
               :files="currentFiles"
               :view-mode="viewMode"
               :active-options-menu="activeOptionsMenu"
-              :selected-files="selectedFiles"
+              :selected-files="activeTab === 'all' ? selectedFiles : []"
+              :enable-multi-select="activeTab === 'all'"
               @file-click="handleFileClick"
               @file-action="handleFileAction"
-              @file-select="handleFileSelect"
-              @select-all="handleSelectAll"
+              @file-select="activeTab === 'all' ? handleFileSelect : () => {}"
+              @select-all="activeTab === 'all' ? handleSelectAll : () => {}"
             />
           </div>
-
-          <!-- 其他标签页（最近上传、我的收藏、我的分享） -->
-          <FileListView
-            v-else
-            :files="currentFiles"
-            :view-mode="viewMode"
-            :active-options-menu="activeOptionsMenu"
-            @file-click="handleFileClick"
-            @file-action="handleFileAction"
-          />
         </div>
       </main>
     </div>

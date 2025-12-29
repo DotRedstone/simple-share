@@ -370,7 +370,7 @@ onMounted(() => {
 
 <template>
   <PageFrame no-padding :allow-overflow="false" :full-screen="true">
-    <div class="absolute inset-0 flex flex-col md:flex-row overflow-hidden max-w-full">
+    <div class="flex flex-col md:flex-row h-full w-full overflow-hidden relative">
       <Sidebar
         :menu-items="menuItems"
         :active-tab="activeTab"
@@ -384,11 +384,11 @@ onMounted(() => {
         <template #title>管理面板</template>
       </Sidebar>
 
-      <main class="flex-1 flex flex-col h-full overflow-hidden relative min-w-0 max-w-full">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
         <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
-          <div class="flex flex-col">
-            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tighter">{{ pageTitle }}</h1>
-            <p class="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em]">Management System / {{ activeTab }}</p>
+          <div class="flex flex-col min-w-0">
+            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tighter truncate">{{ pageTitle }}</h1>
+            <p class="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em] truncate">Management System / {{ activeTab }}</p>
           </div>
           <BaseButton
             v-if="activeTab === 'users'"

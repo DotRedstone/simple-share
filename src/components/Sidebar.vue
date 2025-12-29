@@ -49,7 +49,7 @@ const getIcon = (iconName: string) => {
 <template>
   <aside 
     :class="[
-      'shrink-0 bg-surface-900/80 backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden transition-all duration-300',
+      'shrink-0 bg-surface-900/80 backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden transition-all duration-300 z-30',
       isCollapsed ? 'md:w-20' : 'w-full md:w-72'
     ]"
   >
