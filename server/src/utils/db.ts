@@ -104,17 +104,11 @@ export class Database {
       const userAlloc = await this.db.prepare('SELECT id FROM group_storage_allocations WHERE group_id = ? AND storage_backend_id = ?').bind('user_group', 'system_r2').first()
       if (!userAlloc) {
         try {
-          await this.createGroupStorageAllocation({
-            id: `alloc_user_r2_${now}`,
-            groupId: 'user_group',
-            storageBackend_id: 'system_r2', // 注意：这里我根据 schema 里的字段名修正一下，但发现你 schema 里有重复表定义，我统一使用 storage_backend_id
-            quotaGb: 1.0
-          })
+          await this.db.prepare(
+            'INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+          ).bind(`alloc_user_r2_${now}`, 'user_group', 'system_r2', 1.0, now, now).run()
         } catch (e) {
-          // 如果字段名不对，尝试另一种兼容写法
-          try {
-            await this.db.prepare('INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)').bind(`alloc_user_r2_${now}`, 'user_group', 'system_r2', 1.0, now, now).run()
-          } catch (err) {}
+          console.error('Failed to allocate system_r2 to user_group:', e)
         }
       }
 
@@ -122,8 +116,12 @@ export class Database {
       const adminAlloc = await this.db.prepare('SELECT id FROM group_storage_allocations WHERE group_id = ? AND storage_backend_id = ?').bind('admin_group', 'system_r2').first()
       if (!adminAlloc) {
         try {
-          await this.db.prepare('INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)').bind(`alloc_admin_r2_${now}`, 'admin_group', 'system_r2', 1000.0, now, now).run()
-        } catch (e) {}
+          await this.db.prepare(
+            'INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+          ).bind(`alloc_admin_r2_${now}`, 'admin_group', 'system_r2', 1000.0, now, now).run()
+        } catch (e) {
+          console.error('Failed to allocate system_r2 to admin_group:', e)
+        }
       }
     }
   }
