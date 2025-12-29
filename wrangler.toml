@@ -1,6 +1,6 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "simple-share"
-main = "server/src/index.ts"
+main = "server/index.ts"
 compatibility_date = "2024-04-03"
 
 [[d1_databases]]
