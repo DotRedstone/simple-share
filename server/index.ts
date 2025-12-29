@@ -70,7 +70,11 @@ export default {
     const origin = request.headers.get('Origin') || ''
     
     if (env.DB) {
-      try { await ensureDatabaseInitialized(env.DB) } catch (e) {}
+      try { 
+        await ensureDatabaseInitialized(env.DB)
+        const db = new Database(env.DB)
+        await db.ensureDefaultStorageBackend(env)
+      } catch (e) {}
     }
     
     if (request.method === 'OPTIONS') return handleOptions()

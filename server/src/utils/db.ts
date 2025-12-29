@@ -74,30 +74,43 @@ export class Database {
   async ensureDefaultStorageBackend(env: Env) {
     const now = Date.now()
     
-    // 1. 使用原生 SQL 强制写入 system_r2 后端 (INSERT OR IGNORE)
-    if (env.FILES) {
+    // 如果没有检测到 FILES 绑定，直接返回（或记录错误）
+    if (!env.FILES) {
+      console.warn('⚠️ 未检测到 FILES (R2 Bucket) 绑定，内置存储将不可用。')
+      return
+    }
+
+    // 1. 确保内置 R2 后端记录存在
+    const existing = await this.db.prepare('SELECT id, config FROM storage_backends WHERE id = ?').bind('system_r2').first<any>()
+    
+    if (!existing) {
+      console.log('🚀 正在初始化内置 R2 存储后端...')
       await this.db.prepare(`
-        INSERT OR IGNORE INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at)
-        VALUES ('system_r2', '内置 R2 存储', 'r2', ?, '系统核心资源', 1, 1, ?, ?)
+        INSERT INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at)
+        VALUES ('system_r2', '内置 R2 存储', 'r2', ?, '系统核心资源（通过 Worker 绑定）', 1, 1, ?, ?)
       `).bind(
         JSON.stringify({ bucket: 'env.FILES', quotaGb: 10 }),
         now,
         now
       ).run()
+    }
 
-      // 2. 强制对齐用户组分配
-      await this.ensureDefaultGroups()
-      
-      const groups = [
-        { id: 'user_group', quota: 1.0 },
-        { id: 'admin_group', quota: 1000.0 }
-      ]
+    // 2. 强制补齐用户组配额分配 (自愈逻辑)
+    await this.ensureDefaultGroups()
+    
+    const groupAllocations = [
+      { id: 'user_group', quota: 1.0, allocId: 'alloc_user_r2_fix' },
+      { id: 'admin_group', quota: 1000.0, allocId: 'alloc_admin_r2_fix' }
+    ]
 
-      for (const group of groups) {
+    for (const item of groupAllocations) {
+      const alloc = await this.db.prepare('SELECT id FROM group_storage_allocations WHERE group_id = ? AND storage_backend_id = ?').bind(item.id, 'system_r2').first()
+      if (!alloc) {
+        console.log(`🔧 正在为组 ${item.id} 自动挂载内置存储...`)
         await this.db.prepare(`
-          INSERT OR IGNORE INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
+          INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
           VALUES (?, ?, 'system_r2', ?, ?, ?)
-        `).bind(`alloc_${group.id}_r2`, group.id, group.quota, now, now).run()
+        `).bind(item.allocId, item.id, item.quota, now, now).run()
       }
     }
   }
