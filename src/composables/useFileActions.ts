@@ -1,11 +1,9 @@
 import { ref } from 'vue'
-import { useFileStore, useShareStore } from '../stores'
+import { useFileStore } from '../stores'
 import type { FileItem } from '../types'
-import { FileActionType } from '../types'
 
 export function useFileActions() {
   const fileStore = useFileStore()
-  const shareStore = useShareStore()
   const isLoading = ref(false)
 
   const downloadFile = async (file: FileItem) => {

@@ -75,16 +75,18 @@ export interface MenuItem {
   icon: string
 }
 
-// 文件操作枚举
-export enum FileActionType {
-  SHARE = 'SHARE',
-  DOWNLOAD = 'DOWNLOAD',
-  RENAME = 'RENAME',
-  DELETE = 'DELETE',
-  STAR = 'STAR',
-  MANAGE_SHARE = 'MANAGE_SHARE',
-  OPTIONS = 'OPTIONS'
-}
+// 文件操作常量
+export const FileActionType = {
+  SHARE: 'SHARE',
+  DOWNLOAD: 'DOWNLOAD',
+  RENAME: 'RENAME',
+  DELETE: 'DELETE',
+  STAR: 'STAR',
+  MANAGE_SHARE: 'MANAGE_SHARE',
+  OPTIONS: 'OPTIONS'
+} as const
+
+export type FileActionType = typeof FileActionType[keyof typeof FileActionType]
 
 // 对应旧的字符串类型（保持兼容性）
 export type FileAction = '分享' | '下载' | '重命名' | '删除' | '收藏' | '管理分享' | 'options'

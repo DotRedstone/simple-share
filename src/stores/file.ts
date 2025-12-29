@@ -63,9 +63,8 @@ export const useFileStore = defineStore('file', () => {
   }
 
   const currentFolderId = computed(() => {
-    return breadcrumbs.value.length > 0 
-      ? breadcrumbs.value[breadcrumbs.value.length - 1].id 
-      : null
+    const lastBreadcrumb = breadcrumbs.value[breadcrumbs.value.length - 1]
+    return lastBreadcrumb ? lastBreadcrumb.id : null
   })
 
   const currentFiles = computed(() => {

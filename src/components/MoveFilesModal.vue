@@ -75,9 +75,8 @@ const navigateToRoot = () => {
 }
 
 const handleConfirmMove = async () => {
-  const targetFolderId = modalBreadcrumbs.value.length > 0 
-    ? modalBreadcrumbs.value[modalBreadcrumbs.value.length - 1].id 
-    : null
+  const lastBreadcrumb = modalBreadcrumbs.value[modalBreadcrumbs.value.length - 1]
+  const targetFolderId = lastBreadcrumb ? lastBreadcrumb.id : null
   
   isLoading.value = true
   try {

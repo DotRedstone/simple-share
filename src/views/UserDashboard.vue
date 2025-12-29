@@ -3,7 +3,6 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore, useFileStore, useShareStore } from '../stores'
 import type { FileItem, MenuItem, FileAction } from '../types'
-import { FileActionType } from '../types'
 import type { ShareRecord } from '../stores/share'
 import PageFrame from '../components/PageFrame.vue'
 import Sidebar from '../components/Sidebar.vue'
@@ -59,10 +58,6 @@ const searchQuery = computed({
   set: (val) => { fileStore.searchQuery = val }
 })
 const breadcrumbs = computed(() => fileStore.breadcrumbs)
-// 移动模态框中的文件列表（只显示文件夹）
-const moveModalFiles = computed(() => {
-  return fileStore.currentFiles.filter(f => f.type === 'folder')
-})
 
 // 主界面的文件列表
 const currentFiles = computed(() => {
