@@ -8,6 +8,8 @@ export interface StorageAdapter {
 
 export interface StorageBackendConfig {
   type: 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+  quotaGb?: number // 存储后端总配额（GB）
+  publicUrl?: string // 自定义公网访问 URL
   // R2 配置
   bucket?: string
   accountId?: string
@@ -17,23 +19,25 @@ export interface StorageBackendConfig {
   accessKeyId?: string
   secretAccessKey?: string
   bucketName?: string
+  forcePathStyle?: boolean
   // WebDAV 配置
   webdavUrl?: string
   username?: string
   password?: string
-  basePath?: string // WebDAV 基础路径
+  basePath?: string // WebDAV 或 FTP/SFTP 基础路径
   // FTP/SFTP 配置
   host?: string
   port?: number
-  path?: string
 }
 
 // R2 存储适配器
 export class R2StorageAdapter implements StorageAdapter {
   private bucket: any // R2Bucket
+  private publicUrl: string
 
-  constructor(bucket: any) {
+  constructor(bucket: any, config?: StorageBackendConfig) {
     this.bucket = bucket
+    this.publicUrl = (config?.publicUrl || '').replace(/\/$/, '')
   }
 
   async upload(key: string, file: ArrayBuffer, contentType?: string): Promise<void> {
@@ -55,11 +59,12 @@ export class R2StorageAdapter implements StorageAdapter {
     await this.bucket.delete(key)
   }
 
-  async generatePresignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
-    // R2 预签名 URL 生成
-    const url = await this.bucket.createMultipartUpload(key)
-    // 注意：R2 的预签名 URL 生成方式可能不同，这里需要根据实际 API 调整
-    return url
+  async generatePresignedUrl(key: string, _expiresIn: number = 3600): Promise<string> {
+    if (this.publicUrl) {
+      return `${this.publicUrl}/${key}`
+    }
+    // 注意：R2 的预签名 URL 生成需要特定的 API 或通过自定义域访问
+    return `/${key}` 
   }
 }
 
@@ -186,27 +191,46 @@ export class S3StorageAdapter implements StorageAdapter {
   private accessKeyId: string
   private secretAccessKey: string
   private bucketName: string
+  private forcePathStyle: boolean
+  private publicUrl: string
 
   constructor(config: StorageBackendConfig) {
     this.config = config
-    this.endpoint = config.endpoint || ''
+    this.endpoint = (config.endpoint || '').replace(/\/$/, '')
     this.region = config.region || 'us-east-1'
     this.accessKeyId = config.accessKeyId || ''
     this.secretAccessKey = config.secretAccessKey || ''
     this.bucketName = config.bucketName || config.bucket || ''
+    this.forcePathStyle = config.forcePathStyle || false
+    this.publicUrl = (config.publicUrl || '').replace(/\/$/, '')
+  }
+
+  private getUrl(key: string): string {
+    if (this.forcePathStyle) {
+      return `${this.endpoint}/${this.bucketName}/${key}`
+    }
+    // 默认虚拟托管样式
+    try {
+      const url = new URL(this.endpoint)
+      return `${url.protocol}//${this.bucketName}.${url.host}${url.pathname === '/' ? '' : url.pathname}/${key}`
+    } catch {
+      return `${this.endpoint}/${this.bucketName}/${key}`
+    }
   }
 
   private async signRequest(method: string, key: string, body?: ArrayBuffer): Promise<Request> {
     // 简化的 S3 签名实现（生产环境应使用完整的 AWS Signature V4）
-    const url = `${this.endpoint}/${this.bucketName}/${key}`
+    const url = this.getUrl(key)
     const headers: HeadersInit = {
-      'Host': new URL(this.endpoint).hostname,
+      'Host': new URL(url).hostname,
     }
     
     if (body) {
       headers['Content-Length'] = body.byteLength.toString()
     }
 
+    // TODO: 实现完整的 AWS Signature V4 签名
+    // 目前仅支持公共读写或不需要签名的测试环境
     return new Request(url, {
       method,
       headers,
@@ -215,12 +239,12 @@ export class S3StorageAdapter implements StorageAdapter {
   }
 
   async upload(key: string, file: ArrayBuffer, contentType?: string): Promise<void> {
-    const url = `${this.endpoint}/${this.bucketName}/${key}`
+    const url = this.getUrl(key)
     const headers: HeadersInit = {
       'Content-Type': contentType || 'application/octet-stream',
     }
 
-    // 使用 AWS Signature V4 签名（简化版，实际应使用完整实现）
+    // TODO: 使用 AWS Signature V4 签名
     const response = await fetch(url, {
       method: 'PUT',
       headers,
@@ -228,37 +252,36 @@ export class S3StorageAdapter implements StorageAdapter {
     })
 
     if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`)
+      throw new Error(`Upload failed: ${response.status} ${response.statusText}`)
     }
   }
 
   async get(key: string): Promise<ArrayBuffer | null> {
-    const url = `${this.endpoint}/${this.bucketName}/${key}`
+    const url = this.getUrl(key)
     const response = await fetch(url, { method: 'GET' })
     
     if (response.status === 404) return null
     if (!response.ok) {
-      throw new Error(`Get failed: ${response.statusText}`)
+      throw new Error(`Get failed: ${response.status} ${response.statusText}`)
     }
     
     return await response.arrayBuffer()
   }
 
   async delete(key: string): Promise<void> {
-    const url = `${this.endpoint}/${this.bucketName}/${key}`
+    const url = this.getUrl(key)
     const response = await fetch(url, { method: 'DELETE' })
     
     if (!response.ok && response.status !== 404) {
-      throw new Error(`Delete failed: ${response.statusText}`)
+      throw new Error(`Delete failed: ${response.status} ${response.statusText}`)
     }
   }
 
-  async generatePresignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
-    // S3 预签名 URL 生成（简化版）
-    // 实际应使用 AWS SDK 或完整的签名算法
-    const url = `${this.endpoint}/${this.bucketName}/${key}`
-    // TODO: 实现完整的预签名 URL 生成
-    return url
+  async generatePresignedUrl(key: string, _expiresIn: number = 3600): Promise<string> {
+    if (this.publicUrl) {
+      return `${this.publicUrl}/${key}`
+    }
+    return this.getUrl(key)
   }
 }
 
@@ -272,7 +295,7 @@ export function createStorageAdapter(
       if (!r2Bucket) {
         throw new Error('R2 bucket is required for R2 storage adapter')
       }
-      return new R2StorageAdapter(r2Bucket)
+      return new R2StorageAdapter(r2Bucket, config)
     
     case 's3':
       return new S3StorageAdapter(config)

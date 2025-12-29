@@ -53,6 +53,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     const storageBackendId = formData.get('storageBackendId') as string | null
     let storageBackend = null
     let storageAdapter = null
+    let backendConfig: StorageBackendConfig | null = null
     
     if (storageBackendId) {
       storageBackend = await db.getStorageBackendById(storageBackendId)
@@ -88,11 +89,36 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
           }
         )
       }
-      storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
+      backendConfig = { type: 'r2' }
+      storageAdapter = createStorageAdapter(backendConfig, env.FILES)
     } else {
-      const config: StorageBackendConfig = JSON.parse(storageBackend.config)
-      config.type = storageBackend.type as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
-      storageAdapter = createStorageAdapter(config, env.FILES)
+      backendConfig = JSON.parse(storageBackend.config)
+      backendConfig!.type = storageBackend.type as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
+      storageAdapter = createStorageAdapter(backendConfig!, env.FILES)
+    }
+
+    // 检查存储后端总配额（如果设置了）
+    if (backendConfig && backendConfig.quotaGb && backendConfig.quotaGb > 0) {
+      const totalSizeResult = await db.db.prepare('SELECT SUM(size_bytes) as total FROM files WHERE storage_backend_id = ? OR (storage_backend_id IS NULL AND ? = "r2")')
+        .bind(storageBackend?.id || null, backendConfig.type)
+        .first<{ total: number }>()
+      
+      const currentUsedBytes = totalSizeResult?.total || 0
+      const quotaBytes = backendConfig.quotaGb * 1024 * 1024 * 1024
+      
+      if (currentUsedBytes + file.size > quotaBytes) {
+        const origin = request.headers.get('Origin')
+        return new Response(
+          JSON.stringify({ success: false, error: `存储后端空间不足 (最大配额: ${backendConfig.quotaGb}GB)` }),
+          { 
+            status: 403, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
+        )
+      }
     }
     
     // 上传文件

@@ -18,7 +18,7 @@ const emit = defineEmits<{
 interface StorageBackend {
   id: string
   name: string
-  type: 'r2' | 's3' | 'webdav'
+  type: 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp'
   enabled: boolean
   isDefault: boolean
   description?: string
@@ -36,10 +36,11 @@ const editingBackend = ref<StorageBackend | null>(null)
 // 表单数据
 const formData = ref({
   name: '',
-  type: 'r2' as 'r2' | 's3' | 'webdav',
+  type: 'r2' as 'r2' | 's3' | 'webdav' | 'ftp' | 'sftp',
   description: '',
   enabled: true,
   isDefault: false,
+  quotaGb: 0, // 0 表示无限制
   // R2 配置
   r2Bucket: '',
   r2AccountId: '',
@@ -49,8 +50,13 @@ const formData = ref({
   accessKeyId: '',
   secretAccessKey: '',
   bucketName: '',
+  forcePathStyle: false,
+  publicUrl: '',
   // WebDAV 配置
   webdavUrl: '',
+  // FTP/SFTP 配置
+  host: '',
+  port: 21,
   username: '',
   password: '',
   basePath: ''
@@ -112,6 +118,7 @@ const resetForm = () => {
     description: '',
     enabled: true,
     isDefault: false,
+    quotaGb: 0,
     r2Bucket: '',
     r2AccountId: '',
     endpoint: '',
@@ -119,8 +126,11 @@ const resetForm = () => {
     accessKeyId: '',
     secretAccessKey: '',
     bucketName: '',
-    // WebDAV 配置
+    forcePathStyle: false,
+    publicUrl: '',
     webdavUrl: '',
+    host: '',
+    port: 21,
     username: '',
     password: '',
     basePath: ''
@@ -141,6 +151,7 @@ const openEditModal = (backend: StorageBackend) => {
     description: backend.description || '',
     enabled: backend.enabled,
     isDefault: backend.isDefault,
+    quotaGb: backend.config.quotaGb || 0,
     r2Bucket: backend.config.bucket || backend.config.bucketName || '',
     r2AccountId: backend.config.accountId || '',
     endpoint: backend.config.endpoint || '',
@@ -148,7 +159,11 @@ const openEditModal = (backend: StorageBackend) => {
     accessKeyId: backend.config.accessKeyId || '',
     secretAccessKey: '', // 不显示密钥
     bucketName: backend.config.bucketName || backend.config.bucket || '',
+    forcePathStyle: backend.config.forcePathStyle || false,
+    publicUrl: backend.config.publicUrl || '',
     webdavUrl: backend.config.webdavUrl || '',
+    host: backend.config.host || '',
+    port: backend.config.port || (backend.type === 'sftp' ? 22 : 21),
     username: backend.config.username || '',
     password: '', // 不显示密码
     basePath: backend.config.basePath || ''
@@ -157,10 +172,13 @@ const openEditModal = (backend: StorageBackend) => {
 }
 
 const buildConfig = () => {
-  const config: any = {}
+  const config: any = {
+    quotaGb: formData.value.quotaGb
+  }
   
   if (formData.value.type === 'r2') {
     config.bucket = formData.value.r2Bucket
+    config.publicUrl = formData.value.publicUrl
     if (formData.value.r2AccountId) {
       config.accountId = formData.value.r2AccountId
     }
@@ -168,6 +186,8 @@ const buildConfig = () => {
     config.endpoint = formData.value.endpoint
     config.region = formData.value.region
     config.accessKeyId = formData.value.accessKeyId
+    config.forcePathStyle = formData.value.forcePathStyle
+    config.publicUrl = formData.value.publicUrl
     if (formData.value.secretAccessKey) {
       config.secretAccessKey = formData.value.secretAccessKey
     }
@@ -179,6 +199,12 @@ const buildConfig = () => {
     if (formData.value.basePath) {
       config.basePath = formData.value.basePath
     }
+  } else if (formData.value.type === 'ftp' || formData.value.type === 'sftp') {
+    config.host = formData.value.host
+    config.port = formData.value.port
+    config.username = formData.value.username
+    config.password = formData.value.password
+    config.basePath = formData.value.basePath
   }
   
   return config
@@ -357,6 +383,9 @@ onMounted(() => {
               </p>
               <div class="text-xs text-slate-500">
                 创建于 {{ new Date(backend.createdAt * 1000).toLocaleString() }}
+                <template v-if="backend.config.quotaGb">
+                  · 配额 {{ backend.config.quotaGb }} GB
+                </template>
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -411,8 +440,10 @@ onMounted(() => {
             :disabled="!!editingBackend"
           >
             <option value="r2">Cloudflare R2</option>
-            <option value="s3">AWS S3</option>
+            <option value="s3">AWS S3 / S3 兼容对象存储</option>
             <option value="webdav">WebDAV (AList/OpenList)</option>
+            <option value="ftp">FTP</option>
+            <option value="sftp">SFTP</option>
           </select>
         </div>
 
@@ -420,6 +451,14 @@ onMounted(() => {
           v-model="formData.description"
           label="描述"
           placeholder="可选"
+        />
+
+        <BaseInput
+          v-model.number="formData.quotaGb"
+          label="存储后端总配额 (GB)"
+          type="number"
+          placeholder="0 表示不限制，建议设置以避免额外费用"
+          :min="0"
         />
 
         <!-- R2 配置 -->
@@ -435,6 +474,11 @@ onMounted(() => {
             label="账户 ID（可选）"
             placeholder="Cloudflare Account ID"
           />
+          <BaseInput
+            v-model="formData.publicUrl"
+            label="自定义公网访问 URL（可选）"
+            placeholder="https://pub-xxx.r2.dev 或 https://cdn.yourdomain.com"
+          />
         </template>
 
         <!-- S3 配置 -->
@@ -447,7 +491,7 @@ onMounted(() => {
           />
           <BaseInput
             v-model="formData.region"
-          label="区域"
+            label="区域"
             placeholder="us-east-1"
             required
           />
@@ -456,20 +500,34 @@ onMounted(() => {
             label="存储桶名称"
             placeholder="my-bucket"
             required
-        />
-          <BaseInput
-            v-model="formData.accessKeyId"
-            label="Access Key ID"
-            placeholder="AKIA..."
-            required
           />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseInput
+              v-model="formData.accessKeyId"
+              label="Access Key ID"
+              placeholder="AKIA..."
+              required
+            />
+            <BaseInput
+              v-model="formData.secretAccessKey"
+              label="Secret Access Key"
+              type="password"
+              placeholder="留空则不更新"
+              :required="!editingBackend"
+            />
+          </div>
           <BaseInput
-            v-model="formData.secretAccessKey"
-            label="Secret Access Key"
-            type="password"
-            placeholder="留空则不更新"
-            :required="!editingBackend"
+            v-model="formData.publicUrl"
+            label="自定义公网访问 URL（可选）"
+            placeholder="https://cdn.yourdomain.com"
           />
+          <BaseCheckbox
+            v-model="formData.forcePathStyle"
+            label="强制路径样式 (Force Path Style)"
+          />
+          <div class="text-xs text-slate-400 mt-1">
+            提示：MinIO 或某些私有云对象存储通常需要开启此选项。
+          </div>
         </template>
 
         <!-- WebDAV 配置 -->
@@ -501,6 +559,49 @@ onMounted(() => {
           <div class="text-xs text-slate-400 mt-1">
             提示：适用于 AList、OpenList 等支持 WebDAV 的网盘挂载服务
           </div>
+        </template>
+
+        <!-- FTP/SFTP 配置 -->
+        <template v-else-if="formData.type === 'ftp' || formData.type === 'sftp'">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="col-span-2">
+              <BaseInput
+                v-model="formData.host"
+                label="服务器地址"
+                placeholder="ftp.example.com"
+                required
+              />
+            </div>
+            <div>
+              <BaseInput
+                v-model.number="formData.port"
+                label="端口"
+                type="number"
+                placeholder="21"
+                required
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BaseInput
+              v-model="formData.username"
+              label="用户名"
+              placeholder="ftp-user"
+              required
+            />
+            <BaseInput
+              v-model="formData.password"
+              label="密码"
+              type="password"
+              placeholder="留空则不更新"
+              :required="!editingBackend"
+            />
+          </div>
+          <BaseInput
+            v-model="formData.basePath"
+            label="远程路径"
+            placeholder="/uploads 或留空使用根目录"
+          />
         </template>
 
         <div class="flex items-center gap-4">
