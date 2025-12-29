@@ -100,9 +100,9 @@ const getTypeColor = (type: string) => {
 const loadStorageBackends = async () => {
   isLoading.value = true
   try {
-    const response = await api.get('/admin/storage')
-    if (response.data.success) {
-      storageBackends.value = response.data.data
+    const response = await api.get<StorageBackend[]>('/admin/storage')
+    if (response.success && response.data) {
+      storageBackends.value = response.data
     }
   } catch (error) {
     console.error('加载存储后端失败:', error)

@@ -342,8 +342,8 @@ const loadGroupStorageAllocations = async (groupId: string) => {
   } else {
     groupStorageAllocations.value = [];
   }
-  if (backendRes.success && backendRes.data?.data) {
-    availableBackends.value = backendRes.data.data;
+  if (backendRes.success && backendRes.data) {
+    availableBackends.value = backendRes.data;
   } else {
     availableBackends.value = [];
   }
