@@ -380,12 +380,10 @@ onMounted(() => {
         logo-color="blue"
         @tab-change="activeTab = $event"
         @logout="handleLogout"
-      >
-        <template #title>管理面板</template>
-      </Sidebar>
+      />
 
-      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
-        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full">
+        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 bg-surface-900/40 backdrop-blur-md">
           <div class="flex flex-col min-w-0">
             <h1 class="text-2xl md:text-3xl font-black text-white tracking-tighter truncate">{{ pageTitle }}</h1>
             <p class="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em] truncate">Management System / {{ activeTab }}</p>
@@ -403,104 +401,109 @@ onMounted(() => {
           </BaseButton>
         </header>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 pt-0 relative z-0">
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 relative z-0 bg-surface-950/20">
           <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <!-- 仪表盘视图 -->
-          <div v-if="activeTab === 'dashboard'" class="space-y-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCardComponent v-for="stat in stats" :key="stat.title" :stat="stat" />
-            </div>
-            <div class="bg-white/5 border border-white/5 rounded-2xl p-6">
-              <h3 class="text-lg font-bold text-white mb-4">系统概览</h3>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">总用户数</span>
-                  <span class="text-white font-bold">{{ users.length }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">活跃用户</span>
-                  <span class="text-green-400 font-bold">{{ users.filter(u => u.status === '活跃').length }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">用户组数</span>
-                  <span class="text-white font-bold">{{ userGroups.length }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">总文件数</span>
-                  <span class="text-white font-bold">{{ storageStats.totalFiles.toLocaleString() }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">可用存储</span>
-                  <span class="text-green-400 font-bold">{{ formatSize(storageStats.availableStorage) }}</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">系统日志</span>
-                  <span class="text-white font-bold">{{ logs.length }} 条</span>
+          <div class="min-h-full">
+            <!-- 仪表盘视图 -->
+            <div v-if="activeTab === 'dashboard'" class="space-y-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCardComponent v-for="stat in stats" :key="stat.title" :stat="stat" />
+              </div>
+              <div class="bg-white/5 border border-white/5 rounded-2xl p-6 glass-card">
+                <h3 class="text-lg font-bold text-white mb-4">系统概览</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-slate-400">总用户数</span>
+                    <span class="text-white font-bold">{{ users.length }}</span>
+                  </div>
+                  <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-slate-400">活跃用户</span>
+                    <span class="text-green-400 font-bold">{{ users.filter(u => u.status === '活跃').length }}</span>
+                  </div>
+                  <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-slate-400">用户组数</span>
+                    <span class="text-white font-bold">{{ userGroups.length }}</span>
+                  </div>
+                  <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-slate-400">总文件数</span>
+                    <span class="text-white font-bold">{{ storageStats.totalFiles.toLocaleString() }}</span>
+                  </div>
+                  <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-slate-400">可用存储</span>
+                    <span class="text-green-400 font-bold">{{ formatSize(storageStats.availableStorage) }}</span>
+                  </div>
+                  <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-slate-400">系统日志</span>
+                    <span class="text-white font-bold">{{ logs.length }} 条</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- 存储管理视图 -->
-          <div v-if="activeTab === 'storage'">
-            <StorageManagement :stats="storageStats" @refresh="() => {}" />
-          </div>
+            <!-- 存储管理视图 -->
+            <div v-if="activeTab === 'storage'" class="h-full">
+              <StorageManagement :stats="storageStats" @refresh="() => {}" />
+            </div>
 
-          <!-- 用户管理视图 -->
-          <div v-if="activeTab === 'users'">
-            <UserTable 
-              v-if="users.length > 0" 
-              :users="users" 
-              :groups="userGroups.map(g => ({ id: g.id, name: g.name }))"
-              @edit="editUser" 
-              @delete="deleteUser"
-              @update-quota="handleUpdateQuota"
-            />
-            <EmptyState
-              v-else
-              icon="user"
-              title="暂无用户"
-              description="系统中还没有任何用户"
-              action-label="添加用户"
-              @action="openCreateUser"
-            />
-          </div>
+            <!-- 用户管理视图 -->
+            <div v-if="activeTab === 'users'" class="h-full">
+              <UserTable 
+                v-if="users.length > 0" 
+                :users="users" 
+                :groups="userGroups.map(g => ({ id: g.id, name: g.name }))"
+                @edit="editUser" 
+                @delete="deleteUser"
+                @update-quota="handleUpdateQuota"
+              />
+              <EmptyState
+                v-else
+                icon="user"
+                title="暂无用户"
+                description="系统中还没有任何用户"
+                action-label="添加用户"
+                @action="openCreateUser"
+              />
+            </div>
 
-          <!-- 用户组管理视图 -->
-          <div v-if="activeTab === 'groups'">
-            <UserGroupManagement
-              :groups="userGroups"
-              @add="handleAddGroup"
-              @edit="handleEditGroup"
-              @delete="handleDeleteGroup"
-              @configure-storage="handleConfigureGroupStorage"
-            />
-          </div>
+            <!-- 用户组管理视图 -->
+            <div v-if="activeTab === 'groups'" class="h-full">
+              <UserGroupManagement
+                :groups="userGroups"
+                @add="handleAddGroup"
+                @edit="handleEditGroup"
+                @delete="handleDeleteGroup"
+                @configure-storage="handleConfigureGroupStorage"
+              />
+            </div>
 
-          <!-- 文件管理视图 -->
-          <div v-if="activeTab === 'files'">
-            <FileTable v-if="files.length > 0" :files="files" @view="viewFile" @delete="deleteFile" />
-            <EmptyState
-              v-else
-              icon="file"
-              title="暂无文件"
-              description="系统中还没有任何文件"
-            />
-          </div>
+            <!-- 文件管理视图 -->
+            <div v-if="activeTab === 'files'" class="h-full">
+              <FileTable v-if="files.length > 0" :files="files" @view="viewFile" @delete="deleteFile" />
+              <EmptyState
+                v-else
+                icon="file"
+                title="暂无文件"
+                description="系统中还没有任何文件"
+              />
+            </div>
 
-          <!-- 系统日志视图 -->
-          <div v-if="activeTab === 'logs'">
-            <LogTable v-if="logs.length > 0" :logs="logs" />
-            <EmptyState
-              v-else
-              icon="search"
-              title="暂无日志"
-              description="系统中还没有任何日志记录"
-            />
+            <!-- 系统日志视图 -->
+            <div v-if="activeTab === 'logs'" class="h-full">
+              <LogTable v-if="logs.length > 0" :logs="logs" />
+              <EmptyState
+                v-else
+                icon="search"
+                title="暂无日志"
+                description="系统中还没有任何日志记录"
+              />
+            </div>
           </div>
+        </div>
+      </main>
+    </div>
 
           <!-- 添加/编辑用户模态框 -->
           <BaseModal

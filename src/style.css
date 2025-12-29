@@ -22,13 +22,17 @@
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+}
+
+html, body, #app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    margin: 0;
-    padding: 0;
     width: 100%;
-    min-height: 100vh;
     background-color: var(--color-surface-950);
     color: #f9fafb;
     overflow-x: hidden;

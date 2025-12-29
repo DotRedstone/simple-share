@@ -28,21 +28,22 @@ const iconPaths: Record<string, string> = {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center text-slate-500 min-h-[300px] py-12">
-    <div class="mb-4">
+  <div class="flex-1 flex flex-col items-center justify-center text-slate-500 py-12 px-4">
+    <div class="mb-8 relative">
+      <div class="absolute inset-0 bg-brand-primary/10 blur-3xl rounded-full"></div>
       <svg
         v-if="iconPaths[icon]"
-        class="w-16 h-16 text-slate-600"
+        class="w-24 h-24 text-slate-700 relative z-10 animate-pulse"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
       >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="iconPaths[icon]" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" :d="iconPaths[icon]" />
       </svg>
     </div>
-    <h3 class="text-lg font-medium text-slate-400 mb-2">{{ title }}</h3>
-    <p class="text-sm text-slate-500 mb-6 max-w-sm text-center">{{ description }}</p>
-    <BaseButton v-if="actionLabel" variant="primary" @click="emit('action')">
+    <h3 class="text-2xl font-black text-white mb-3 tracking-tight">{{ title }}</h3>
+    <p class="text-base text-slate-500 mb-8 max-w-sm text-center leading-relaxed font-medium">{{ description }}</p>
+    <BaseButton v-if="actionLabel" variant="primary" size="lg" @click="emit('action')" class="shadow-2xl shadow-brand-primary/20">
       {{ actionLabel }}
     </BaseButton>
   </div>

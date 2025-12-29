@@ -272,12 +272,10 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         logo-color="blue"
         @tab-change="activeTab = $event"
         @logout="handleLogout"
-      >
-        <template #title>SimpleShare</template>
-      </Sidebar>
+      />
 
-      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
-        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full">
+        <header class="h-20 md:h-28 shrink-0 flex items-center justify-between px-6 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 bg-surface-900/40 backdrop-blur-md">
           <div class="flex-1 min-w-0">
             <SearchBar v-model="searchQuery" />
           </div>
@@ -324,12 +322,12 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
           </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar relative z-0">
+        <div class="flex-1 overflow-y-auto custom-scrollbar relative z-0 bg-surface-950/20">
           <div v-if="combinedLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-20 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <div class="p-6 md:p-12 space-y-4 md:space-y-6">
+          <div class="min-h-full flex flex-col p-6 md:p-12 space-y-4 md:space-y-6">
             <!-- 在全部文件标签页显示面包屑（包括根目录） -->
             <div v-if="activeTab === 'all'" class="shrink-0">
               <Breadcrumb
@@ -346,39 +344,44 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               <span v-else-if="activeTab === 'shares'">🔗 显示已分享的文件</span>
             </div>
 
-            <!-- 我的分享标签页 -->
-            <div v-if="activeTab === 'shares'" class="space-y-4">
-              <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold text-white">我的分享</h3>
-                <BaseButton variant="primary" class="!py-1.5 !px-3 !text-xs" @click="showShareList = true">
-                  管理所有分享
-                </BaseButton>
+            <div class="flex-1 flex flex-col">
+              <!-- 我的分享标签页 -->
+              <div v-if="activeTab === 'shares'" class="flex-1 flex flex-col space-y-4">
+                <div class="flex justify-between items-center shrink-0">
+                  <h3 class="text-lg font-bold text-white">我的分享</h3>
+                  <BaseButton variant="primary" class="!py-1.5 !px-3 !text-xs" @click="showShareList = true">
+                    管理所有分享
+                  </BaseButton>
+                </div>
+                <div class="flex-1">
+                  <FileListView
+                    :files="currentFiles"
+                    :view-mode="viewMode"
+                    :active-options-menu="activeOptionsMenu"
+                    :selected-files="selectedFiles"
+                    @file-click="handleFileClick"
+                    @file-action="handleFileAction"
+                    @file-select="handleFileSelect"
+                    @select-all="handleSelectAll"
+                  />
+                </div>
               </div>
-              <FileListView
-                :files="currentFiles"
-                :view-mode="viewMode"
-                :active-options-menu="activeOptionsMenu"
-                :selected-files="selectedFiles"
-                @file-click="handleFileClick"
-                @file-action="handleFileAction"
-                @file-select="handleFileSelect"
-                @select-all="handleSelectAll"
-              />
-            </div>
 
-            <!-- 其他标签页（最近上传、我的收藏、全部文件） -->
-            <FileListView
-              v-else
-              :files="currentFiles"
-              :view-mode="viewMode"
-              :active-options-menu="activeOptionsMenu"
-              :selected-files="activeTab === 'all' ? selectedFiles : []"
-              :enable-multi-select="activeTab === 'all'"
-              @file-click="handleFileClick"
-              @file-action="handleFileAction"
-              @file-select="activeTab === 'all' ? handleFileSelect : () => {}"
-              @select-all="activeTab === 'all' ? handleSelectAll : () => {}"
-            />
+              <!-- 其他标签页（最近上传、我的收藏、全部文件） -->
+              <div v-else class="flex-1">
+                <FileListView
+                  :files="currentFiles"
+                  :view-mode="viewMode"
+                  :active-options-menu="activeOptionsMenu"
+                  :selected-files="activeTab === 'all' ? selectedFiles : []"
+                  :enable-multi-select="activeTab === 'all'"
+                  @file-click="handleFileClick"
+                  @file-action="handleFileAction"
+                  @file-select="activeTab === 'all' ? handleFileSelect : () => {}"
+                  @select-all="activeTab === 'all' ? handleSelectAll : () => {}"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </main>

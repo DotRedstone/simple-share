@@ -28,7 +28,7 @@ const handleSelectAll = (selected: boolean) => {
 </script>
 
 <template>
-  <div v-if="files.length > 0">
+  <div v-if="files.length > 0" class="w-full h-full">
     <div v-if="viewMode === 'list'" class="overflow-x-auto -mx-4 md:mx-0">
       <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
         <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
@@ -76,11 +76,12 @@ const handleSelectAll = (selected: boolean) => {
       />
     </div>
   </div>
-  <EmptyState
-    v-else
-    icon="folder"
-    title="此文件夹为空"
-    description="当前目录下还没有任何文件或文件夹"
-  />
+  <div v-else class="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+    <EmptyState
+      icon="folder"
+      title="此文件夹为空"
+      description="当前目录下还没有任何文件或文件夹"
+    />
+  </div>
 </template>
 
