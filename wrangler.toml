@@ -3,14 +3,14 @@ name = "simple-share"
 main = "server/index.ts"
 compatibility_date = "2024-04-03"
 
-# 💡 提示：为了方便，D1 数据库和 R2 桶的绑定请直接在 Cloudflare Dashboard 进行：
-# 路径：Workers & Pages -> 你的 Worker -> Settings -> Variables -> Bindings
-# 1. 添加 D1 数据库绑定，名称设为：DB
-# 2. 添加 R2 存储桶绑定，名称设为：FILES
+# 💡 D1 和 R2 请在 Cloudflare Dashboard 手动绑定：
+# 变量名分别设为 DB 和 FILES
 
 [vars]
-# JWT_SECRET 已由代码内置自愈逻辑自动处理
+# JWT_SECRET 将在部署时由脚本自动填充
 
 [env.production]
 name = "simple-share"
-# 生产环境的绑定也请在 Dashboard 的对应环境中设置
+
+[env.production.vars]
+# JWT_SECRET 将在部署时由脚本自动填充
