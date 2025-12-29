@@ -72,57 +72,35 @@ export class Database {
   }
 
   async ensureDefaultStorageBackend(env: Env) {
-    // 检查内置 R2 后端是否已经存在
-    const existing = await this.db.prepare('SELECT id FROM storage_backends WHERE id = ?').bind('system_r2').first()
     const now = Date.now()
     
-    // 如果内置后端不存在且环境变量中有 R2 绑定，则创建它
-    if (!existing && env.FILES) {
-      // 检查是否已经有其他后端被设为默认
-      const hasDefault = await this.db.prepare('SELECT id FROM storage_backends WHERE is_default = 1').first()
-      
-      await this.db.prepare(
-        'INSERT INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-      ).bind(
-        'system_r2',
-        '内置 R2 存储',
-        'r2',
-        JSON.stringify({ bucket: 'env.FILES', quotaGb: 10 }), // 初始默认 10GB
-        '通过 Worker 绑定的内置 Cloudflare R2 存储（系统核心，不可删除）',
-        1,
-        hasDefault ? 0 : 1, // 如果没有其他默认，则设为默认
+    // 1. 使用原生 SQL 强制写入 system_r2 后端 (INSERT OR IGNORE)
+    // 这样做可以确保无论 D1 状态如何，都能瞬间补齐记录
+    if (env.FILES) {
+      await this.db.prepare(`
+        INSERT OR IGNORE INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at)
+        VALUES ('system_r2', '内置 R2 存储', 'r2', ?, '通过 Worker 绑定的内置 Cloudflare R2 存储（核心资源）', 1, 1, ?, ?)
+      `).bind(
+        JSON.stringify({ bucket: 'env.FILES', quotaGb: 10 }),
         now,
         now
       ).run()
-    }
 
-    // 无论 system_r2 是否存在，都强制对齐用户组分配
-    if (env.FILES) {
+      // 2. 强制对齐用户组分配
       await this.ensureDefaultGroups()
       
-      // 检查并分配给普通用户组 (1GB)
-      const userAlloc = await this.db.prepare('SELECT id FROM group_storage_allocations WHERE group_id = ? AND storage_backend_id = ?').bind('user_group', 'system_r2').first()
-      if (!userAlloc) {
-        try {
-          await this.db.prepare(
-            'INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
-          ).bind(`alloc_user_r2_${now}`, 'user_group', 'system_r2', 1.0, now, now).run()
-        } catch (e) {
-          console.error('Failed to allocate system_r2 to user_group:', e)
-        }
-      }
-
-      // 检查并分配给管理员组 (1000GB)
-      const adminAlloc = await this.db.prepare('SELECT id FROM group_storage_allocations WHERE group_id = ? AND storage_backend_id = ?').bind('admin_group', 'system_r2').first()
-      if (!adminAlloc) {
-        try {
-          await this.db.prepare(
-            'INSERT INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
-          ).bind(`alloc_admin_r2_${now}`, 'admin_group', 'system_r2', 1000.0, now, now).run()
-        } catch (e) {
-          console.error('Failed to allocate system_r2 to admin_group:', e)
-        }
-      }
+      // 使用更稳健的批量插入/忽略逻辑
+      await this.db.batch([
+        this.db.prepare(`
+          INSERT OR IGNORE INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
+          VALUES (?, 'user_group', 'system_r2', 1.0, ?, ?)
+        `).bind(`alloc_user_r2_fix`, now, now),
+        
+        this.db.prepare(`
+          INSERT OR IGNORE INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
+          VALUES (?, 'admin_group', 'system_r2', 1000.0, ?, ?)
+        `).bind(`alloc_admin_r2_fix`, now, now)
+      ])
     }
   }
 
