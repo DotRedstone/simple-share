@@ -104,13 +104,12 @@ export default {
   async fetch(request: Request, env: WorkerEnv, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url)
     
-    // 自动初始化数据库（仅在首次请求时执行）
+    // 自动初始化数据库（仅在检测到绑定时执行）
     if (env.DB) {
       try {
         await ensureDatabaseInitialized(env.DB)
       } catch (error) {
-        console.error('数据库初始化错误:', error)
-        // 继续处理请求，即使初始化失败
+        console.error('数据库初始化延迟或错误:', error)
       }
     }
     
@@ -119,9 +118,19 @@ export default {
       return handleOptions()
     }
 
-    // 处理 API 路由
+    // 检查是否是 API 请求
     if (url.pathname.startsWith('/api/')) {
-      try {
+      // 检查关键绑定是否缺失
+      if (!env.DB) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: '数据库未绑定', 
+            details: '请前往 Cloudflare Dashboard 为此 Worker 添加名为 "DB" 的 D1 绑定。' 
+          }),
+          { status: 503, headers: { 'Content-Type': 'application/json' } }
+        )
+      }
         const apiPath = url.pathname.replace('/api/', '')
         const method = request.method
         

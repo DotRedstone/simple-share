@@ -3,29 +3,14 @@ name = "simple-share"
 main = "server/index.ts"
 compatibility_date = "2024-04-03"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "simpleshare-db"
-database_id = "5f0e0656-b9a3-433e-97e2-5322a7058f40"
-
-[[r2_buckets]]
-binding = "FILES"
-bucket_name = "simpleshare-files"
+# 💡 提示：为了方便，D1 数据库和 R2 桶的绑定请直接在 Cloudflare Dashboard 进行：
+# 路径：Workers & Pages -> 你的 Worker -> Settings -> Variables -> Bindings
+# 1. 添加 D1 数据库绑定，名称设为：DB
+# 2. 添加 R2 存储桶绑定，名称设为：FILES
 
 [vars]
-# JWT_SECRET 已移至代码内置安全回退逻辑
+# JWT_SECRET 已由代码内置自愈逻辑自动处理
 
 [env.production]
 name = "simple-share"
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "simpleshare-db"
-database_id = "5f0e0656-b9a3-433e-97e2-5322a7058f40"
-
-[[env.production.r2_buckets]]
-binding = "FILES"
-bucket_name = "simpleshare-files"
-
-[env.production.vars]
-# JWT_SECRET 已由系统自动生成并持久化到 D1 数据库
+# 生产环境的绑定也请在 Dashboard 的对应环境中设置
