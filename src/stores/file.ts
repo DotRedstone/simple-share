@@ -240,6 +240,26 @@ export const useFileStore = defineStore('file', () => {
     return { success: false, error: response.error || '操作失败' }
   }
 
+  const moveFiles = async (fileIds: number[], targetFolderId: number | null) => {
+    try {
+      const response = await post('/files/move', {
+        fileIds,
+        targetFolderId
+      })
+      if (response.success) {
+        // 刷新文件列表
+        const parentId = breadcrumbs.value.length > 0 
+          ? breadcrumbs.value[breadcrumbs.value.length - 1]?.id 
+          : null
+        await fetchFiles(parentId)
+        return { success: true }
+      }
+      return { success: false, error: response.error || '移动失败' }
+    } catch (error) {
+      return { success: false, error: '网络错误' }
+    }
+  }
+
   const downloadFile = async (fileId: number, shareCode?: string) => {
     try {
       const params = new URLSearchParams()
@@ -307,7 +327,8 @@ export const useFileStore = defineStore('file', () => {
     deleteFile,
     renameFile,
     toggleStar,
-    downloadFile
+    downloadFile,
+    moveFiles
   }
 })
 

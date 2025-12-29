@@ -24,10 +24,13 @@ const shareStore = useShareStore()
 const showUpload = ref(false)
 const showShare = ref(false)
 const showShareList = ref(false)
+const showMoveModal = ref(false)
 const currentShareFile = ref<FileItem | null>(null)
 const shareCode = ref('')
 const activeOptionsMenu = ref<number | null>(null)
 const isLoading = ref(false)
+const selectedFiles = ref<number[]>([])
+const moveTargetFolder = ref<number | null | undefined>(null)
 
 const username = computed(() => authStore.user?.name || '用户')
 const viewMode = computed({
@@ -219,6 +222,58 @@ const handleFileUpload = async (files: File[]) => {
   }
 }
 
+const handleFileSelect = (fileId: number, selected: boolean) => {
+  if (selected) {
+    if (!selectedFiles.value.includes(fileId)) {
+      selectedFiles.value.push(fileId)
+    }
+  } else {
+    selectedFiles.value = selectedFiles.value.filter(id => id !== fileId)
+  }
+}
+
+const handleSelectAll = (selected: boolean) => {
+  if (selected) {
+    selectedFiles.value = currentFiles.value.map(f => f.id)
+  } else {
+    selectedFiles.value = []
+  }
+}
+
+const handleMoveFiles = () => {
+  if (selectedFiles.value.length === 0) {
+    alert('请先选择要移动的文件')
+    return
+  }
+  openMoveModal()
+}
+
+const confirmMoveFiles = async () => {
+  if (selectedFiles.value.length === 0) return
+  
+  isLoading.value = true
+  try {
+    const result = await fileStore.moveFiles(selectedFiles.value, moveTargetFolder.value ?? null)
+    if (result.success) {
+      selectedFiles.value = []
+      moveTargetFolder.value = null
+      await initFiles()
+      showMoveModal.value = false
+    } else {
+      alert(result.error || '移动失败')
+    }
+  } catch (error) {
+    alert('移动失败，请稍后重试')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const openMoveModal = () => {
+  moveTargetFolder.value = null
+  showMoveModal.value = true
+}
+
 const handleFileAction = async (action: string | FileAction, file: FileItem) => {
   if (action === 'options') {
     toggleOptionsMenu(file.id)
@@ -331,13 +386,34 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         <template #title>SimpleShare</template>
       </Sidebar>
 
-      <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900/20 relative min-w-0 max-w-full">
+      <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-900/20 relative min-w-0">
         <header class="h-16 md:h-20 shrink-0 border-b border-white/5 flex items-center justify-between px-3 md:px-4 lg:px-8 gap-2 overflow-hidden">
           <div class="flex-1 min-w-0">
             <SearchBar v-model="searchQuery" />
           </div>
           <div class="flex items-center gap-2 md:gap-3 shrink-0">
             <ViewModeToggle v-model="viewMode" />
+            <BaseButton
+              v-if="activeTab === 'all' && selectedFiles.length > 0"
+              variant="glass"
+              class="!py-1.5 !px-2 md:!px-3 !text-xs"
+              @click="handleMoveFiles"
+              title="移动选中文件"
+            >
+              <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <span class="hidden sm:inline">移动 ({{ selectedFiles.length }})</span>
+            </BaseButton>
+            <BaseButton
+              v-if="activeTab === 'all' && selectedFiles.length > 0"
+              variant="glass"
+              class="!py-1.5 !px-2 md:!px-3 !text-xs text-red-400"
+              @click="selectedFiles = []"
+              title="取消选择"
+            >
+              <span class="hidden sm:inline">取消</span>
+            </BaseButton>
             <BaseButton
               v-if="activeTab === 'all'"
               variant="glass"
@@ -364,17 +440,17 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
           </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-4 lg:p-8 scrollbar-thin scrollbar-thumb-slate-700 relative">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden p-3 md:p-4 lg:p-8 scrollbar-thin scrollbar-thumb-slate-700 relative min-h-0">
           <div v-if="isLoading" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-10 flex items-center justify-center">
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <!-- 只在全部文件标签页且不在根目录时显示面包屑 -->
+          <!-- 在全部文件标签页显示面包屑（包括根目录） -->
           <Breadcrumb
-            v-if="activeTab === 'all' && breadcrumbs.length > 0"
+            v-if="activeTab === 'all'"
             :breadcrumbs="breadcrumbs"
             @navigate="navigateToBreadcrumb"
-            @navigate-root="breadcrumbs = []"
+            @navigate-root="() => fileStore.navigateToRoot()"
           />
 
           <!-- 标签页提示 -->
@@ -396,8 +472,11 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               :files="currentFiles"
               :view-mode="viewMode"
               :active-options-menu="activeOptionsMenu"
+              :selected-files="selectedFiles"
               @file-click="handleFileClick"
               @file-action="handleFileAction"
+              @file-select="handleFileSelect"
+              @select-all="handleSelectAll"
             />
           </div>
 
@@ -433,5 +512,56 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
       @close="() => showShareList = false"
       @manage="handleManageShare"
     />
+
+    <!-- 移动文件模态框 -->
+    <BaseModal
+      :show="showMoveModal"
+      title="移动文件"
+      width="max-w-md"
+      @close="showMoveModal = false"
+    >
+      <div class="space-y-4">
+        <p class="text-sm text-slate-300">
+          已选择 {{ selectedFiles.length }} 个文件，选择目标文件夹：
+        </p>
+        <div class="bg-white/5 border border-white/10 rounded-lg p-4 max-h-60 overflow-y-auto">
+          <button
+            @click="moveTargetFolder = null"
+            :class="[
+              'w-full text-left px-3 py-2 rounded-lg mb-2 transition-colors',
+              moveTargetFolder === null
+                ? 'bg-blue-500/20 text-blue-300'
+                : 'text-slate-300 hover:bg-white/5'
+            ]"
+          >
+            📁 根目录
+          </button>
+          <div
+            v-for="folder in fileStore.files.filter(f => f.type === 'folder')"
+            :key="folder.id"
+            @click="moveTargetFolder = folder.id"
+            :class="[
+              'w-full text-left px-3 py-2 rounded-lg mb-2 transition-colors cursor-pointer',
+              moveTargetFolder === folder.id
+                ? 'bg-blue-500/20 text-blue-300'
+                : 'text-slate-300 hover:bg-white/5'
+            ]"
+          >
+            📁 {{ folder.name }}
+          </div>
+        </div>
+        <div class="flex justify-end gap-3">
+          <BaseButton variant="glass" @click="showMoveModal = false" :disabled="isLoading">取消</BaseButton>
+          <BaseButton 
+            variant="primary" 
+            @click="confirmMoveFiles" 
+            :loading="isLoading" 
+            :disabled="isLoading"
+          >
+            确认移动
+          </BaseButton>
+        </div>
+      </div>
+    </BaseModal>
   </PageFrame>
 </template>

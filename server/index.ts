@@ -15,6 +15,8 @@ import { onRequestGet as filesListHandler } from './functions/api/files/list'
 import { onRequestPost as filesUploadHandler } from './functions/api/files/upload'
 import { onRequestGet as filesDownloadHandler } from './functions/api/files/download'
 import { onRequestPost as filesFoldersHandler } from './functions/api/files/folders'
+import { onRequestPost as filesSaveHandler } from './functions/api/files/save'
+import { onRequestPost as filesMoveHandler } from './functions/api/files/move'
 import { onRequestPut as filesUpdateHandler, onRequestDelete as filesDeleteHandler } from './functions/api/files/[id]'
 import { onRequestPost as sharesCreateHandler } from './functions/api/shares/create'
 import { onRequestGet as sharesListHandler } from './functions/api/shares/list'
@@ -58,6 +60,12 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   },
   'files/folders': {
     'POST': filesFoldersHandler
+  },
+  'files/save': {
+    'POST': filesSaveHandler
+  },
+  'files/move': {
+    'POST': filesMoveHandler
   },
   'shares/create': {
     'POST': sharesCreateHandler

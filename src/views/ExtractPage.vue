@@ -1,23 +1,29 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useShareStore } from '../stores'
+import { useShareStore, useAuthStore } from '../stores'
 import PageFrame from '../components/PageFrame.vue'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 import BaseButton from '../components/BaseButton.vue'
 import BaseModal from '../components/BaseModal.vue'
+import { api } from '../api'
 
 const route = useRoute()
 const router = useRouter()
 const shareStore = useShareStore()
+const authStore = useAuthStore()
 
 const shareCode = ref('')
 const isLoading = ref(false)
 const fileInfo = ref<any>(null)
+const fileId = ref<number | null>(null)
 const error = ref('')
 const showDownloadModal = ref(false)
+const showSaveModal = ref(false)
+const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 onMounted(() => {
+  authStore.initAuth()
   const code = route.params.code as string
   if (code) {
     shareCode.value = code.toUpperCase()
@@ -41,6 +47,12 @@ const fetchFileInfo = async (code: string) => {
         uploadTime: data.data.uploadTime || data.data.created_at,
         type: data.data.type,
         downloadUrl: data.data.downloadUrl || data.data.url
+      }
+      // 从downloadUrl中提取fileId
+      const url = new URL(data.data.downloadUrl, window.location.origin)
+      const id = url.searchParams.get('id')
+      if (id) {
+        fileId.value = parseInt(id)
       }
       // 增加访问计数
       const share = await shareStore.getShareByCode(code)
@@ -67,31 +79,58 @@ const confirmDownload = async () => {
   if (!fileInfo.value) return
   
   try {
-    // 从 downloadUrl 中提取文件ID
-    const url = new URL(fileInfo.value.downloadUrl, window.location.origin)
-    const fileId = parseInt(url.searchParams.get('id') || '0')
-    
-    if (fileId) {
-      // 使用 fetch 下载文件
-      const response = await fetch(fileInfo.value.downloadUrl)
-      if (!response.ok) {
-        throw new Error('下载失败')
-      }
-      
-      const blob = await response.blob()
-      const urlObj = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = urlObj
-      a.download = fileInfo.value.name
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(urlObj)
+    // 使用 fetch 下载文件
+    const response = await fetch(fileInfo.value.downloadUrl)
+    if (!response.ok) {
+      throw new Error('下载失败')
     }
+    
+    const blob = await response.blob()
+    const urlObj = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlObj
+    a.download = fileInfo.value.name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(urlObj)
     showDownloadModal.value = false
   } catch (error) {
     alert('下载失败，请稍后重试')
     showDownloadModal.value = false
+  }
+}
+
+const handleSave = () => {
+  if (!isAuthenticated.value) {
+    router.push('/')
+    return
+  }
+  showSaveModal.value = true
+}
+
+const confirmSave = async () => {
+  if (!fileId.value || !shareCode.value) return
+  
+  isLoading.value = true
+  try {
+    const response = await api.post('/files/save', {
+      fileId: fileId.value,
+      shareCode: shareCode.value
+    })
+    
+    if (response.data?.success) {
+      alert('文件已保存到你的文件库')
+      router.push('/dashboard')
+    } else {
+      alert(response.data?.error || '保存失败')
+    }
+    showSaveModal.value = false
+  } catch (error: any) {
+    alert(error.response?.data?.error || '保存失败，请稍后重试')
+    showSaveModal.value = false
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -164,6 +203,14 @@ const goHome = () => {
 
           <div class="flex gap-3">
             <BaseButton variant="glass" class="flex-1" @click="goHome">返回首页</BaseButton>
+            <BaseButton 
+              v-if="isAuthenticated" 
+              variant="glass" 
+              class="flex-1" 
+              @click="handleSave"
+            >
+              转存到我的文件
+            </BaseButton>
             <BaseButton variant="primary" class="flex-1" @click="handleDownload">下载文件</BaseButton>
           </div>
         </div>
@@ -182,6 +229,25 @@ const goHome = () => {
             @click="confirmDownload"
           >
             确认下载
+          </BaseButton>
+        </div>
+      </div>
+    </BaseModal>
+
+    <!-- 转存确认 -->
+    <BaseModal :show="showSaveModal" title="转存文件" width="max-w-sm" @close="showSaveModal = false">
+      <div class="text-center py-4">
+        <p class="text-slate-300 mb-6">确定要将文件 "{{ fileInfo?.name }}" 转存到你的文件库吗？</p>
+        <div class="flex gap-3">
+          <BaseButton variant="glass" class="flex-1" @click="showSaveModal = false" :disabled="isLoading">取消</BaseButton>
+          <BaseButton
+            variant="primary"
+            class="flex-1"
+            @click="confirmSave"
+            :loading="isLoading"
+            :disabled="isLoading"
+          >
+            确认转存
           </BaseButton>
         </div>
       </div>

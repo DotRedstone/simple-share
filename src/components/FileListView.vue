@@ -2,20 +2,30 @@
 import type { FileItem } from '../types'
 import FileItemComponent from './FileItem.vue'
 import EmptyState from './EmptyState.vue'
+import BaseCheckbox from './BaseCheckbox.vue'
 
 interface Props {
   files: FileItem[]
   viewMode: 'list' | 'grid'
   activeOptionsMenu: number | null
+  selectedFiles?: number[]
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  selectedFiles: () => []
+})
 
 const emit = defineEmits<{
   (e: 'file-click', file: FileItem): void
   (e: 'file-action', action: string, file: FileItem): void
+  (e: 'file-select', fileId: number, selected: boolean): void
+  (e: 'select-all', selected: boolean): void
   (e: 'upload'): void
 }>()
+
+const handleSelectAll = (selected: boolean) => {
+  emit('select-all', selected)
+}
 </script>
 
 <template>
@@ -24,6 +34,12 @@ const emit = defineEmits<{
       <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
         <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
           <tr>
+            <th class="px-3 md:px-6 py-4 w-12">
+              <BaseCheckbox
+                :model-value="selectedFiles.length === files.length && files.length > 0"
+                @update:model-value="handleSelectAll"
+              />
+            </th>
             <th class="px-3 md:px-6 py-4">名称</th>
             <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell">大小</th>
             <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell">修改日期</th>
@@ -37,8 +53,10 @@ const emit = defineEmits<{
           :file="file"
           :view-mode="viewMode"
           :show-options="activeOptionsMenu === file.id"
+          :selected="selectedFiles.includes(file.id)"
           @click="emit('file-click', $event)"
           @action="(action, f) => emit('file-action', action, f)"
+          @select="(selected) => emit('file-select', file.id, selected)"
         />
       </tbody>
       </table>
@@ -50,8 +68,10 @@ const emit = defineEmits<{
         :file="file"
         :view-mode="viewMode"
         :show-options="activeOptionsMenu === file.id"
+        :selected="selectedFiles.includes(file.id)"
         @click="emit('file-click', $event)"
         @action="(action, f) => emit('file-action', action, f)"
+        @select="(selected) => emit('file-select', file.id, selected)"
       />
     </div>
   </div>

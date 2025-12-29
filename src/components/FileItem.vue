@@ -2,21 +2,29 @@
 import { computed } from 'vue'
 import type { FileItem as FileItemType } from '../types'
 import FileOptionsMenu from './FileOptionsMenu.vue'
+import BaseCheckbox from './BaseCheckbox.vue'
 
 interface Props {
   file: FileItemType
   viewMode: 'list' | 'grid'
   showOptions?: boolean
+  selected?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showOptions: false
+  showOptions: false,
+  selected: false
 })
 
 const emit = defineEmits<{
   (e: 'click', file: FileItemType): void
   (e: 'action', action: string, file: FileItemType): void
+  (e: 'select', selected: boolean): void
 }>()
+
+const handleCheckboxChange = (value: boolean) => {
+  emit('select', value)
+}
 
 const getFileIconColor = (type: string) => {
   const colors: Record<string, string> = {
@@ -41,7 +49,13 @@ const iconColor = computed(() => getFileIconColor(props.file.type))
     class="hover:bg-white/5 transition-colors group"
     :class="file.type === 'folder' ? 'cursor-pointer' : ''"
   >
-    <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0">
+    <td class="px-3 md:px-6 py-4 w-12" @click.stop>
+      <BaseCheckbox
+        :model-value="selected"
+        @update:model-value="handleCheckboxChange"
+      />
+    </td>
+    <td class="px-3 md:px-6 py-4 font-medium text-white min-w-0" :class="{ 'bg-blue-500/10': selected }">
       <div class="flex items-center gap-2 md:gap-3 min-w-0">
         <svg class="w-5 h-5 md:w-6 md:h-6 shrink-0" :class="iconColor" fill="currentColor" viewBox="0 0 24 24">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
@@ -71,9 +85,18 @@ const iconColor = computed(() => getFileIconColor(props.file.type))
   <div
     v-else
     @click="emit('click', file)"
-    :class="file.type === 'folder' ? 'cursor-pointer' : ''"
-    class="group relative bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 rounded-2xl p-4 transition-all flex flex-col items-center justify-between aspect-[4/5]"
+    :class="[
+      file.type === 'folder' ? 'cursor-pointer' : '',
+      selected ? 'bg-blue-500/20 border-blue-500/50' : 'bg-white/5 border-white/5'
+    ]"
+    class="group relative hover:bg-white/10 hover:border-white/20 rounded-2xl p-4 transition-all flex flex-col items-center justify-between aspect-[4/5]"
   >
+    <div class="absolute top-2 left-2 z-10" @click.stop>
+      <BaseCheckbox
+        :model-value="selected"
+        @update:model-value="handleCheckboxChange"
+      />
+    </div>
     <div class="flex-1 flex items-center justify-center w-full text-center">
       <svg v-if="file.type === 'folder'" class="w-20 h-20 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
         <path d="M2.165 19.551c.086.58.586 1.01 1.173 1.01h17.324c.587 0 1.087-.43 1.173-1.01l1.161-7.854c.099-.672-.42-1.282-1.096-1.282H2.099c-.676 0-1.195.61-1.096 1.282l1.162 7.854z" opacity=".4"></path>

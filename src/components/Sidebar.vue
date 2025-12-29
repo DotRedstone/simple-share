@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import type { MenuItem } from '../types'
 
 interface Props {
@@ -22,6 +22,11 @@ const emit = defineEmits<{
   (e: 'tab-change', tab: string): void
   (e: 'logout'): void
 }>()
+
+const isCollapsed = ref(false)
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 
 const getIcon = (iconName: string) => {
   const icons: Record<string, string> = {
@@ -46,14 +51,31 @@ const activeColor = computed(() => {
 </script>
 
 <template>
-  <aside class="w-full md:w-64 shrink-0 bg-slate-900/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden">
-    <div class="h-16 md:h-20 flex items-center px-6 border-b border-white/5 shrink-0">
-      <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center mr-3 shadow-lg">
+  <aside 
+    :class="[
+      'shrink-0 bg-slate-900/40 border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-full max-w-full overflow-hidden transition-all duration-300',
+      isCollapsed ? 'md:w-16' : 'w-full md:w-64'
+    ]"
+  >
+    <div class="h-16 md:h-20 flex items-center px-3 md:px-6 border-b border-white/5 shrink-0 relative">
+      <div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center mr-3 shadow-lg shrink-0">
         <img src="/favicon-96x96.png" alt="SimpleShare" class="w-full h-full object-contain" />
       </div>
-      <span class="font-bold text-lg text-white tracking-wide">
+      <span v-if="!isCollapsed" class="font-bold text-lg text-white tracking-wide">
         <slot name="title">SimpleShare</slot>
       </span>
+      <button
+        @click="toggleCollapse"
+        class="absolute right-2 md:right-4 p-1.5 rounded-lg text-slate-400 hover:bg-white/5 hover:text-white transition-colors hidden md:block"
+        title="收起/展开"
+      >
+        <svg v-if="!isCollapsed" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+        </svg>
+        <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+      </button>
     </div>
 
     <div class="p-2 md:p-4 space-x-1 md:space-x-0 md:space-y-1 flex md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide -mx-2 md:mx-0">
@@ -61,26 +83,35 @@ const activeColor = computed(() => {
         v-for="item in menuItems"
         :key="item.id"
         @click="emit('tab-change', item.id)"
-        class="flex-shrink-0 md:w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all"
-        :class="activeTab === item.id ? activeColor : 'text-slate-400 hover:bg-white/5 hover:text-white'"
+        :class="[
+          'flex-shrink-0 md:w-full flex items-center rounded-xl text-sm font-medium transition-all',
+          isCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3',
+          activeTab === item.id ? activeColor : 'text-slate-400 hover:bg-white/5 hover:text-white'
+        ]"
+        :title="isCollapsed ? item.label : ''"
       >
-        <svg v-if="getIcon(item.icon)" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg v-if="getIcon(item.icon)" class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getIcon(item.icon)" />
         </svg>
-        <span>{{ item.label }}</span>
+        <span v-if="!isCollapsed" class="truncate">{{ item.label }}</span>
       </button>
     </div>
 
-    <div class="hidden md:block p-6 shrink-0 space-y-4 mt-auto">
-      <div class="pt-4 border-t border-white/5 flex items-center justify-between">
-        <div class="flex items-center gap-3 overflow-hidden">
+    <div class="hidden md:block p-3 md:p-6 shrink-0 space-y-4 mt-auto">
+      <div class="pt-4 border-t border-white/5 flex items-center" :class="isCollapsed ? 'justify-center' : 'justify-between'">
+        <div v-if="!isCollapsed" class="flex items-center gap-3 overflow-hidden flex-1">
           <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 shrink-0"></div>
           <div class="flex flex-col min-w-0">
             <span class="text-xs font-bold text-white truncate">{{ username }}</span>
             <span class="text-[10px] text-slate-500 truncate">{{ userRole }}</span>
           </div>
         </div>
-        <button @click="emit('logout')" class="text-slate-500 hover:text-red-400 transition-colors shrink-0 p-1">
+        <div v-else class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 shrink-0"></div>
+        <button 
+          @click="emit('logout')" 
+          class="text-slate-500 hover:text-red-400 transition-colors shrink-0 p-1"
+          :title="isCollapsed ? '退出登录' : ''"
+        >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
