@@ -110,5 +110,4 @@ const handleAction = (action: FileAction, file: FileItem) => {
     </button>
   </div>
 </template>
-</template>
 
