@@ -3,14 +3,11 @@ name = "simple-share"
 main = "server/index.ts"
 compatibility_date = "2024-04-03"
 
-# 💡 D1 和 R2 请在 Cloudflare Dashboard 手动绑定：
-# 变量名分别设为 DB 和 FILES
-
 [vars]
-# JWT_SECRET 将在部署时由脚本自动填充
+# 生产环境环境变量请在 Cloudflare Dashboard 中进行配置
 
 [env.production]
 name = "simple-share"
 
 [env.production.vars]
-# JWT_SECRET 将在部署时由脚本自动填充
+# 预留生产环境配置槽位

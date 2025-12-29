@@ -12,10 +12,8 @@
     "build": "node scripts/init-secret.cjs && vue-tsc -b && vite build",
     "preview": "vite preview",
     "gen-token": "node scripts/generate-token.js",
-    "build:worker": "npm run build",
     "deploy": "npm run build && npx wrangler deploy",
     "server:dev": "npx wrangler dev",
-    "server:deploy": "npx wrangler deploy",
     "db:init": "cd server && npx wrangler d1 execute simpleshare-db --file=./src/db/schema.sql",
     "db:init:prod": "cd server && npx wrangler d1 execute simpleshare-db --remote --file=./src/db/schema.sql"
   },
