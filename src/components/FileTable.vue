@@ -42,38 +42,38 @@ const getSortIcon = (field: string) => {
 <template>
   <div class="glass-card rounded-[2rem] overflow-hidden border border-white/5">
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm text-slate-400">
+      <table class="w-full text-left text-sm text-slate-400 table-fixed min-w-[900px]">
         <thead class="bg-white/5 text-[10px] uppercase font-black tracking-[0.2em] text-slate-500 border-b border-white/5">
           <tr>
-            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'name')">
+            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors w-[35%]" @click="emit('sort', 'name')">
               文件名 {{ getSortIcon('name') }}
             </th>
-            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'type')">
+            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors w-24" @click="emit('sort', 'type')">
               类型 {{ getSortIcon('type') }}
             </th>
-            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'user_id')">
+            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors w-32" @click="emit('sort', 'user_id')">
               上传者 {{ getSortIcon('user_id') }}
             </th>
-            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'size_bytes')">
+            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors w-28" @click="emit('sort', 'size_bytes')">
               大小 {{ getSortIcon('size_bytes') }}
             </th>
-            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'created_at')">
+            <th class="px-8 py-5 cursor-pointer hover:text-white transition-colors w-44" @click="emit('sort', 'created_at')">
               上传时间 {{ getSortIcon('created_at') }}
             </th>
-            <th class="px-8 py-5 hidden md:table-cell">状态</th>
-            <th class="px-8 py-5 text-right">操作</th>
+            <th class="px-8 py-5 hidden md:table-cell w-24">状态</th>
+            <th class="px-8 py-5 text-right w-32">操作</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/5">
           <tr v-for="file in files" :key="file.id" class="group hover:bg-white/[0.02] transition-colors" :class="{'opacity-60 bg-red-500/5': file.status === '违规'}">
-            <td class="px-8 py-5">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center group-hover:scale-110 transition-transform" :class="file.status === '违规' ? 'text-red-400' : 'text-brand-primary'">
+            <td class="px-8 py-5 overflow-hidden">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-surface-800 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform" :class="file.status === '违规' ? 'text-red-400' : 'text-brand-primary'">
                   <svg v-if="file.status === '违规'" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                   <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" /></svg>
                 </div>
-                <div class="flex flex-col">
-                  <span class="font-bold tracking-tight" :class="file.status === '违规' ? 'text-red-400' : 'text-white'">{{ file.name }}</span>
+                <div class="flex flex-col min-w-0 overflow-hidden">
+                  <span class="font-bold tracking-tight truncate" :class="file.status === '违规' ? 'text-red-400' : 'text-white'" :title="file.name">{{ file.name }}</span>
                   <span v-if="file.status === '违规'" class="text-[10px] text-red-500 font-medium">管理员下架</span>
                 </div>
               </div>
@@ -82,7 +82,7 @@ const getSortIcon = (field: string) => {
               <span class="px-2.5 py-1 rounded-md bg-surface-800 text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ file.type }}</span>
             </td>
             <td class="px-8 py-5">
-              <span class="px-2.5 py-1 rounded-md bg-surface-800 text-[11px] font-bold text-slate-400">{{ file.uploader }}</span>
+              <span class="px-2.5 py-1 rounded-md bg-surface-800 text-[11px] font-bold text-slate-400 truncate block">{{ file.uploader }}</span>
             </td>
             <td class="px-8 py-5">
               <span class="font-mono text-xs opacity-60">{{ file.size }}</span>

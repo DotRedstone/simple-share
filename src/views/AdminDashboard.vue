@@ -636,7 +636,7 @@ onMounted(() => {
 
             <!-- 存储管理视图 -->
             <div v-if="activeTab === 'storage'" class="h-full">
-              <StorageManagement :stats="storageStats" @refresh="() => {}" />
+              <StorageManagement :stats="storageStats" @refresh="initAdminData" />
             </div>
 
             <!-- 用户管理视图 -->

@@ -9,6 +9,11 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
 
   try {
     await requireAdmin(request, env)
+    
+    // 确保 R2 统计前先尝试激活/刷新后端记录
+    if (env.FILES) {
+      await db.ensureDefaultStorageBackend(env)
+    }
 
     const stats = await db.getStorageStats()
 
