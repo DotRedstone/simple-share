@@ -9,17 +9,33 @@ interface Props {
   activeOptionsMenu: number | null
   selectedFiles?: number[]
   enableMultiSelect?: boolean
+  sortBy?: string
+  order?: 'ASC' | 'DESC'
 }
 
-const { files, viewMode, activeOptionsMenu, selectedFiles = [], enableMultiSelect = true } = defineProps<Props>()
+const { 
+  files, 
+  viewMode, 
+  activeOptionsMenu, 
+  selectedFiles = [], 
+  enableMultiSelect = true,
+  sortBy = 'created_at',
+  order = 'DESC'
+} = defineProps<Props>()
 
 const emit = defineEmits<{
   (e: 'file-click', file: FileItem): void
   (e: 'file-action', action: string, file: FileItem): void
   (e: 'file-select', fileId: number, selected: boolean): void
   (e: 'select-all', selected: boolean): void
+  (e: 'sort', field: string): void
   (e: 'upload'): void
 }>()
+
+const getSortIcon = (field: string) => {
+  if (sortBy !== field) return '↕'
+  return order === 'ASC' ? '↑' : '↓'
+}
 </script>
 
 <template>
@@ -28,9 +44,15 @@ const emit = defineEmits<{
       <table class="w-full text-left text-sm text-slate-400 min-w-[600px]">
         <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
           <tr>
-            <th class="px-3 md:px-6 py-4" :class="{ 'pl-6 md:pl-12': !enableMultiSelect }">名称</th>
-            <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell">大小</th>
-            <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell">修改日期</th>
+            <th class="px-3 md:px-6 py-4 cursor-pointer hover:text-white transition-colors" :class="{ 'pl-6 md:pl-12': !enableMultiSelect }" @click="emit('sort', 'name')">
+              名称 {{ getSortIcon('name') }}
+            </th>
+            <th class="px-3 md:px-6 py-4 w-32 hidden sm:table-cell cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'size_bytes')">
+              大小 {{ getSortIcon('size_bytes') }}
+            </th>
+            <th class="px-3 md:px-6 py-4 w-40 hidden sm:table-cell cursor-pointer hover:text-white transition-colors" @click="emit('sort', 'created_at')">
+              修改日期 {{ getSortIcon('created_at') }}
+            </th>
             <th class="px-3 md:px-6 py-4 w-20 text-right"></th>
           </tr>
         </thead>

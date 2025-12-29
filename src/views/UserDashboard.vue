@@ -45,6 +45,18 @@ const activeOptionsMenu = ref<number | null>(null)
 const isLoading = ref(false)
 const isInitialized = ref(false)
 const selectedFiles = ref<number[]>([])
+const sortBy = ref('created_at')
+const order = ref<'ASC' | 'DESC'>('DESC')
+
+const handleSort = (field: string) => {
+  if (sortBy.value === field) {
+    order.value = order.value === 'ASC' ? 'DESC' : 'ASC'
+  } else {
+    sortBy.value = field
+    order.value = 'DESC'
+  }
+  initFiles()
+}
 
 const combinedLoading = computed(() => isLoading.value || isActionLoading.value)
 
@@ -87,7 +99,7 @@ const initFiles = async () => {
   
   isLoading.value = true
   try {
-    const result = await fileStore.fetchFiles(fileStore.currentFolderId)
+    const result = await fileStore.fetchFiles(fileStore.currentFolderId, sortBy.value, order.value)
     if (!result.success) {
       fileStore.setFiles([])
     }
@@ -508,6 +520,9 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
                     :view-mode="viewMode"
                     :active-options-menu="activeOptionsMenu"
                     :selected-files="selectedFiles"
+                    :sort-by="sortBy"
+                    :order="order"
+                    @sort="handleSort"
                     @file-click="handleFileClick"
                     @file-action="handleFileAction"
                     @file-select="handleFileSelect"
@@ -524,6 +539,9 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
                   :active-options-menu="activeOptionsMenu"
                   :selected-files="activeTab === 'all' ? selectedFiles : []"
                   :enable-multi-select="activeTab === 'all'"
+                  :sort-by="sortBy"
+                  :order="order"
+                  @sort="handleSort"
                   @file-click="handleFileClick"
                   @file-action="handleFileAction"
                   @file-select="activeTab === 'all' ? handleFileSelect : () => {}"

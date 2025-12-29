@@ -77,8 +77,8 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const fetchAdminFiles = async () => {
-    const response = await get<any[]>('/admin/files')
+  const fetchAdminFiles = async (limit: number = 100, sortBy: string = 'created_at', order: string = 'DESC') => {
+    const response = await get<any[]>(`/admin/files?limit=${limit}&sortBy=${sortBy}&order=${order}`)
     if (response.success && response.data) {
       adminFiles.value = response.data
     }

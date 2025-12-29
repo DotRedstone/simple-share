@@ -78,11 +78,42 @@ const formatSize = (gb: number) => {
   return gb.toFixed(2) + " GB";
 };
 
+const sortBy = ref('created_at');
+const order = ref<'ASC' | 'DESC'>('DESC');
+
+const handleSort = (field: string) => {
+  if (sortBy.value === field) {
+    order.value = order.value === 'ASC' ? 'DESC' : 'ASC';
+  } else {
+    sortBy.value = field;
+    order.value = 'DESC';
+  }
+  adminStore.fetchAdminFiles(100, sortBy.value, order.value);
+};
+
+const handleTakedown = async (file: any) => {
+  if (!confirm(`确定要下架文件 "${file.name}" 吗？物理文件将被删除，系统将为用户保留一个违规通知占位符。`)) return;
+  
+  isLoading.value = true;
+  try {
+    const res = await api.post('/admin/files/takedown', { fileId: file.id });
+    if (res.success) {
+      await adminStore.fetchAdminFiles(100, sortBy.value, order.value);
+    } else {
+      alert(res.error || '下架失败');
+    }
+  } catch (error) {
+    alert('操作失败，请稍后重试');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const initAdminData = async () => {
   isLoading.value = true;
   try {
     await adminStore.initData();
-    await adminStore.fetchAdminFiles();
+    await adminStore.fetchAdminFiles(100, sortBy.value, order.value);
   } catch (error) {
     // 初始化失败，静默处理
   } finally {
@@ -622,7 +653,10 @@ onMounted(() => {
               <FileTable
                 v-if="files.length > 0"
                 :files="files"
-                @view="viewFile"
+                :sort-by="sortBy"
+                :order="order"
+                @sort="handleSort"
+                @takedown="handleTakedown"
                 @delete="deleteFile"
               />
               <EmptyState

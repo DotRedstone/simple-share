@@ -198,12 +198,16 @@ export class Database {
     return result as any
   }
 
-  async getFilesByUserId(userId: string, parentId?: number | null) {
+  async getFilesByUserId(userId: string, parentId?: number | null, sortBy: string = 'created_at', order: string = 'DESC') {
+    const validSortFields = ['name', 'size_bytes', 'created_at', 'type', 'starred']
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at'
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC'
+
     if (parentId === null || parentId === undefined) {
-      const result = await this.db.prepare('SELECT * FROM files WHERE user_id = ? AND parent_id IS NULL ORDER BY created_at DESC').bind(userId).all()
+      const result = await this.db.prepare(`SELECT * FROM files WHERE user_id = ? AND parent_id IS NULL ORDER BY ${sortField} ${sortOrder}`).bind(userId).all()
       return result.results as any[]
     }
-    const result = await this.db.prepare('SELECT * FROM files WHERE user_id = ? AND parent_id = ? ORDER BY created_at DESC').bind(userId, parentId).all()
+    const result = await this.db.prepare(`SELECT * FROM files WHERE user_id = ? AND parent_id = ? ORDER BY ${sortField} ${sortOrder}`).bind(userId, parentId).all()
     return result.results as any[]
   }
 
@@ -510,8 +514,19 @@ export class Database {
   }
 
   // 获取所有文件（管理员）
-  async getAllFiles(limit: number = 100) {
-    const result = await this.db.prepare('SELECT * FROM files WHERE type != "folder" ORDER BY created_at DESC LIMIT ?').bind(limit).all()
+  async getAllFiles(limit: number = 100, sortBy: string = 'created_at', order: string = 'DESC') {
+    const validSortFields = ['name', 'size_bytes', 'created_at', 'type', 'user_id']
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at'
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC'
+
+    const result = await this.db.prepare(`
+      SELECT f.*, u.name as user_name, u.email as user_email 
+      FROM files f 
+      LEFT JOIN users u ON f.user_id = u.id 
+      WHERE f.type != 'folder' 
+      ORDER BY ${sortField} ${sortOrder} 
+      LIMIT ?
+    `).bind(limit).all()
     return result.results as any[]
   }
 

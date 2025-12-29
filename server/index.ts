@@ -30,6 +30,7 @@ import { onRequestPut as adminGroupsUpdateHandler, onRequestDelete as adminGroup
 import { onRequestGet as adminGroupStorageHandler, onRequestPost as adminGroupStorageCreateHandler } from './functions/api/admin/groups/storage'
 import { onRequestPut as adminGroupStorageUpdateHandler, onRequestDelete as adminGroupStorageDeleteHandler } from './functions/api/admin/groups/storage/[id]'
 import { onRequestGet as adminFilesHandler } from './functions/api/admin/files'
+import { onRequestPost as adminFilesTakedownHandler } from './functions/api/admin/files/takedown'
 import { onRequestGet as adminStatsHandler } from './functions/api/admin/stats'
 import { onRequestGet as adminLogsHandler } from './functions/api/admin/logs'
 import { onRequestGet as adminStorageHandler, onRequestPost as adminStorageCreateHandler } from './functions/api/admin/storage'
@@ -58,6 +59,7 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   'admin/groups': { 'GET': adminGroupsHandler, 'POST': adminGroupsCreateHandler },
   'admin/groups/storage': { 'GET': adminGroupStorageHandler, 'POST': adminGroupStorageCreateHandler },
   'admin/files': { 'GET': adminFilesHandler },
+  'admin/files/takedown': { 'POST': adminFilesTakedownHandler },
   'admin/stats': { 'GET': adminStatsHandler },
   'admin/logs': { 'GET': adminLogsHandler },
   'admin/storage': { 'GET': adminStorageHandler, 'POST': adminStorageCreateHandler },

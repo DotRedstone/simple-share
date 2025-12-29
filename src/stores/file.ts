@@ -103,13 +103,15 @@ export const useFileStore = defineStore('file', () => {
     searchQuery.value = ''
   }
 
-  const fetchFiles = async (parentId?: number | null) => {
+  const fetchFiles = async (parentId?: number | null, sortBy: string = 'created_at', order: string = 'DESC') => {
     try {
       const params = new URLSearchParams()
       if (parentId !== undefined && parentId !== null) {
         params.append('parentId', parentId.toString())
       }
       params.append('tab', activeTab.value)
+      params.append('sortBy', sortBy)
+      params.append('order', order)
 
       const response = await get<FileItem[]>(`/files/list?${params.toString()}`)
       
