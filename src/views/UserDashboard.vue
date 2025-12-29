@@ -139,10 +139,22 @@ const closeOptionsMenu = (event?: MouseEvent) => {
 }
 
 const handleFileClick = (file: FileItem) => {
-  // 只有在全部文件标签页且是文件夹时才能进入
-  if (activeTab.value === 'all' && file.type === 'folder') {
-    fileStore.navigateToFolder(file)
-    initFiles()
+  // 如果当前是全部文件且正在进行多选操作（按住 Ctrl/Cmd，或者已经有选中的文件）
+  // 这种逻辑可以让用户点击文件直接选中，如果是文件夹则需要特殊处理
+  
+  const isSelected = selectedFiles.value.includes(file.id)
+  
+  if (isSelected) {
+    selectedFiles.value = selectedFiles.value.filter(id => id !== file.id)
+  } else {
+    // 如果点击的是文件夹且没有其他文件被选中，则进入文件夹
+    if (file.type === 'folder' && selectedFiles.value.length === 0) {
+      fileStore.navigateToFolder(file)
+      initFiles()
+      return
+    }
+    // 否则加入选中列表
+    selectedFiles.value.push(file.id)
   }
 }
 
@@ -226,6 +238,52 @@ const handleBatchDelete = async () => {
   }
 }
 
+const handleBatchStar = async () => {
+  if (selectedFiles.value.length === 0) return
+  isLoading.value = true
+  try {
+    let success = false
+    for (const id of selectedFiles.value) {
+      const file = currentFiles.value.find(f => f.id === id)
+      if (file) {
+        const result = await fileStore.toggleStar(id, !file.starred)
+        if (result.success) success = true
+      }
+    }
+    if (success) await initFiles()
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleBatchDownload = async () => {
+  if (selectedFiles.value.length === 0) return
+  for (const id of selectedFiles.value) {
+    const file = currentFiles.value.find(f => f.id === id)
+    if (file && file.type !== 'folder') {
+      await downloadFile(file)
+    }
+  }
+}
+
+const handleBatchShare = () => {
+  if (selectedFiles.value.length === 1) {
+    const file = currentFiles.value.find(f => f.id === selectedFiles.value[0])
+    if (file) {
+      handleFileAction('分享', file)
+    }
+  }
+}
+
+const handleSingleRename = () => {
+  if (selectedFiles.value.length === 1) {
+    const file = currentFiles.value.find(f => f.id === selectedFiles.value[0])
+    if (file) {
+      handleFileAction('重命名', file)
+    }
+  }
+}
+
 const onMoveSuccess = async () => {
   showMoveModal.value = false
   selectedFiles.value = []
@@ -299,33 +357,83 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             <SearchBar v-model="searchQuery" />
           </div>
           <div class="flex items-center gap-4 shrink-0">
-            <ViewModeToggle v-model="viewMode" />
-            <div class="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
-            
-            <BaseButton
-              v-if="activeTab === 'all' && selectedFiles.length > 0"
-              variant="glass"
-              @click="handleBatchDelete"
-              title="删除选中项目"
-              class="!px-3 sm:!px-5 text-red-400 hover:text-red-300"
-            >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </BaseButton>
+            <!-- 批量操作按钮组 -->
+            <template v-if="activeTab === 'all' && selectedFiles.length > 0">
+              <div class="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+                <!-- 针对单选的操作 -->
+                <template v-if="selectedFiles.length === 1">
+                  <BaseButton
+                    variant="glass"
+                    @click="handleBatchShare"
+                    title="分享"
+                    class="!p-2 text-slate-300 hover:text-white"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.368a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                    </svg>
+                  </BaseButton>
+                  <BaseButton
+                    variant="glass"
+                    @click="handleSingleRename"
+                    title="重命名"
+                    class="!p-2 text-slate-300 hover:text-white"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L14.732 5.232z" />
+                    </svg>
+                  </BaseButton>
+                </template>
 
-            <BaseButton
-              v-if="activeTab === 'all' && selectedFiles.length > 0"
-              variant="glass"
-              @click="handleMoveFiles"
-              title="移动选中文件"
-              class="!px-3 sm:!px-5"
-            >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-              </svg>
-              <span class="ml-2 text-xs sm:text-sm">{{ selectedFiles.length }}</span>
-            </BaseButton>
+                <BaseButton
+                  variant="glass"
+                  @click="handleBatchStar"
+                  title="收藏/取消收藏"
+                  class="!p-2 text-slate-300 hover:text-yellow-400"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                  </svg>
+                </BaseButton>
+
+                <BaseButton
+                  variant="glass"
+                  @click="handleBatchDownload"
+                  title="下载文件"
+                  class="!p-2 text-slate-300 hover:text-white"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                </BaseButton>
+
+                <BaseButton
+                  variant="glass"
+                  @click="handleMoveFiles"
+                  title="移动"
+                  class="!p-2 text-slate-300 hover:text-white"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                  </svg>
+                </BaseButton>
+
+                <div class="w-[1px] h-4 bg-white/10 mx-1"></div>
+
+                <BaseButton
+                  variant="glass"
+                  @click="handleBatchDelete"
+                  title="删除"
+                  class="!p-2 text-red-400 hover:text-red-300"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </BaseButton>
+              </div>
+              <div class="h-8 w-[1px] bg-white/10 mx-2 hidden sm:block"></div>
+            </template>
+
+            <ViewModeToggle v-model="viewMode" />
 
             <BaseButton
               v-if="activeTab === 'all'"
