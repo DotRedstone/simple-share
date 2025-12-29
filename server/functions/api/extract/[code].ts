@@ -1,11 +1,13 @@
 import { Database } from '../../../src/utils/db'
 import { getR2Object } from '../../../src/utils/r2'
 import { formatFileSize } from '../../../src/utils/r2'
+import { corsHeaders } from '../../../src/utils/cors'
 import type { Env } from '../../../src/utils/db'
 
 export async function onRequestGet(context: { env: Env; request: Request; params: { code: string } }): Promise<Response> {
   const { env, request, params } = context
   const db = new Database(env.DB)
+  const origin = request.headers.get('Origin')
 
   try {
     const shareCode = params.code.toUpperCase()
@@ -15,7 +17,13 @@ export async function onRequestGet(context: { env: Env; request: Request; params
     if (!share) {
       return new Response(
         JSON.stringify({ success: false, error: '提取码无效或已过期' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 404, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -23,7 +31,13 @@ export async function onRequestGet(context: { env: Env; request: Request; params
     if (share.max_access && share.access_count >= share.max_access) {
       return new Response(
         JSON.stringify({ success: false, error: '分享链接已达到最大访问次数' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 403, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -32,7 +46,13 @@ export async function onRequestGet(context: { env: Env; request: Request; params
     if (!file) {
       return new Response(
         JSON.stringify({ success: false, error: '文件不存在' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 404, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -61,13 +81,32 @@ export async function onRequestGet(context: { env: Env; request: Request; params
           downloadUrl: `/api/files/download?id=${file.id}&shareCode=${shareCode}`
         }
       }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders(origin)
+        } 
+      }
     )
   } catch (error) {
     return new Response(
       JSON.stringify({ success: false, error: '获取文件信息失败' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders(origin)
+        } 
+      }
     )
   }
+}
+
+export async function onRequestOptions(context: { request: Request }): Promise<Response> {
+  const origin = context.request.headers.get('Origin')
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(origin)
+  })
 }
 

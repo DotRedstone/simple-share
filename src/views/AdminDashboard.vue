@@ -18,6 +18,7 @@ import LoadingSpinner from "../components/LoadingSpinner.vue";
 import type { UserGroup } from "../types";
 import BaseModal from "../components/BaseModal.vue";
 import BaseInput from "../components/BaseInput.vue";
+import ExtractModal from "../components/ExtractModal.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -25,6 +26,7 @@ const adminStore = useAdminStore();
 
 const activeTab = ref("dashboard");
 const isLoading = ref(false);
+const showExtractModal = ref(false);
 
 const menuItems: MenuItem[] = [
   { id: "dashboard", label: "仪表盘", icon: "home" },
@@ -33,7 +35,16 @@ const menuItems: MenuItem[] = [
   { id: "groups", label: "用户组", icon: "groups" },
   { id: "files", label: "文件管理", icon: "files" },
   { id: "logs", label: "系统日志", icon: "logs" },
+  { id: "extract", label: "提取文件", icon: "download" },
 ];
+
+const handleTabChange = (tabId: string) => {
+  if (tabId === "extract") {
+    showExtractModal.value = true;
+  } else {
+    activeTab.value = tabId;
+  }
+};
 
 const stats = computed(() => adminStore.stats);
 const users = computed(() => adminStore.users);
@@ -394,16 +405,16 @@ onMounted(() => {
     <div
       class="flex flex-col md:flex-row h-full w-full overflow-hidden relative"
     >
-      <Sidebar
-        :menu-items="menuItems"
-        :active-tab="activeTab"
-        username="管理员"
-        user-role="超级权限"
-        logo="S"
-        logo-color="blue"
-        @tab-change="activeTab = $event"
-        @logout="handleLogout"
-      />
+        <Sidebar
+          :menu-items="menuItems"
+          :active-tab="activeTab"
+          username="管理员"
+          user-role="超级权限"
+          logo="S"
+          logo-color="blue"
+          @tab-change="handleTabChange"
+          @logout="handleLogout"
+        />
 
       <main
         class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full"
@@ -792,7 +803,12 @@ onMounted(() => {
             </div>
           </div>
         </div>
-      </div>
-    </BaseModal>
-  </PageFrame>
-</template>
+       </div>
+     </BaseModal>
+ 
+     <ExtractModal
+       :show="showExtractModal"
+       @close="showExtractModal = false"
+     />
+   </PageFrame>
+ </template>

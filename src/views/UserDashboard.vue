@@ -16,6 +16,7 @@ import ShareModal from '../components/ShareModal.vue'
 import ShareList from '../components/ShareList.vue'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 import MoveFilesModal from '../components/MoveFilesModal.vue'
+import ExtractModal from '../components/ExtractModal.vue'
 import { useFileActions } from '../composables/useFileActions'
 
 const router = useRouter()
@@ -36,6 +37,7 @@ const showUpload = ref(false)
 const showShare = ref(false)
 const showShareList = ref(false)
 const showMoveModal = ref(false)
+const showExtractModal = ref(false)
 const currentShareFile = ref<FileItem | null>(null)
 const shareCode = ref('')
 const activeOptionsMenu = ref<number | null>(null)
@@ -76,7 +78,16 @@ const menuItems: MenuItem[] = [
   { id: 'recent', label: '最近上传', icon: 'clock' },
   { id: 'starred', label: '我的收藏', icon: 'star' },
   { id: 'shares', label: '我的分享', icon: 'share' },
+  { id: 'extract', label: '提取文件', icon: 'download' },
 ]
+
+const handleTabChange = (tabId: string) => {
+  if (tabId === 'extract') {
+    showExtractModal.value = true
+  } else {
+    activeTab.value = tabId
+  }
+}
 
 const initFiles = async () => {
   isLoading.value = true
@@ -270,7 +281,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         user-role="高级账户"
         logo="S"
         logo-color="blue"
-        @tab-change="activeTab = $event"
+        @tab-change="handleTabChange"
         @logout="handleLogout"
       />
 
@@ -414,6 +425,11 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
       :selected-files="selectedFiles"
       @close="showMoveModal = false"
       @success="onMoveSuccess"
+    />
+
+    <ExtractModal
+      :show="showExtractModal"
+      @close="showExtractModal = false"
     />
   </PageFrame>
 </template>

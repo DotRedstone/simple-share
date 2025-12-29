@@ -60,11 +60,9 @@ router.beforeEach((to, _from, next) => {
             next()
         }
     } else {
-        if (authStore.isAuthenticated && to.path === '/') {
-            next(authStore.user?.role === 'admin' ? '/admin' : '/dashboard')
-        } else {
-            next()
-        }
+        // 非认证要求的页面，如果已登录，不再强制重定向
+        // 这样用户可以访问首页（LandingPage）来提取文件而不必登出
+        next()
     }
 })
 

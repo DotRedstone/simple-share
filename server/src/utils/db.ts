@@ -109,7 +109,7 @@ export class Database {
       const now = Date.now()
       await this.db.prepare(
         'INSERT INTO user_groups (id, name, description, storage_quota, max_users, current_users, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-      ).bind('user_group', '用户组', '普通用户组', 50.0, 10000, 0, now, now).run()
+      ).bind('user_group', '用户组', '普通用户组', 1.0, 10000, 0, now, now).run()
     }
   }
 

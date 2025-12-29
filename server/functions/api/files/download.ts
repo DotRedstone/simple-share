@@ -1,11 +1,13 @@
 import { Database } from '../../../src/utils/db'
 import { requireAuth } from '../../../src/middleware/auth'
 import { createStorageAdapter, type StorageBackendConfig } from '../../../src/utils/storage'
+import { corsHeaders } from '../../../src/utils/cors'
 import type { Env } from '../../../src/utils/db'
 
 export async function onRequestGet(context: { env: Env; request: Request }): Promise<Response> {
   const { env, request } = context
   const db = new Database(env.DB)
+  const origin = request.headers.get('Origin')
 
   try {
     const url = new URL(request.url)
@@ -21,7 +23,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     if (!fileId) {
       return new Response(
         JSON.stringify({ success: false, error: '文件ID不能为空' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -29,7 +37,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     if (!file) {
       return new Response(
         JSON.stringify({ success: false, error: '文件不存在' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 404, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -52,7 +66,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     if (!hasAccess) {
       return new Response(
         JSON.stringify({ success: false, error: '无权访问此文件' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 403, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -63,7 +83,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       if (!storageBackend || storageBackend.enabled !== 1) {
         return new Response(
           JSON.stringify({ success: false, error: '存储后端不可用' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
+          { 
+            status: 500, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
         )
       }
       const config: StorageBackendConfig = JSON.parse(storageBackend.config)
@@ -74,7 +100,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       if (!env.FILES) {
         return new Response(
           JSON.stringify({ success: false, error: '未配置存储后端' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
+          { 
+            status: 500, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
         )
       }
       storageAdapter = createStorageAdapter({ type: 'r2' }, env.FILES)
@@ -85,7 +117,13 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     if (!fileData) {
       return new Response(
         JSON.stringify({ success: false, error: '文件不存在' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 404, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
       )
     }
 
@@ -111,7 +149,8 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       headers: {
         'Content-Type': file.mime_type || 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${file.name}"`,
-        'Content-Length': file.size_bytes.toString()
+        'Content-Length': file.size_bytes.toString(),
+        ...corsHeaders(origin)
       }
     })
   } catch (error: any) {
@@ -119,8 +158,22 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     
     return new Response(
       JSON.stringify({ success: false, error: '下载失败' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders(origin)
+        } 
+      }
     )
   }
+}
+
+export async function onRequestOptions(context: { request: Request }): Promise<Response> {
+  const origin = context.request.headers.get('Origin')
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(origin)
+  })
 }
 
