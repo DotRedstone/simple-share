@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "gen-token": "node scripts/generate-token.js",
     "build:worker": "npm run build",
-    "deploy": "npm run build && npx wrangler deploy",
+    "deploy": "node scripts/init-deployment.js && npm run build && npx wrangler deploy",
     "server:dev": "npx wrangler dev",
     "server:deploy": "npx wrangler deploy",
     "db:init": "cd server && npx wrangler d1 execute simpleshare-db --file=./src/db/schema.sql",
