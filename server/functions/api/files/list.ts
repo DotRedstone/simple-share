@@ -63,27 +63,10 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       parentId: file.parent_id
     }))
 
-    // 构建文件夹树结构
-    const buildTree = (parentId: number | null): any[] => {
-      return formattedFiles
-        .filter(f => f.parentId === parentId)
-        .map(file => {
-          if (file.type === 'folder') {
-            return {
-              ...file,
-              children: buildTree(file.id)
-            }
-          }
-          return file
-        })
-    }
-
-    const tree = buildTree(parentId)
-
     return new Response(
       JSON.stringify({
         success: true,
-        data: tree
+        data: formattedFiles
       }),
       { headers: { 'Content-Type': 'application/json' } }
     )

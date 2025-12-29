@@ -43,26 +43,38 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
-    const authStore = useAuthStore()
-    
-    if (!authStore.isAuthenticated) {
-        authStore.initAuth()
-    }
+    try {
+        const authStore = useAuthStore()
+        
+        // 确保在每次路由跳转前尝试从本地存储恢复认证状态
+        if (!authStore.user && authStore.token) {
+            authStore.initAuth()
+        }
 
-    document.title = (to.meta.title as string) || 'SimpleShare'
+        document.title = (to.meta.title as string) || 'SimpleShare'
 
-    if (to.meta.requiresAuth) {
-        if (!authStore.isAuthenticated) {
-            next('/')
-        } else if (to.meta.role && to.meta.role !== authStore.user?.role) {
-            next(authStore.user?.role === 'admin' ? '/admin' : '/dashboard')
+        if (to.meta.requiresAuth) {
+            if (!authStore.isAuthenticated) {
+                next('/')
+                return
+            }
+            
+            if (to.meta.role && authStore.user && to.meta.role !== authStore.user.role) {
+                const target = authStore.user.role === 'admin' ? '/admin' : '/dashboard'
+                if (to.path !== target) {
+                    next(target)
+                    return
+                }
+            }
+            next()
         } else {
+            // 非认证要求的页面，如果已登录，不再强制重定向
+            // 这样用户可以访问首页（LandingPage）来提取文件而不必登出
             next()
         }
-    } else {
-        // 非认证要求的页面，如果已登录，不再强制重定向
-        // 这样用户可以访问首页（LandingPage）来提取文件而不必登出
-        next()
+    } catch (error) {
+        console.error('路由守卫错误:', error)
+        next('/')
     }
 })
 

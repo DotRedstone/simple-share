@@ -114,22 +114,19 @@ export const useFileStore = defineStore('file', () => {
       const response = await get<FileItem[]>(`/files/list?${params.toString()}`)
       
       if (response.success && response.data) {
-        const transformFile = (file: any): FileItem => ({
+        files.value = response.data.map((file: any) => ({
           id: file.id,
           name: file.name,
           size: file.size || '-',
           date: file.date || new Date(file.created_at || file.uploadTime).toISOString().split('T')[0],
           type: file.type,
           starred: file.starred || false,
-          children: file.children ? file.children.map(transformFile) : undefined,
           mimeType: file.mimeType || file.mime_type,
           uploadTime: file.uploadTime || file.created_at,
           storageKey: file.storageKey || file.storage_key,
           userId: file.userId || file.user_id,
           downloadCount: file.downloadCount || file.download_count
-        })
-        
-        files.value = response.data.map(transformFile)
+        }))
         return { success: true }
       } else {
         return { success: false, error: response.error || '获取文件列表失败' }

@@ -43,6 +43,7 @@ const currentShareFile = ref<FileItem | null>(null)
 const shareCode = ref('')
 const activeOptionsMenu = ref<number | null>(null)
 const isLoading = ref(false)
+const isInitialized = ref(false)
 const selectedFiles = ref<number[]>([])
 
 const combinedLoading = computed(() => isLoading.value || isActionLoading.value)
@@ -82,6 +83,8 @@ const handleTabChange = (tabId: string) => {
 }
 
 const initFiles = async () => {
+  if (!authStore.isAuthenticated || isLoading.value) return
+  
   isLoading.value = true
   try {
     const result = await fileStore.fetchFiles(fileStore.currentFolderId)
@@ -91,7 +94,10 @@ const initFiles = async () => {
   } catch (error) {
     fileStore.setFiles([])
   } finally {
-    isLoading.value = false
+    // 稍微延迟关闭加载状态，防止极短时间内的状态剧烈震荡
+    setTimeout(() => {
+      isLoading.value = false
+    }, 50)
   }
 }
 
@@ -105,9 +111,10 @@ const navigateToRoot = () => {
   initFiles()
 }
 
-onMounted(() => {
-  authStore.initAuth()
-  initFiles()
+onMounted(async () => {
+  // authStore.initAuth() // 已经在路由守卫中处理，无需重复调用
+  await initFiles()
+  isInitialized.value = true
   document.addEventListener('click', closeOptionsMenu)
 })
 
@@ -115,7 +122,10 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', closeOptionsMenu)
 })
 
-watch(() => activeTab.value, () => {
+watch(() => activeTab.value, (newTab, oldTab) => {
+  if (!isInitialized.value) return
+  if (newTab === oldTab) return
+  
   activeOptionsMenu.value = null
   selectedFiles.value = [] // 切换标签页时清空选择
   initFiles() // 切换标签页时重新加载文件
