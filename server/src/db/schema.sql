@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS files (
   storage_key TEXT NOT NULL, -- 存储键
   storage_backend_id TEXT, -- 存储后端ID
   user_id TEXT NOT NULL,
-  parent_id INTEGER, -- 父文件夹ID，NULL表示根目录
+  parent_id INTEGER, -- 父文件夹ID
   path TEXT NOT NULL, -- 文件路径
   type TEXT NOT NULL CHECK(type IN ('folder', 'pdf', 'image', 'video', 'zip', 'code')),
   starred INTEGER DEFAULT 0, -- 0 or 1
@@ -67,34 +67,18 @@ CREATE TABLE IF NOT EXISTS shares (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 存储后端表（系统/管理员存储）
--- 存储后端表（管理员共享的存储）
+-- 存储后端表
 CREATE TABLE IF NOT EXISTS storage_backends (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   type TEXT NOT NULL CHECK(type IN ('r2', 's3', 'webdav', 'ftp', 'sftp')),
   enabled INTEGER DEFAULT 1, -- 0 or 1
   is_default INTEGER DEFAULT 0, -- 0 or 1
-  is_shared INTEGER DEFAULT 1, -- 0 or 1, 是否共享给用户组
+  is_shared INTEGER DEFAULT 1, -- 0 or 1
   config TEXT NOT NULL, -- JSON 配置
   description TEXT,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-);
-
--- 用户存储后端表（用户自己的存储，加密）
-CREATE TABLE IF NOT EXISTS user_storage_backends (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  type TEXT NOT NULL CHECK(type IN ('r2', 's3', 'webdav', 'ftp', 'sftp')),
-  enabled INTEGER DEFAULT 1, -- 0 or 1
-  is_default INTEGER DEFAULT 0, -- 0 or 1
-  config_encrypted TEXT NOT NULL, -- 加密的 JSON 配置
-  description TEXT,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- 用户组存储配额分配表
@@ -103,6 +87,7 @@ CREATE TABLE IF NOT EXISTS group_storage_allocations (
   group_id TEXT NOT NULL,
   storage_backend_id TEXT NOT NULL,
   quota_gb REAL NOT NULL DEFAULT 0.0,
+  used_gb REAL DEFAULT 0.0,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
   FOREIGN KEY (group_id) REFERENCES user_groups(id) ON DELETE CASCADE,
@@ -110,32 +95,12 @@ CREATE TABLE IF NOT EXISTS group_storage_allocations (
   UNIQUE(group_id, storage_backend_id)
 );
 
--- 用户存储后端表（用户自己的存储，加密）
-CREATE TABLE IF NOT EXISTS user_storage_backends (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  type TEXT NOT NULL CHECK(type IN ('r2', 's3', 'webdav', 'ftp', 'sftp')),
-  enabled INTEGER DEFAULT 1, -- 0 or 1
-  is_default INTEGER DEFAULT 0, -- 0 or 1
-  config_encrypted TEXT NOT NULL, -- 加密的配置（使用用户密钥加密）
+-- 系统设置表（用于存储自动生成的 JWT 密钥等）
+CREATE TABLE IF NOT EXISTS system_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
   description TEXT,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- 用户组存储分配表（管理员分配给用户组的存储空间）
-CREATE TABLE IF NOT EXISTS group_storage_allocations (
-  id TEXT PRIMARY KEY,
-  group_id TEXT NOT NULL,
-  storage_backend_id TEXT NOT NULL,
-  quota_gb REAL NOT NULL, -- 分配的存储配额（GB）
-  used_gb REAL DEFAULT 0.0, -- 已使用（GB）
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  FOREIGN KEY (group_id) REFERENCES user_groups(id) ON DELETE CASCADE,
-  FOREIGN KEY (storage_backend_id) REFERENCES storage_backends(id) ON DELETE CASCADE
+  updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
 
 -- 系统日志表
@@ -158,20 +123,5 @@ CREATE TABLE IF NOT EXISTS system_logs (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_files_user_id ON files(user_id);
 CREATE INDEX IF NOT EXISTS idx_files_parent_id ON files(parent_id);
-CREATE INDEX IF NOT EXISTS idx_files_path ON files(path);
 CREATE INDEX IF NOT EXISTS idx_shares_code ON shares(share_code);
-CREATE INDEX IF NOT EXISTS idx_shares_file_id ON shares(file_id);
-CREATE INDEX IF NOT EXISTS idx_shares_user_id ON shares(user_id);
 CREATE INDEX IF NOT EXISTS idx_logs_created_at ON system_logs(created_at);
-CREATE INDEX IF NOT EXISTS idx_storage_backends_type ON storage_backends(type);
-CREATE INDEX IF NOT EXISTS idx_storage_backends_enabled ON storage_backends(enabled);
-CREATE INDEX IF NOT EXISTS idx_files_storage_backend_id ON files(storage_backend_id);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
-CREATE INDEX IF NOT EXISTS idx_user_storage_backends_user_id ON user_storage_backends(user_id);
-CREATE INDEX IF NOT EXISTS idx_group_storage_allocations_group_id ON group_storage_allocations(group_id);
-CREATE INDEX IF NOT EXISTS idx_user_storage_backends_user_id ON user_storage_backends(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_storage_backends_enabled ON user_storage_backends(enabled);
-CREATE INDEX IF NOT EXISTS idx_group_storage_allocations_group_id ON group_storage_allocations(group_id);
-CREATE INDEX IF NOT EXISTS idx_group_storage_allocations_storage_backend_id ON group_storage_allocations(storage_backend_id);
-

@@ -89,6 +89,22 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
       )
     }
 
+    // 获取生效的 JWT 密钥
+    const getEffectiveSecret = async () => {
+      const placeholders = ['dev-jwt-secret-change-in-production', 'your-jwt-secret-key-change-in-production'];
+      if (env.JWT_SECRET && !placeholders.includes(env.JWT_SECRET)) {
+        return env.JWT_SECRET;
+      }
+      let secret = await db.getSetting('system_jwt_secret');
+      if (!secret) {
+        secret = crypto.randomUUID() + crypto.randomUUID();
+        await db.setSetting('system_jwt_secret', secret, '自动生成的系统 JWT 密钥');
+      }
+      return secret;
+    }
+
+    const effectiveSecret = await getEffectiveSecret();
+
     // 生成 token（根据 remember 参数设置不同的过期时间）
     const token = await generateToken(
       {
@@ -96,7 +112,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
         email: user.email,
         role: user.role
       },
-      env.JWT_SECRET,
+      effectiveSecret,
       remember
     )
 

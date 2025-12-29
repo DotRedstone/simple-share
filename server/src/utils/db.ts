@@ -75,11 +75,10 @@ export class Database {
     const now = Date.now()
     
     // 1. 使用原生 SQL 强制写入 system_r2 后端 (INSERT OR IGNORE)
-    // 这样做可以确保无论 D1 状态如何，都能瞬间补齐记录
     if (env.FILES) {
       await this.db.prepare(`
         INSERT OR IGNORE INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at)
-        VALUES ('system_r2', '内置 R2 存储', 'r2', ?, '通过 Worker 绑定的内置 Cloudflare R2 存储（核心资源）', 1, 1, ?, ?)
+        VALUES ('system_r2', '内置 R2 存储', 'r2', ?, '系统核心资源', 1, 1, ?, ?)
       `).bind(
         JSON.stringify({ bucket: 'env.FILES', quotaGb: 10 }),
         now,
@@ -89,19 +88,37 @@ export class Database {
       // 2. 强制对齐用户组分配
       await this.ensureDefaultGroups()
       
-      // 使用更稳健的批量插入/忽略逻辑
-      await this.db.batch([
-        this.db.prepare(`
+      const groups = [
+        { id: 'user_group', quota: 1.0 },
+        { id: 'admin_group', quota: 1000.0 }
+      ]
+
+      for (const group of groups) {
+        await this.db.prepare(`
           INSERT OR IGNORE INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
-          VALUES (?, 'user_group', 'system_r2', 1.0, ?, ?)
-        `).bind(`alloc_user_r2_fix`, now, now),
-        
-        this.db.prepare(`
-          INSERT OR IGNORE INTO group_storage_allocations (id, group_id, storage_backend_id, quota_gb, created_at, updated_at)
-          VALUES (?, 'admin_group', 'system_r2', 1000.0, ?, ?)
-        `).bind(`alloc_admin_r2_fix`, now, now)
-      ])
+          VALUES (?, ?, 'system_r2', ?, ?, ?)
+        `).bind(`alloc_${group.id}_r2`, group.id, group.quota, now, now).run()
+      }
     }
+  }
+
+  // 系统设置相关 (用于 Zero-Config JWT)
+  async getSetting(key: string): Promise<string | null> {
+    try {
+      const result = await this.db.prepare('SELECT value FROM system_settings WHERE key = ?').bind(key).first<{ value: string }>()
+      return result ? result.value : null
+    } catch (e) {
+      return null
+    }
+  }
+
+  async setSetting(key: string, value: string, description?: string) {
+    const now = Date.now()
+    await this.db.prepare(`
+      INSERT INTO system_settings (key, value, description, updated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?
+    `).bind(key, value, description || null, now, value, now).run()
   }
 
   async ensureDefaultGroups() {
