@@ -5,51 +5,10 @@ import { get, post, put, del } from '../api'
 
 export const useFileStore = defineStore('file', () => {
   const files = ref<FileItem[]>([])
-  const currentFolder = ref<FileItem | null>(null)
   const breadcrumbs = ref<FileItem[]>([])
   const searchQuery = ref('')
   const viewMode = ref<'list' | 'grid'>('grid')
   const activeTab = ref('all')
-
-  const getAllFilesFlat = (fileList: FileItem[]): FileItem[] => {
-    const result: FileItem[] = []
-    fileList.forEach(file => {
-      result.push(file)
-      if (file.children) {
-        result.push(...getAllFilesFlat(file.children))
-      }
-    })
-    return result
-  }
-
-  const getFilesByTab = (fileList: FileItem[]): FileItem[] => {
-    switch (activeTab.value) {
-      case 'recent': {
-        const allFilesFlat = getAllFilesFlat(fileList)
-        const sevenDaysAgo = new Date()
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-        return allFilesFlat
-          .filter(f => {
-            try {
-              const fileDate = new Date(f.date)
-              return fileDate >= sevenDaysAgo && f.type !== 'folder'
-            } catch {
-              return false
-            }
-          })
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      }
-      case 'starred':
-        return getAllFilesFlat(fileList).filter(f => f.starred)
-      
-      case 'shares':
-        return []
-      
-      case 'all':
-      default:
-        return fileList
-    }
-  }
 
   const findFileById = (fileList: FileItem[], id: number): FileItem | null => {
     for (const file of fileList) {
@@ -68,17 +27,8 @@ export const useFileStore = defineStore('file', () => {
   })
 
   const currentFiles = computed(() => {
-    let filesToShow: FileItem[] = []
+    let filesToShow = [...files.value]
     
-    if (breadcrumbs.value.length > 0) {
-      const currentFolder = breadcrumbs.value[breadcrumbs.value.length - 1]
-      if (currentFolder) {
-        filesToShow = currentFolder.children || []
-      }
-    } else {
-      filesToShow = getFilesByTab(files.value)
-    }
-
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase()
       filesToShow = filesToShow.filter(f => f.name.toLowerCase().includes(q))
@@ -323,7 +273,6 @@ export const useFileStore = defineStore('file', () => {
 
   return {
     files,
-    currentFolder,
     breadcrumbs,
     searchQuery,
     viewMode,

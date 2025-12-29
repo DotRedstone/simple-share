@@ -62,16 +62,7 @@ const searchQuery = computed({
 const breadcrumbs = computed(() => fileStore.breadcrumbs)
 
 // 主界面的文件列表
-const currentFiles = computed(() => {
-  if (activeTab.value === 'shares') {
-    const shares = shareStore.getUserShares()
-    const allFiles = fileStore.files
-    return shares
-      .map(share => fileStore.findFileById(allFiles, share.fileId))
-      .filter((f): f is FileItem => f !== null)
-  }
-  return fileStore.currentFiles
-})
+const currentFiles = computed(() => fileStore.currentFiles)
 
 const menuItems: MenuItem[] = [
   { id: 'all', label: '全部文件', icon: 'folder' },
@@ -105,6 +96,11 @@ const initFiles = async () => {
 
 const navigateToBreadcrumb = (index: number) => {
   fileStore.navigateToBreadcrumb(index)
+  initFiles()
+}
+
+const navigateToRoot = () => {
+  fileStore.navigateToRoot()
   initFiles()
 }
 
@@ -344,7 +340,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
               <Breadcrumb
                 :breadcrumbs="breadcrumbs"
                 @navigate="navigateToBreadcrumb"
-                @navigate-root="() => fileStore.navigateToRoot()"
+                @navigate-root="navigateToRoot"
               />
             </div>
 
