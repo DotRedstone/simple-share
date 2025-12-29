@@ -72,12 +72,15 @@ export class Database {
   }
 
   async ensureDefaultStorageBackend(env: Env) {
-    // 检查是否已经有存储后端
-    const existing = await this.db.prepare('SELECT COUNT(*) as count FROM storage_backends').first<{ count: number }>()
+    // 检查内置 R2 后端是否已经存在
+    const existing = await this.db.prepare('SELECT id FROM storage_backends WHERE id = ?').bind('system_r2').first()
     
-    // 如果没有任何后端且有环境变量绑定，自动创建一个内置 R2 后端
-    if (existing?.count === 0 && env.FILES) {
+    // 如果内置后端不存在且环境变量中有 R2 绑定，则创建它
+    if (!existing && env.FILES) {
       const now = Date.now()
+      // 检查是否已经有其他后端被设为默认
+      const hasDefault = await this.db.prepare('SELECT id FROM storage_backends WHERE is_default = 1').first()
+      
       await this.db.prepare(
         'INSERT INTO storage_backends (id, name, type, config, description, enabled, is_default, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
       ).bind(
@@ -85,9 +88,9 @@ export class Database {
         '内置 R2 存储',
         'r2',
         JSON.stringify({ bucket: 'env.FILES', quotaGb: 10 }), // 初始默认 10GB
-        '通过 Worker 绑定的内置 Cloudflare R2 存储',
+        '通过 Worker 绑定的内置 Cloudflare R2 存储（不可删除）',
         1,
-        1, // 设为默认
+        hasDefault ? 0 : 1, // 如果没有其他默认，则设为默认
         now,
         now
       ).run()

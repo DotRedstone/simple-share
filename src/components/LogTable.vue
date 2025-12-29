@@ -12,7 +12,7 @@ defineProps<{
       <thead class="bg-black/20 text-xs uppercase font-bold tracking-wider">
         <tr>
           <th class="px-6 py-3">时间戳</th>
-          <th class="px-6 py-3">操作</th>
+          <th class="px-6 py-3 whitespace-nowrap">操作</th>
           <th class="px-6 py-3">用户</th>
           <th class="px-6 py-3 hidden md:table-cell">详情</th>
           <th class="px-6 py-3 text-right">状态</th>
@@ -21,7 +21,7 @@ defineProps<{
       <tbody class="divide-y divide-white/5">
         <tr v-for="log in logs" :key="log.id" class="hover:bg-white/5">
           <td class="px-6 py-3 text-slate-500">{{ log.time }}</td>
-          <td class="px-6 py-3 text-white">{{ log.action }}</td>
+          <td class="px-6 py-3 text-white whitespace-nowrap">{{ log.action }}</td>
           <td class="px-6 py-3">{{ log.user }}</td>
           <td class="px-6 py-3 hidden md:table-cell text-slate-500 text-xs">
             <span v-if="log.fileName" class="text-slate-400">{{ log.fileName }}</span>

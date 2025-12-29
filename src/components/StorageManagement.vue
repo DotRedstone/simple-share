@@ -403,14 +403,14 @@ onMounted(() => {
               >
                 编辑
               </BaseButton>
-              <BaseButton
-                variant="glass"
-                class="!py-1 !px-2 !text-xs text-red-400"
-                @click="handleDelete(backend)"
-                :disabled="backend.isDefault"
-              >
-                删除
-              </BaseButton>
+                <BaseButton
+                  variant="glass"
+                  class="!py-1 !px-2 !text-xs text-red-400"
+                  @click="handleDelete(backend)"
+                  :disabled="backend.isDefault || backend.id === 'system_r2'"
+                >
+                  删除
+                </BaseButton>
             </div>
         </div>
         </div>
