@@ -121,6 +121,8 @@ export default {
             params = { id: apiPath.split('/')[2] }
             if (method === 'PUT') handler = adminStorageUpdateHandler
             else if (method === 'DELETE') handler = adminStorageDeleteHandler
+          } else if (apiPath === 'admin/files/takedown' && method === 'POST') {
+            handler = adminFilesTakedownHandler
           } else if (apiPath.match(/^user\/storage\/[^/]+$/)) {
             params = { id: apiPath.split('/')[2] }
             if (method === 'PUT') handler = userStorageUpdateHandler

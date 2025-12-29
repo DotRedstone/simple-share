@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FileItem, FileAction } from '../types'
 
-defineProps<{
+const props = defineProps<{
   file: FileItem
   show: boolean
 }>()
@@ -10,7 +10,16 @@ const emit = defineEmits<{
   (e: 'action', action: FileAction, file: FileItem): void
 }>()
 
+const isViolated = computed(() => 
+  props.file.size_bytes === 0 && 
+  props.file.type !== 'folder' && 
+  (props.file.name.includes('[违规已下架]') || props.file.status === '违规')
+)
+
 const handleAction = (action: FileAction, file: FileItem) => {
+  if (isViolated.value && action !== '删除') {
+    return
+  }
   emit('action', action, file)
 }
 </script>
@@ -21,6 +30,8 @@ const handleAction = (action: FileAction, file: FileItem) => {
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('分享', file)"
       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      :class="{'opacity-20 cursor-not-allowed': isViolated}"
+      :disabled="isViolated"
       title="分享"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -31,6 +42,8 @@ const handleAction = (action: FileAction, file: FileItem) => {
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('管理分享', file)"
       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      :class="{'opacity-20 cursor-not-allowed': isViolated}"
+      :disabled="isViolated"
       title="管理分享"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,6 +55,8 @@ const handleAction = (action: FileAction, file: FileItem) => {
       v-if="file.type !== 'folder'"
       @click.stop="handleAction('下载', file)"
       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      :class="{'opacity-20 cursor-not-allowed': isViolated}"
+      :disabled="isViolated"
       title="下载"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,6 +66,8 @@ const handleAction = (action: FileAction, file: FileItem) => {
     <button
       @click.stop="handleAction('收藏', file)"
       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      :class="{'opacity-20 cursor-not-allowed': isViolated}"
+      :disabled="isViolated"
       :title="file.starred ? '取消收藏' : '添加到收藏'"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" :class="file.starred ? 'fill-yellow-400 text-yellow-400' : ''">
@@ -60,6 +77,8 @@ const handleAction = (action: FileAction, file: FileItem) => {
     <button
       @click.stop="handleAction('重命名', file)"
       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      :class="{'opacity-20 cursor-not-allowed': isViolated}"
+      :disabled="isViolated"
       title="重命名"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,6 +88,8 @@ const handleAction = (action: FileAction, file: FileItem) => {
     <button
       @click.stop="handleAction('移动', file)"
       class="w-full flex items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:bg-slate-700"
+      :class="{'opacity-20 cursor-not-allowed': isViolated}"
+      :disabled="isViolated"
       title="移动"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
