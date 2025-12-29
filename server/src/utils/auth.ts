@@ -49,3 +49,28 @@ export function getAuthToken(request: Request): string | null {
   return authHeader.substring(7)
 }
 
+/**
+ * 生成无状态重置令牌 (基于 Email + 日期 + 密钥)
+ * 这种令牌不需要存储在数据库，当天有效
+ */
+export async function generateResetToken(email: string, secret: string): Promise<string> {
+  const dateStr = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+  const encoder = new TextEncoder()
+  const data = encoder.encode(`${email.toLowerCase()}:${dateStr}`)
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  
+  const signature = await crypto.subtle.sign('HMAC', key, data)
+  const hashArray = Array.from(new Uint8Array(signature))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  
+  // 返回前 16 位作为令牌，方便用户输入
+  return hashHex.substring(0, 16).toUpperCase()
+}
+

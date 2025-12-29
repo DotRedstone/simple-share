@@ -125,7 +125,6 @@ onMounted(() => {
       </div>
       <LoginForm 
         @login="onLoginSuccess" 
-        @forgot="showLogin = false" 
         @switch-to-register="switchToRegister"
       />
     </BaseModal>
