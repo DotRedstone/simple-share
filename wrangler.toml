@@ -1,6 +1,6 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "simple-share"
-main = "server/dist/index.js"
+main = "server/src/index.ts"
 compatibility_date = "2024-04-03"
 
 [[d1_databases]]
@@ -12,12 +12,9 @@ database_id = "49954cc4-6599-448f-9a10-252c42bc707b"
 binding = "FILES"
 bucket_name = "simpleshare-files"
 
-# 环境变量配置
-# ⚠️ 重要：生产环境的环境变量必须在 Cloudflare Dashboard 中配置，不要在这里填写真实值
 [vars]
-# JWT_SECRET 已移至代码内置安全回退逻辑，如需自定义请在 Dashboard 设置
+# JWT_SECRET 已移至代码内置安全回退逻辑
 
-# 生产环境配置
 [env.production]
 name = "simple-share"
 
