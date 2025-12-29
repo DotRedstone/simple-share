@@ -309,6 +309,7 @@ export const useFileStore = defineStore('file', () => {
     uploadFile,
     createFolder,
     deleteFile,
+    deleteFiles,
     renameFile,
     toggleStar,
     downloadFile,

@@ -139,6 +139,7 @@ export function useFileActions() {
     isLoading,
     downloadFile,
     deleteFile,
+    deleteFiles,
     renameFile,
     toggleStar,
     createFolder,
