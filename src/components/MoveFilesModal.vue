@@ -32,16 +32,11 @@ const currentFolders = computed(() => {
 const loadFolders = async (parentId: number | null = null) => {
   isLoading.value = true
   try {
-    // 这里我们直接调用 API 获取指定目录下的文件列表
-    // 为了不影响全局 store 的状态，我们可以考虑在 store 中添加一个不更新状态的 fetch 方法
-    // 或者直接在这里使用 api
     const params = new URLSearchParams()
     if (parentId !== null) {
       params.append('parentId', parentId.toString())
     }
     
-    // 借用 store 的 fetch logic，但我们需要一个纯净的获取方法
-    // 暂时先这样处理，稍后我们会优化 store
     const response = await fetch(`/api/files/list?${params.toString()}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`

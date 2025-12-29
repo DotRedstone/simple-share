@@ -1,0 +1,108 @@
+# 《分布式对象存储与文件分发系统》项目核心说明（组员参考手册）
+
+## 1. 引言
+### 1.1 编写背景及目的
+**编写背景：**
+随着个人数据量的爆发式增长，传统的单体服务器存储方案面临磁盘空间有限、带宽成本高昂、数据库 BLOB 字段臃肿等瓶颈。组长目前虽运营有四台物理服务器，但考虑到物理服务器资源的稳定性、高昂的带宽成本及生产环境的安全隔离，决定不为本项目开放任何物理机资源，包括现有的 Redis 和 MySQL 实例。
+
+**设计目的：**
+基于“能白嫖绝不自建”的原则，本项目旨在利用 Cloudflare Serverless 边缘计算架构，构建一套物理资源零占用的云文件管理系统。
+- **存算分离**：彻底将文件元数据与文件实体剥离。
+- **边缘计算**：利用 Cloudflare D1 分布式数据库，确保全球范围内的低延迟查询。
+- **极致成本控制**：充分利用 R2 提供的 10GB 免费对象存储额度，实现高性能、全球加速的文件分发效果。
+
+### 1.2 定义说明
+- **D1 (Edge Database)**：部署在边缘节点的分布式关系型数据库。
+- **R2 (Object Storage)**：兼容 S3 协议的分布式对象存储。
+- **预签名 URL**：后端生成的带权限临时下载链接，实现零带宽消耗。
+
+## 2. 数据库设计
+### 2.1 需求分析设计
+- **访客**：输入 6 位提取码即可提取内容。
+- **注册用户**：文件管理（上传、重命名、删除、收藏、嵌套）、批量操作（移动、删除）、分享管理、配额查看。
+- **管理员**：动态配置存储后端、用户组配额管理、全域审计。
+
+### 2.2 概念结构设计（E-R图）
+系统核心实体及关系如下：
+- **UserGroups ↔ Users** (1:N)：用户组定义默认配额，用户归属于特定组。
+- **Users ↔ Files** (1:N)：用户拥有并管理其上传的文件或创建的文件夹。
+- **Files ↔ Files** (1:N)：通过 `parent_id` 自关联实现无限级文件夹嵌套。
+- **Files ↔ Shares** (1:N)：一个文件/文件夹可生成多个带有随机提取码的分享。
+- **StorageBackends ↔ Files** (1:N)：文件与其物理存储后端关联（R2/S3/WebDAV等）。
+- **Users ↔ UserStorageBackends** (1:N)：用户可挂载私有的加密存储后端。
+- **UserGroups ↔ StorageBackends** (N:N)：通过分配表实现存储资源的灵活调度。
+- **Users ↔ SystemLogs** (1:N)：记录用户的所有操作审计日志。
+
+### 2.3 逻辑结构设计（关系模式）
+本设计严格遵循 **第三范式 (3NF)**，消除数据冗余。核心关系模式如下：
+- `user_groups` (id, name, description, storage_quota, max_users, current_users)
+- `users` (id, name, email, password_hash, role, status, storage_quota, storage_used, group_id)
+- `files` (id, name, size_bytes, storage_key, storage_backend_id, user_id, parent_id, path, type, starred)
+- `shares` (id, file_id, user_id, share_code, expires_at, access_count, max_access)
+- `storage_backends` (id, name, type, enabled, is_default, config_json)
+- `user_storage_backends` (id, user_id, name, type, enabled, config_encrypted)
+- `group_storage_allocations` (id, group_id, storage_backend_id, quota_gb, used_gb)
+- `system_logs` (id, action, user_id, user_name, status, details, ip, file_id, file_name)
+
+## 3. 数据库实现
+### 3.1 数据库建立
+采用 Cloudflare D1 分布式数据库。完全不占用组长宝贵的四台物理机资源。
+
+### 3.2 建表语句
+```sql
+-- 用户表
+CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    password_hash TEXT,
+    role TEXT NOT NULL DEFAULT 'user',
+    storage_used REAL DEFAULT 0.0,
+    group_id TEXT
+);
+
+-- 文件表 (存算分离核心)
+CREATE TABLE files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    storage_key TEXT NOT NULL,
+    storage_backend_id TEXT,
+    user_id TEXT NOT NULL,
+    parent_id INTEGER,
+    path TEXT NOT NULL,
+    type TEXT NOT NULL,
+    starred INTEGER DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (parent_id) REFERENCES files(id)
+);
+
+-- 系统日志表 (审计日志)
+CREATE TABLE system_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action TEXT NOT NULL,
+    user_id TEXT,
+    user_name TEXT,
+    status TEXT NOT NULL,
+    details TEXT,
+    created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+-- ... (更多表结构详见 schema.sql)
+```
+
+### 3.3 逻辑示例
+- **批量移动**：`UPDATE files SET parent_id = ? WHERE id IN (...)`
+- **文件夹提取**：通过提取码查询 `shares` 表并关联 `files` 表展示子项。
+
+## 4. 团队分工
+- **明航宇 (队长)**：全栈开发、系统架构、运维部署。负责录制**系统部署演示视频**。
+- **组员 1**：数据库建模、绘制 E-R/DFD 图。
+- **组员 2**：功能核验、演示数据填充、界面截图。负责录制**系统使用操作视频**。
+- **组员 3**：需求分析撰写、报告排版与文档整合。
+- **组员 4**：成果汇报、PPT 制作与答辩。
+
+## 5. 心得体会
+- **资源调配**：证明了在物理机资源紧张时利用 Serverless “白嫖”方案的可行性。
+- **全栈视野**：掌握了分布式环境下数据库与对象存储的协作。
+- **架构权衡**：放弃物理机部署是出于对生产环境安全隔离的考量。
+

@@ -202,7 +202,7 @@ const viewFile = (file: any) => {
 const deleteFile = async (file: any) => {
   if (confirm(`确定要删除文件 "${file.name}" 吗？此操作不可恢复。`)) {
     isLoading.value = true;
-    // TODO: 可在此接入管理员强制删除文件的后端接口
+    // 模拟删除操作（暂未对接后端强制删除接口）
     await new Promise((resolve) => setTimeout(resolve, 500));
     adminStore.addLog(
       "删除文件",

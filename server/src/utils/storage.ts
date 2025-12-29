@@ -167,18 +167,14 @@ export class FTPStorageAdapter implements StorageAdapter {
   }
 
   async upload(key: string, file: ArrayBuffer, contentType?: string): Promise<void> {
-    // TODO: 实现 FTP/SFTP 上传
-    // 这需要专门的 FTP/SFTP 客户端库
     throw new Error('FTP/SFTP 上传功能待实现')
   }
 
   async get(key: string): Promise<ArrayBuffer | null> {
-    // TODO: 实现 FTP/SFTP 下载
     throw new Error('FTP/SFTP 下载功能待实现')
   }
 
   async delete(key: string): Promise<void> {
-    // TODO: 实现 FTP/SFTP 删除
     throw new Error('FTP/SFTP 删除功能待实现')
   }
 }
@@ -219,7 +215,7 @@ export class S3StorageAdapter implements StorageAdapter {
   }
 
   private async signRequest(method: string, key: string, body?: ArrayBuffer): Promise<Request> {
-    // 简化的 S3 签名实现（生产环境应使用完整的 AWS Signature V4）
+    // 简化的 S3 访问实现（目前仅支持公共读写或不需要签名的测试环境）
     const url = this.getUrl(key)
     const headers: HeadersInit = {
       'Host': new URL(url).hostname,
@@ -229,8 +225,6 @@ export class S3StorageAdapter implements StorageAdapter {
       headers['Content-Length'] = body.byteLength.toString()
     }
 
-    // TODO: 实现完整的 AWS Signature V4 签名
-    // 目前仅支持公共读写或不需要签名的测试环境
     return new Request(url, {
       method,
       headers,
@@ -244,7 +238,6 @@ export class S3StorageAdapter implements StorageAdapter {
       'Content-Type': contentType || 'application/octet-stream',
     }
 
-    // TODO: 使用 AWS Signature V4 签名
     const response = await fetch(url, {
       method: 'PUT',
       headers,
