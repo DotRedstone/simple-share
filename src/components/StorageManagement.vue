@@ -358,25 +358,27 @@ onMounted(() => {
           :key="backend.id"
           class="bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-colors"
         >
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-2">
-                <span :class="['font-bold text-white', getTypeColor(backend.type)]">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <span :class="['font-bold text-[10px] uppercase tracking-wider', getTypeColor(backend.type)]">
                   {{ getTypeLabel(backend.type) }}
                 </span>
-                <span class="text-white font-semibold">{{ backend.name }}</span>
-                <span
-                  v-if="backend.isDefault"
-                  class="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded"
-                >
-                  默认
-                </span>
-                <span
-                  v-if="!backend.enabled"
-                  class="text-xs bg-slate-500/20 text-slate-300 px-2 py-0.5 rounded"
-                >
-                  已禁用
-                </span>
+                <span class="text-white font-bold truncate max-w-[150px] sm:max-w-none">{{ backend.name }}</span>
+                <div class="flex gap-1.5">
+                  <span
+                    v-if="backend.isDefault"
+                    class="text-[10px] font-black uppercase tracking-widest bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/20"
+                  >
+                    默认
+                  </span>
+                  <span
+                    v-if="!backend.enabled"
+                    class="text-[10px] font-black uppercase tracking-widest bg-slate-500/20 text-slate-300 px-2 py-0.5 rounded border border-slate-500/20"
+                  >
+                    已禁用
+                  </span>
+                </div>
               </div>
               <p v-if="backend.description" class="text-sm text-slate-400 mb-2">
                 {{ backend.description }}
@@ -388,24 +390,24 @@ onMounted(() => {
                 </template>
               </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               <BaseButton
                 variant="glass"
-                class="!py-1 !px-2 !text-xs"
+                class="!py-1 !px-2 !text-[10px] whitespace-nowrap"
                 @click="toggleEnabled(backend)"
               >
                 {{ backend.enabled ? '禁用' : '启用' }}
               </BaseButton>
               <BaseButton
                 variant="glass"
-                class="!py-1 !px-2 !text-xs"
+                class="!py-1 !px-2 !text-[10px] whitespace-nowrap"
                 @click="openEditModal(backend)"
               >
                 编辑
               </BaseButton>
                 <BaseButton
                   variant="glass"
-                  class="!py-1 !px-2 !text-xs text-red-400"
+                  class="!py-1 !px-2 !text-[10px] text-red-400 whitespace-nowrap"
                   @click="handleDelete(backend)"
                   :disabled="backend.isDefault || backend.id === 'system_r2'"
                 >
