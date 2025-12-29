@@ -26,7 +26,7 @@ binding = "ASSETS"
 # 
 # 本地开发可以使用以下占位符，但生产环境必须使用 Dashboard 配置
 [vars]
-JWT_SECRET = "dev-jwt-secret-change-in-production"
+# JWT_SECRET 已移至代码内置安全回退逻辑，如需自定义请在 Dashboard 设置
 
 # 生产环境配置
 [env.production]
@@ -44,5 +44,5 @@ name = "simple-share"
 # ⚠️ 生产环境变量必须在 Dashboard 中配置，不要在这里填写真实值
 # 这里只是声明变量类型，实际值从 Dashboard 读取
 [env.production.vars]
-JWT_SECRET = "your-jwt-secret-key-change-in-production"
+# JWT_SECRET 已移至代码内置安全回退逻辑
 

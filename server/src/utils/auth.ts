@@ -1,12 +1,21 @@
 import { SignJWT, jwtVerify } from 'jose'
 import type { JwtPayload } from '../types'
 
-// 默认密钥回退，确保即使不设置环境变量系统也能运行
 // 使用一个固定的、足够长的随机安全字符串，确保在生产环境冷启动时 Token 不会失效
 const DEFAULT_SECRET = 'ss_v1_f8e9d2c1b0a3948576e5d4c3b2a10928374655463728190a9b8c7d6e5f4e3d2c1';
 
+// 检查密钥是否为有效的自定义密钥（过滤掉默认的开发占位符）
+const isValidSecret = (s?: string) => {
+  if (!s) return false;
+  const placeholders = [
+    'dev-jwt-secret-change-in-production',
+    'your-jwt-secret-key-change-in-production'
+  ];
+  return !placeholders.includes(s);
+}
+
 const getSecret = (secret?: string) => {
-  return new TextEncoder().encode(secret || DEFAULT_SECRET)
+  return new TextEncoder().encode(isValidSecret(secret) ? secret : DEFAULT_SECRET)
 }
 
 export async function generateToken(payload: Omit<JwtPayload, 'iat' | 'exp'>, secret: string, remember?: boolean): Promise<string> {
@@ -68,7 +77,7 @@ export async function generateResetToken(email: string, secret: string, version:
   
   const key = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(secret || DEFAULT_SECRET),
+    new TextEncoder().encode(isValidSecret(secret) ? secret : DEFAULT_SECRET),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign']
