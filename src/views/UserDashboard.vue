@@ -62,6 +62,10 @@ const currentFiles = computed(() => {
     }
     return shares.map(share => findFile(allFiles, share.fileId)).filter(f => f !== null) as FileItem[]
   }
+  // 在移动模式下，只显示文件夹
+  if (showMoveModal.value) {
+    return fileStore.currentFiles.filter(f => f.type === 'folder')
+  }
   return fileStore.currentFiles
 })
 
@@ -266,12 +270,14 @@ const confirmMoveFiles = async () => {
     const filesToMove = selectedFiles.value.length
     const result = await fileStore.moveFiles(selectedFiles.value, currentFolderId)
     if (result.success) {
-      selectedFiles.value = []
+      // 先关闭模态框
       showMoveModal.value = false
       // 返回原目录
       fileStore.navigateToRoot()
       // 如果之前保存了目录，导航回去
       if (moveTargetFolder.value !== null) {
+        // 重新加载所有文件
+        await fileStore.fetchFiles(null)
         const allFiles = fileStore.files
         const findFolder = (files: typeof allFiles, folderId: number): FileItem | null => {
           for (const file of files) {
@@ -288,7 +294,11 @@ const confirmMoveFiles = async () => {
           fileStore.navigateToFolder(savedFolder)
         }
       }
+      // 刷新文件列表
       await initFiles()
+      // 清空选中的文件
+      selectedFiles.value = []
+      moveTargetFolder.value = null
       alert(`成功移动 ${filesToMove} 个文件`)
     } else {
       alert(result.error || '移动失败')
@@ -320,6 +330,40 @@ const handleMoveModeFolderClick = async (folder: FileItem) => {
     // 导航后重新加载文件列表
     await initFiles()
   }
+}
+
+// 关闭移动模态框
+const handleCloseMoveModal = () => {
+  showMoveModal.value = false
+  // 返回根目录
+  fileStore.navigateToRoot()
+  // 如果之前保存了目录，导航回去
+  if (moveTargetFolder.value !== null) {
+    // 重新加载所有文件
+    fileStore.fetchFiles(null).then(() => {
+      const allFiles = fileStore.files
+      const findFolder = (files: typeof allFiles, folderId: number): FileItem | null => {
+        for (const file of files) {
+          if (file.id === folderId && file.type === 'folder') return file
+          if (file.children) {
+            const found = findFolder(file.children, folderId)
+            if (found) return found
+          }
+        }
+        return null
+      }
+      const savedFolder = findFolder(allFiles, moveTargetFolder.value!)
+      if (savedFolder) {
+        fileStore.navigateToFolder(savedFolder)
+        initFiles()
+      } else {
+        initFiles()
+      }
+    })
+  } else {
+    initFiles()
+  }
+  moveTargetFolder.value = null
 }
 
 const handleFileAction = async (action: string | FileAction, file: FileItem) => {
@@ -568,7 +612,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
       :show="showMoveModal"
       title="选择目标文件夹"
       width="max-w-2xl"
-      @close="() => { showMoveModal = false; fileStore.navigateToRoot() }"
+      @close="handleCloseMoveModal"
     >
       <div class="space-y-4">
         <p class="text-sm text-slate-300">
@@ -629,7 +673,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         </div>
 
         <div class="flex justify-end gap-3 pt-2">
-          <BaseButton variant="glass" @click="() => { showMoveModal = false; fileStore.navigateToRoot() }" :disabled="isLoading">
+          <BaseButton variant="glass" @click="handleCloseMoveModal" :disabled="isLoading">
             取消
           </BaseButton>
           <BaseButton 

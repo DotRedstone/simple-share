@@ -79,21 +79,21 @@ const confirmDownload = async () => {
   if (!fileInfo.value) return
   
   try {
-    // 使用 fetch 下载文件
-    const response = await fetch(fileInfo.value.downloadUrl)
-    if (!response.ok) {
-      throw new Error('下载失败')
-    }
-    
-    const blob = await response.blob()
-    const urlObj = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = urlObj
-    a.download = fileInfo.value.name
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(urlObj)
+      // 使用 fetch 下载文件
+      const response = await fetch(fileInfo.value.downloadUrl)
+      if (!response.ok) {
+        throw new Error('下载失败')
+      }
+      
+      const blob = await response.blob()
+      const urlObj = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = urlObj
+      a.download = fileInfo.value.name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(urlObj)
     showDownloadModal.value = false
   } catch (error) {
     alert('下载失败，请稍后重试')

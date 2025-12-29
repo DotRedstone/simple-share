@@ -182,11 +182,11 @@ export default {
             } else if (parts.length === 3) {
               // admin/groups/[id]
               const id = idOrSegment
-              params = { id }
-              if (method === 'PUT') {
-                handler = adminGroupsUpdateHandler
-              } else if (method === 'DELETE') {
-                handler = adminGroupsDeleteHandler
+            params = { id }
+            if (method === 'PUT') {
+              handler = adminGroupsUpdateHandler
+            } else if (method === 'DELETE') {
+              handler = adminGroupsDeleteHandler
               }
             }
           } else if (apiPath.match(/^admin\/storage\/[a-zA-Z0-9_-]+$/)) {

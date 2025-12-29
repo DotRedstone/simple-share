@@ -164,13 +164,13 @@ const handleGenerate = () => {
           </button>
         </div>
         <div v-if="showCustomInput && expirationPreset === 'custom'" class="mt-3">
-          <BaseInput
+        <BaseInput
             v-model.number="customDays"
-            type="number"
+          type="number"
             label="自定义天数"
-            :min="1"
+          :min="1"
             placeholder="输入天数"
-          />
+        />
         </div>
         <p class="text-xs text-slate-500 mt-2">
           <span v-if="expirationPreset === 'infinity'">链接永久有效</span>
