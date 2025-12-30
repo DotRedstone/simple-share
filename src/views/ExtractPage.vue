@@ -175,11 +175,11 @@ const goHome = () => {
         </div>
 
         <!-- 错误状态 -->
-        <div v-else-if="error" class="bg-red-500/10 border border-red-500/30 rounded-3xl p-8 text-center shadow-xl">
-          <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div v-else-if="error" class="bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-3xl p-8 text-center shadow-xl">
+          <svg class="w-16 h-16 text-red-400 dark:text-red-400 light:text-red-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p class="text-red-400 mb-6 font-bold">{{ error }}</p>
+          <p class="text-red-400 dark:text-red-400 light:text-red-600 mb-6 font-bold">{{ error }}</p>
           <BaseButton variant="primary" @click="goHome" class="w-full">返回首页</BaseButton>
         </div>
 
@@ -224,8 +224,8 @@ const goHome = () => {
           </div>
 
           <!-- 文件夹内容 -->
-          <div v-if="fileInfo.type === 'folder' && fileInfo.children" class="mt-8 border-t border-white/10 pt-6">
-            <h3 class="text-sm font-semibold text-slate-400 mb-4 flex items-center gap-2">
+          <div v-if="fileInfo.type === 'folder' && fileInfo.children" class="mt-8 border-t border-white/10 dark:border-white/10 light:border-slate-200 pt-6">
+            <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-400 light:text-slate-500 mb-4 flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
@@ -235,22 +235,22 @@ const goHome = () => {
               <div
                 v-for="child in fileInfo.children"
                 :key="child.id"
-                class="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group"
+                class="flex items-center justify-between p-3 bg-white/5 dark:bg-white/5 light:bg-slate-50 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-100 transition-colors group"
               >
                 <div class="flex items-center gap-3 min-w-0">
                   <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(child.type)" />
                   </svg>
                   <div class="flex flex-col min-w-0">
-                    <span class="text-sm font-medium text-white truncate" :title="child.name">{{ child.name }}</span>
-                    <span class="text-[10px] text-slate-500 font-mono">{{ child.size }}</span>
+                    <span class="text-sm font-medium text-white dark:text-white light:text-slate-900 truncate" :title="child.name">{{ child.name }}</span>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono">{{ child.size }}</span>
                   </div>
                 </div>
                 <a
                   v-if="child.type !== 'folder'"
                   :href="child.downloadUrl"
                   download
-                  class="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
+                  class="p-2 text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-200 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
                   title="下载"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -267,7 +267,7 @@ const goHome = () => {
     <!-- 下载确认 -->
     <BaseModal :show="showDownloadModal" title="下载文件" width="max-w-sm" @close="showDownloadModal = false">
       <div class="text-center py-4">
-        <p class="text-slate-300 mb-6">准备下载文件：{{ fileInfo?.name }}</p>
+        <p class="text-slate-300 dark:text-slate-300 light:text-slate-600 mb-6">准备下载文件：{{ fileInfo?.name }}</p>
         <div class="flex gap-3">
           <BaseButton variant="glass" class="flex-1" @click="showDownloadModal = false">取消</BaseButton>
           <BaseButton
@@ -284,7 +284,7 @@ const goHome = () => {
     <!-- 转存确认 -->
     <BaseModal :show="showSaveModal" title="转存文件" width="max-w-sm" @close="showSaveModal = false">
       <div class="text-center py-4">
-        <p class="text-slate-300 mb-6">确定要将文件 "{{ fileInfo?.name }}" 转存到你的文件库吗？</p>
+        <p class="text-slate-300 dark:text-slate-300 light:text-slate-600 mb-6">确定要将文件 "{{ fileInfo?.name }}" 转存到你的文件库吗？</p>
         <div class="flex gap-3">
           <BaseButton variant="glass" class="flex-1" @click="showSaveModal = false" :disabled="isLoading">取消</BaseButton>
           <BaseButton

@@ -4,6 +4,8 @@
 /* === 2. Tailwind CSS v4 === */
 @import "tailwindcss";
 
+@variant light (&:where(.light, .light *));
+
 @theme {
   --color-brand-primary: #6366f1;
   --color-brand-secondary: #a855f7;

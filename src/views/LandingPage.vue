@@ -122,13 +122,13 @@ onMounted(() => {
     <!-- 提取错误提示 -->
     <BaseModal v-if="extractionError" :show="!!extractionError" title="提取失败" width="max-w-sm" @close="extractionError = ''">
       <div class="text-center py-4">
-        <p class="text-red-400 mb-4">{{ extractionError }}</p>
+        <p class="text-red-400 dark:text-red-400 light:text-red-600 mb-4">{{ extractionError }}</p>
         <BaseButton variant="primary" @click="extractionError = ''">确定</BaseButton>
       </div>
     </BaseModal>
 
     <BaseModal :show="showLogin" title="欢迎回来" width="max-w-sm" @close="showLogin = false">
-      <div v-if="loginError" class="mb-4 bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
+      <div v-if="loginError" class="mb-4 bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
         {{ loginError }}
       </div>
       <LoginForm 
@@ -138,7 +138,7 @@ onMounted(() => {
     </BaseModal>
 
     <BaseModal :show="showRegister" title="创建账号" width="max-w-sm" @close="showRegister = false">
-      <div v-if="registerError" class="mb-4 bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
+      <div v-if="registerError" class="mb-4 bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
         {{ registerError }}
       </div>
       <RegisterForm @register="onRegisterSuccess" @switch-to-login="switchToLogin" />

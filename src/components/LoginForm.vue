@@ -103,7 +103,7 @@ const handleResetPassword = async () => {
   <div>
     <!-- 登录表单 -->
     <form v-if="mode === 'login'" @submit.prevent="handleLogin" class="space-y-4 sm:space-y-6 min-w-0">
-      <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 break-words min-w-0">
+      <div v-if="error" class="bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
         {{ error }}
       </div>
 
@@ -149,10 +149,10 @@ const handleResetPassword = async () => {
 
     <!-- 重置密码表单 -->
     <form v-else @submit.prevent="handleResetPassword" class="space-y-4 sm:space-y-6 min-w-0">
-      <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
+      <div v-if="error" class="bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
         {{ error }}
       </div>
-      <div v-if="resetSuccess" class="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-sm text-green-400 dark:text-green-400 light:text-green-600 break-words min-w-0">
+      <div v-if="resetSuccess" class="bg-green-500/10 dark:bg-green-500/10 light:bg-green-50 border border-green-500/30 dark:border-green-500/30 light:border-green-200 rounded-lg p-3 text-sm text-green-400 dark:text-green-400 light:text-green-600 break-words min-w-0">
         {{ resetSuccess }}
       </div>
 

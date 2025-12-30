@@ -72,7 +72,7 @@ const handleRegister = async () => {
 
 <template>
   <form @submit.prevent="handleRegister" class="space-y-4 sm:space-y-6 min-w-0">
-    <div v-if="error" class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
+    <div v-if="error" class="bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
       {{ error }}
     </div>
 
