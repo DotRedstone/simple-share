@@ -31,33 +31,35 @@ onMounted(() => {
   }
 })
 
-const fetchFileInfo = async (code: string) => {
+const fetchFileInfo = async (code: string, folderId?: number) => {
   isLoading.value = true
   error.value = ''
   
   try {
     // 从 API 获取文件信息
-    const response = await fetch(`/api/extract/${code}`)
+    let url = `/api/extract/${code}`
+    if (folderId) {
+      url += `?folderId=${folderId}`
+    }
+    const response = await fetch(url)
     const data = await response.json()
     
     if (response.ok && data.success && data.data) {
       fileInfo.value = {
+        id: data.data.id,
         name: data.data.name,
         size: data.data.size,
         uploadTime: data.data.uploadTime || data.data.created_at,
         type: data.data.type,
         downloadUrl: data.data.downloadUrl || data.data.url,
-        children: data.data.children
+        children: data.data.children,
+        isRoot: data.data.isRoot,
+        rootName: data.data.rootName
       }
-      // 从downloadUrl中提取fileId
-      if (data.data.downloadUrl) {
-        const url = new URL(data.data.downloadUrl, window.location.origin)
-        const id = url.searchParams.get('id')
-        if (id) {
-          fileId.value = parseInt(id)
-        }
-      }
-      // 增加访问计数
+      
+      fileId.value = data.data.id
+      
+      // 增加本地访问计数（可选，后端已处理）
       const share = await shareStore.getShareByCode(code)
       if (share) {
         shareStore.incrementAccess(code)
@@ -70,6 +72,14 @@ const fetchFileInfo = async (code: string) => {
   } finally {
     isLoading.value = false
   }
+}
+
+const handleFolderClick = (id: number) => {
+  fetchFileInfo(shareCode.value, id)
+}
+
+const handleBackToRoot = () => {
+  fetchFileInfo(shareCode.value)
 }
 
 const handleDownload = () => {
@@ -139,6 +149,7 @@ const confirmSave = async () => {
 
 const getFileIcon = (type: string) => {
   const icons: Record<string, string> = {
+    folder: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z',
     pdf: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
     image: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
     video: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
@@ -224,21 +235,37 @@ const goHome = () => {
           </div>
 
           <!-- 文件夹内容 -->
-          <div v-if="fileInfo.type === 'folder' && fileInfo.children" class="mt-8 border-t border-white/10 dark:border-white/10 light:border-slate-200 pt-6">
-            <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-400 light:text-slate-500 mb-4 flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              文件夹内容 ({{ fileInfo.children.length }} 个项目)
-            </h3>
-            <div class="space-y-2">
+          <div v-if="fileInfo.type === 'folder'" class="mt-8 border-t border-white/10 dark:border-white/10 light:border-slate-200 pt-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-400 light:text-slate-500 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                内容 ({{ fileInfo.children?.length || 0 }})
+              </h3>
+              <button 
+                v-if="!fileInfo.isRoot" 
+                @click="handleBackToRoot"
+                class="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+              >
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 19l-7-7 7-7" stroke-width="2" /></svg>
+                返回根目录
+              </button>
+            </div>
+
+            <div v-if="!fileInfo.children || fileInfo.children.length === 0" class="text-center py-8 text-slate-500 text-xs">
+              该文件夹是空的
+            </div>
+
+            <div v-else class="space-y-2">
               <div
                 v-for="child in fileInfo.children"
                 :key="child.id"
-                class="flex items-center justify-between p-3 bg-white/5 dark:bg-white/5 light:bg-slate-50 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-100 transition-colors group"
+                class="flex items-center justify-between p-3 bg-white/5 dark:bg-white/5 light:bg-slate-50 rounded-xl hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-100 transition-colors group cursor-pointer"
+                @click="child.type === 'folder' ? handleFolderClick(child.id) : null"
               >
                 <div class="flex items-center gap-3 min-w-0">
-                  <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg class="w-5 h-5 shrink-0" :class="child.type === 'folder' ? 'text-amber-400' : 'text-blue-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(child.type)" />
                   </svg>
                   <div class="flex flex-col min-w-0">
@@ -246,17 +273,23 @@ const goHome = () => {
                     <span class="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono">{{ child.size }}</span>
                   </div>
                 </div>
-                <a
-                  v-if="child.type !== 'folder'"
-                  :href="child.downloadUrl"
-                  download
-                  class="p-2 text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-200 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
-                  title="下载"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <div class="flex items-center gap-2">
+                  <svg v-if="child.type === 'folder'" class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M9 5l7 7-7 7" stroke-width="2" />
                   </svg>
-                </a>
+                  <a
+                    v-else
+                    :href="child.downloadUrl"
+                    download
+                    @click.stop
+                    class="p-2 text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-200 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
+                    title="下载"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
           </div>

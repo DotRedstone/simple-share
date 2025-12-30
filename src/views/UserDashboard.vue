@@ -553,17 +553,6 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
         @logout="handleLogout"
         class="order-2 md:order-first"
       />
-      <Sidebar
-        :menu-items="menuItems"
-        :active-tab="activeTab"
-        :username="username"
-        user-role="高级账户"
-        logo="S"
-        logo-color="blue"
-        @tab-change="handleTabChange"
-        @logout="handleLogout"
-        class="order-2 md:order-first"
-      />
     </div>
     <UploadModal
       :show="showUpload"

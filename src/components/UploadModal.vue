@@ -14,14 +14,25 @@ const uploadProgress = ref(0)
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files) {
-    files.value = Array.from(target.files)
+    const newFiles = Array.from(target.files)
+    // 过滤掉已经在列表中的完全相同的文件（根据名字和大小简单判断）
+    const uniqueNewFiles = newFiles.filter(nf => 
+      !files.value.some(f => f.name === nf.name && f.size === nf.size)
+    )
+    files.value = [...files.value, ...uniqueNewFiles]
+    // 重置 input 的 value，确保同名文件可以再次触发 change
+    target.value = ''
   }
 }
 
 const handleDrop = (event: DragEvent) => {
   isDragging.value = false
   if (event.dataTransfer?.files) {
-    files.value = Array.from(event.dataTransfer.files)
+    const newFiles = Array.from(event.dataTransfer.files)
+    const uniqueNewFiles = newFiles.filter(nf => 
+      !files.value.some(f => f.name === nf.name && f.size === nf.size)
+    )
+    files.value = [...files.value, ...uniqueNewFiles]
   }
 }
 

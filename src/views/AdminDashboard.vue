@@ -742,17 +742,6 @@ onMounted(() => {
         @logout="handleLogout"
         class="order-2 md:order-first"
       />
-      <Sidebar
-        :menu-items="menuItems"
-        :active-tab="activeTab"
-        username="管理员"
-        user-role="超级权限"
-        logo="S"
-        logo-color="blue"
-        @tab-change="handleTabChange"
-        @logout="handleLogout"
-        class="order-2 md:order-first"
-      />
     </div>
 
     <!-- 添加/编辑用户模态框 -->

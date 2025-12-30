@@ -53,10 +53,24 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
     if (shareCode) {
       // 通过分享码访问
       const share = await db.getShareByCode(shareCode)
-      if (share && share.file_id === fileId) {
-        hasAccess = true
-        // 增加分享访问计数
-        await db.incrementShareAccess(shareCode)
+      if (share) {
+        if (share.file_id === fileId) {
+          hasAccess = true
+        } else {
+          // 检查该文件是否在分享的文件夹内
+          const rootFile = await db.getFileById(share.file_id)
+          const isDescendant = rootFile && rootFile.type === 'folder' && (
+            file.path.startsWith(rootFile.path + '/')
+          )
+          if (isDescendant) {
+            hasAccess = true
+          }
+        }
+        
+        if (hasAccess) {
+          // 增加分享访问计数
+          await db.incrementShareAccess(shareCode)
+        }
       }
     } else if (user) {
       // 通过认证访问

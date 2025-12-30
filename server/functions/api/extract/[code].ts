@@ -42,10 +42,15 @@ export async function onRequestGet(context: { env: Env; request: Request; params
     }
 
     // 获取文件信息
-    const file = await db.getFileById(share.file_id)
-    if (!file) {
+    const url = new URL(request.url)
+    const folderIdParam = url.searchParams.get('folderId')
+    const folderId = folderIdParam ? parseInt(folderIdParam) : null
+
+    // 获取被分享的根文件/文件夹
+    const rootFile = await db.getFileById(share.file_id)
+    if (!rootFile) {
       return new Response(
-        JSON.stringify({ success: false, error: '文件不存在' }),
+        JSON.stringify({ success: false, error: '分享的文件已不存在' }),
         { 
           status: 404, 
           headers: { 
@@ -56,13 +61,37 @@ export async function onRequestGet(context: { env: Env; request: Request; params
       )
     }
 
+    // 如果指定了 folderId，验证它是否是被分享文件夹的子项目
+    let currentFile = rootFile
+    if (folderId && folderId !== rootFile.id) {
+      const targetFolder = await db.getFileById(folderId)
+      const isDescendant = targetFolder && (
+        targetFolder.path === rootFile.path || 
+        targetFolder.path.startsWith(rootFile.path + '/')
+      )
+      
+      if (!targetFolder || !isDescendant) {
+        return new Response(
+          JSON.stringify({ success: false, error: '无权访问此目录' }),
+          { 
+            status: 403, 
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders(origin)
+            } 
+          }
+        )
+      }
+      currentFile = targetFolder
+    }
+
     // 增加访问计数
     await db.incrementShareAccess(shareCode)
 
     // 如果是文件夹，获取其下的子项目
     let children = []
-    if (file.type === 'folder') {
-      const childFiles = await db.getFilesByUserId(file.user_id, file.id)
+    if (currentFile.type === 'folder') {
+      const childFiles = await db.getFilesByUserId(currentFile.user_id, currentFile.id)
       children = childFiles.map(cf => ({
         id: cf.id,
         name: cf.name,
@@ -77,9 +106,9 @@ export async function onRequestGet(context: { env: Env; request: Request; params
       action: '提取文件',
       userId: share.user_id,
       status: '成功',
-      fileId: file.id,
-      fileName: file.name,
-      details: `提取码: ${shareCode}`,
+      fileId: rootFile.id,
+      fileName: rootFile.name,
+      details: `提取码: ${shareCode}${folderId ? `, 目录ID: ${folderId}` : ''}`,
       ip: request.headers.get('CF-Connecting-IP') || undefined
     })
 
@@ -87,12 +116,15 @@ export async function onRequestGet(context: { env: Env; request: Request; params
       JSON.stringify({
         success: true,
         data: {
-          name: file.name,
-          size: formatFileSize(file.size_bytes),
-          uploadTime: new Date(file.created_at).toISOString(),
-          type: file.type,
-          downloadUrl: file.type === 'folder' ? null : `/api/files/download?id=${file.id}&shareCode=${shareCode}`,
-          children: children.length > 0 ? children : undefined
+          id: currentFile.id,
+          name: currentFile.name,
+          size: currentFile.type === 'folder' ? '-' : formatFileSize(currentFile.size_bytes),
+          uploadTime: new Date(currentFile.created_at).toISOString(),
+          type: currentFile.type,
+          downloadUrl: currentFile.type === 'folder' ? null : `/api/files/download?id=${currentFile.id}&shareCode=${shareCode}`,
+          children: children.length > 0 ? children : undefined,
+          isRoot: currentFile.id === rootFile.id,
+          rootName: rootFile.name
         }
       }),
       { 
