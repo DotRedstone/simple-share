@@ -470,7 +470,7 @@ const generateUserToken = async () => {
   try {
     const res = await api.post("/admin/users/generate-reset-token", {
       email: securityEmail.value.trim()
-    });
+    }) as any;
     
     if (res.success && res.token) {
       generatedToken.value = res.token;
