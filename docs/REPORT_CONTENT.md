@@ -10,6 +10,8 @@
 - **存算分离**：彻底将文件元数据与文件实体剥离。
 - **边缘计算**：利用 Cloudflare D1 分布式数据库，确保全球范围内的低延迟查询。
 - **极致成本控制**：充分利用 R2 提供的 10GB 免费对象存储额度，实现高性能、全球加速的文件分发效果。
+- **UI/UX 工业化设计**：全站响应式适配移动端，支持日间/夜间模式丝滑切换，具备多维度数据排序（时间、类型、上传者）功能。
+- **内容合规审计**：内置管理员下架（Takedown）机制，物理删除文件并保留违规告知占位符，实现人性化的合规管理。
 
 ### 1.2 定义说明
 - **D1 (Edge Database)**：部署在边缘节点的分布式关系型数据库。
@@ -17,12 +19,13 @@
 - **预签名 URL**：后端生成的带权限临时下载链接，实现零带宽消耗。
 - **无状态重置令牌 (Stateless Token)**：基于 HMAC 算法的 16 位重置码，仅当天有效。
 - **版本指纹失效 (Version Snapshot)**：通过将用户 `updated_at` 时间戳打入哈希算法，实现令牌的“用完即焚”特性。
+- **VitePress 文档站点**：独立部署的高性能静态文档系统，支持中英文检索与全端适配。
 
 ## 2. 数据库设计
 ### 2.1 需求分析设计
 - **访客**：输入 6 位提取码即可提取内容。
-- **注册用户**：文件管理（上传、重命名、删除、收藏、嵌套）、批量操作（移动、删除）、分享管理、配额查看。
-- **管理员**：动态配置存储后端、用户组配额管理、全域审计。
+- **注册用户**：文件管理（上传、重命名、删除、收藏、嵌套）、批量操作（移动、删除）、多维排序（按名称/大小/时间/类型）、分享管理、配额查看。
+- **管理员**：动态配置存储后端、用户管理与排序、用户组配额管理、文件违规下架处理、全域日志审计。
 
 ### 2.2 概念结构设计（E-R图）
 系统核心实体及关系如下：
@@ -38,13 +41,13 @@
 ### 2.3 逻辑结构设计（关系模式）
 本设计严格遵循 **第三范式 (3NF)**，消除数据冗余。核心关系模式如下：
 - `user_groups` (id, name, description, storage_quota, max_users, current_users)
-- `users` (id, name, email, password_hash, role, status, storage_quota, storage_used, group_id)
-- `files` (id, name, size_bytes, storage_key, storage_backend_id, user_id, parent_id, path, type, starred)
+- `users` (id, name, email, password_hash, role, status, storage_quota, storage_used, group_id, updated_at)
+- `files` (id, name, size_bytes, storage_key, storage_backend_id, user_id, parent_id, path, type, starred, status, created_at, updated_at)
 - `shares` (id, file_id, user_id, share_code, expires_at, access_count, max_access)
 - `storage_backends` (id, name, type, enabled, is_default, config_json)
 - `user_storage_backends` (id, user_id, name, type, enabled, config_encrypted)
 - `group_storage_allocations` (id, group_id, storage_backend_id, quota_gb, used_gb)
-- `system_logs` (id, action, user_id, user_name, status, details, ip, file_id, file_name)
+- `system_logs` (id, action, user_id, user_name, status, details, ip, file_id, file_name, created_at)
 
 ## 3. 数据库实现
 ### 3.1 数据库建立
@@ -60,7 +63,8 @@ CREATE TABLE users (
     password_hash TEXT,
     role TEXT NOT NULL DEFAULT 'user',
     storage_used REAL DEFAULT 0.0,
-    group_id TEXT
+    group_id TEXT,
+    updated_at INTEGER
 );
 
 -- 文件表 (存算分离核心)
@@ -75,6 +79,9 @@ CREATE TABLE files (
     path TEXT NOT NULL,
     type TEXT NOT NULL,
     starred INTEGER DEFAULT 0,
+    status TEXT DEFAULT '活跃',
+    created_at INTEGER,
+    updated_at INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (parent_id) REFERENCES files(id)
 );
@@ -87,42 +94,46 @@ CREATE TABLE system_logs (
     user_name TEXT,
     status TEXT NOT NULL,
     details TEXT,
+    ip TEXT,
+    file_id INTEGER,
+    file_name TEXT,
     created_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
--- ... (更多表结构详见 schema.sql)
+-- ...
 ```
 
 ### 3.3 逻辑示例
-- **批量移动**：`UPDATE files SET parent_id = ? WHERE id IN (...)`
-- **文件夹提取**：通过提取码查询 `shares` 表并关联 `files` 表展示子项。
+- **多维动态排序**：后端利用 SQL `ORDER BY ${sortBy} ${order}` 实现对千万级元数据的极速检索排序。
+- **违规文件下架逻辑**：
+  1. 调用 R2 API 删除物理文件。
+  2. `UPDATE files SET name = '[违规已下架] ' || name, size_bytes = 0, status = '违规' WHERE id = ?`。
+  3. 系统自动在用户端显示“管理员已下架”提示，保留元数据作为通知。
 - **自毁式无状态账户找回**：
   - 算法：`HMAC_SHA256(JWT_SECRET, Email + YYYY-MM-DD + updated_at)`
   - 特点：利用数据库已有的 `updated_at` 字段作为版本指纹。重置完成后 `updated_at` 自动更新，旧令牌立即因哈希碰撞失效，实现零存储负载的“一次性令牌”。
 
-## 4. 数据库安全性设计
-本系统在数据库层面实现了工业级的安全防御体系，旨在保障元数据的高可用与强隔离：
+## 4. 工业化设计与合规性
+### 4.1 全平台适配与主题系统
+前端基于 Tailwind CSS 实现了深度的响应式适配与日夜模式切换。
+- **响应式布局**：通过 `flex-row md:flex-col` 等响应式断点，实现了移动端底部导航与 PC 端侧边栏的无缝切换。
+- **主题变量**：利用 CSS Variables (`--bg-main`, `--text-main`) 配合 `.light` / `.dark` 类名，实现了包括滚动条在内的全站主题平滑切换。
 
-### 4.1 架构层：物理级隔离与防注入
-- **物理隔离**：摒弃传统物理机部署，利用 Cloudflare 边缘计算节点，实现了开发环境与组长现有核心生产服务器（游戏、数据库集群）的物理级隔离，规避了潜在的内网渗透风险。
-- **防注入规范**：全程采用 D1 的参数化查询（Prepared Statements），从语法解析层面彻底封堵了 SQL 注入漏洞。
+### 4.2 独立文档系统
+构建了基于 **VitePress** 的独立文档站点（[ss-doc.dotres.cn](https://ss-doc.dotres.cn/)），实现了项目说明、API 手册与部署指南的专业化呈现，支持全站全文检索。
 
-### 4.2 逻辑层：最小权限与 RBAC 模型
-- **角色权限控制**：建立严格的 `admin` 与 `user` 角色模型。在重置密码等敏感接口中，实现了“权限不对称”防御——管理员账户禁用了无状态重置逻辑，必须通过 D1 数据库底层手动干预，确保了系统最高权限的绝对安全。
-- **版本指纹锁**：创新性地利用 `updated_at` 时间戳作为令牌哈希的一部分。这种“数据驱动失效”机制，使得令牌在不占用任何存储空间的前提下，具备了天然的“一次性（OTP）”属性。
-
-### 4.3 审计层：全域操作追溯
-- **全链路日志**：`system_logs` 表记录了所有关键的 DML（增删改）操作，包括操作者、动作、目标文件、地理位置 IP 及结果状态。
-- **防溢出保护**：通过 `group_storage_allocations` 在数据库底层实现了存储配额的“物理硬锁”，防止通过文件上传进行存储溢出攻击。
+### 4.3 法律合规与审计
+- **备案标识**：项目文档站点已底部悬挂 ICP 备案号（湘ICP备2025111357号），满足国内互联网合规要求。
+- **审计链路**：通过 `system_logs` 实现全量操作可追溯，确保每一笔文件流向与配置变更均有据可查。
 
 ## 5. 团队分工
-- **明航宇 (队长)**：全栈开发、系统架构、运维部署。负责录制**系统部署演示视频**。
-- **组员 1**：数据库建模、绘制 E-R/DFD 图。
-- **组员 2**：功能核验、演示数据填充、界面截图。负责录制**系统使用操作视频**。
+- **明航宇 (队长)**：全栈开发、系统架构、UI/UX 工业化设计、VitePress 独立文档系统构建、运维部署。负责录制**系统部署演示视频**。
+- **组员 1**：数据库建模、绘制 E-R/DFD 图（包含排序字段与下架状态逻辑）。
+- **组员 2**：功能核验、演示数据填充、界面截图（含日夜模式对比截图）。负责录制**系统使用操作视频**。
 - **组员 3**：需求分析撰写、报告排版与文档整合。
 - **组员 4**：成果汇报、PPT 制作与答辩。
 
-## 5. 心得体会
-- **资源调配**：证明了在物理机资源紧张时利用 Serverless “白嫖”方案的可行性。
-- **全栈视野**：掌握了分布式环境下数据库与对象存储的协作。
-- **架构权衡**：放弃物理机部署是出于对生产环境安全隔离的考量。
+## 6. 心得体会
+- **极致白嫖**：通过 Serverless 架构实现了真正的物理资源零占用部署。
+- **存算分离**：深刻理解了元数据管理与对象存储解耦的高扩展性优势。
+- **工业化标准**：不仅完成了功能，更在 UI 适配、文档系统、合规备案等方面达到了准商用标准。
 

@@ -39,7 +39,7 @@ onMounted(() => {
       <!-- 中间：文档与仓库 (仅中大屏显示) -->
       <div class="hidden md:flex items-center justify-center gap-4 flex-1">
         <a 
-          href="/docs/REPORT_CONTENT.md" 
+          href="https://ss-doc.dotres.cn/" 
           target="_blank"
           class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-full bg-slate-800/40 hover:bg-slate-700/60 border border-white/5 backdrop-blur-md transition-all text-slate-400 hover:text-white light:bg-slate-200/50 light:hover:bg-slate-300/50 light:text-slate-600 light:hover:text-slate-900 light:border-slate-300/50"
         >
