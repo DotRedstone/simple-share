@@ -50,13 +50,13 @@ const getIcon = (iconName: string) => {
 <template>
   <aside 
     :class="[
-      'shrink-0 bg-surface-900/80 backdrop-blur-xl border-b md:border-b-0 md:border-r border-white/5 flex flex-col md:h-screen max-w-full transition-all duration-300 z-30 dark:bg-surface-900/80 light:bg-slate-50/80 light:border-slate-200',
-      isCollapsed ? 'md:w-20' : 'w-full md:w-72'
+      'shrink-0 bg-surface-900/80 backdrop-blur-xl border-t md:border-t-0 md:border-r border-white/5 flex flex-row md:flex-col w-full md:h-screen transition-all duration-300 z-30 dark:bg-surface-900/80 light:bg-slate-50/80 light:border-slate-200 fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto',
+      isCollapsed ? 'md:w-20' : 'md:w-72'
     ]"
   >
     <div 
       :class="[
-        'h-16 md:h-24 flex items-center shrink-0 relative transition-all duration-300',
+        'h-16 md:h-24 flex items-center shrink-0 relative transition-all duration-300 hidden md:flex',
         isCollapsed ? 'justify-center px-0' : 'px-4 md:px-8'
       ]"
     >
@@ -81,25 +81,26 @@ const getIcon = (iconName: string) => {
       </button>
     </div>
 
-    <div class="p-2 md:p-4 space-x-2 md:space-x-0 md:space-y-2 flex md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide">
+    <div class="px-2 py-1.5 md:p-4 flex flex-row md:flex-col items-center justify-around md:justify-start w-full overflow-x-auto md:overflow-x-visible md:overflow-y-auto md:flex-1 scrollbar-hide">
       <button
         v-for="item in menuItems"
         :key="item.id"
         @click="emit('tab-change', item.id)"
         :class="[
-          'flex-shrink-0 md:w-full flex items-center rounded-2xl text-sm font-bold transition-all duration-300',
-          isCollapsed ? 'justify-center w-12 h-12 px-0' : 'gap-4 px-5 py-4',
+          'flex-shrink-0 flex flex-col md:flex-row items-center rounded-xl md:rounded-2xl transition-all duration-300',
+          isCollapsed ? 'md:justify-center md:w-12 md:h-12 md:px-0' : 'md:gap-4 md:px-5 md:py-4',
+          'px-3 py-2 md:w-full',
           activeTab === item.id 
-            ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20' 
-            : 'text-slate-500 hover:text-white hover:bg-white/5 light:hover:bg-slate-200/50 light:hover:text-slate-900'
+            ? 'bg-brand-primary/10 md:bg-brand-primary text-brand-primary md:text-white shadow-none md:shadow-lg md:shadow-brand-primary/20' 
+            : 'text-slate-500 hover:text-brand-primary md:hover:text-white md:hover:bg-white/5 light:hover:bg-slate-200/50 light:hover:text-slate-900'
         ]"
         :title="isCollapsed ? item.label : ''"
       >
-        <svg v-if="getIcon(item.icon)" class="w-5 h-5 md:w-6 md:h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg v-if="getIcon(item.icon)" class="w-5 h-5 md:w-6 md:h-6 shrink-0" :class="activeTab === item.id ? 'text-brand-primary md:text-white' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getIcon(item.icon)" />
         </svg>
         <span v-if="!isCollapsed" class="truncate tracking-tight hidden md:block text-xs md:text-sm">{{ item.label }}</span>
-        <span class="md:hidden text-xs">{{ item.label }}</span>
+        <span class="md:hidden text-[10px] mt-1 font-bold">{{ item.label }}</span>
       </button>
     </div>
 
@@ -121,7 +122,7 @@ const getIcon = (iconName: string) => {
           </div>
         </div>
         <div v-if="!isCollapsed" class="flex flex-col min-w-0 flex-1">
-          <span class="text-sm font-bold text-white truncate light:text-slate-900">{{ username }}</span>
+          <span class="text-sm font-bold text-white truncate dark:text-white light:text-slate-900">{{ username }}</span>
           <span class="text-[10px] text-slate-500 truncate font-mono uppercase">{{ userRole }}</span>
         </div>
         <button 

@@ -103,7 +103,7 @@ const handleResetPassword = async () => {
   <div>
     <!-- 登录表单 -->
     <form v-if="mode === 'login'" @submit.prevent="handleLogin" class="space-y-4 sm:space-y-6 min-w-0">
-      <div v-if="error" class="bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
+      <div v-if="error" class="bg-red-500/10 dark:bg-red-500/10 border border-red-500/30 dark:border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 break-words min-w-0">
         {{ error }}
       </div>
 
@@ -128,22 +128,22 @@ const handleResetPassword = async () => {
         />
       </div>
 
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 min-w-0">
+      <div class="flex items-center justify-between gap-2 min-w-0">
         <div class="min-w-0 flex-shrink-0">
-          <BaseCheckbox v-model="remember" label="记住我" :disabled="isLoading" />
+          <BaseCheckbox v-model="remember" label="记住我" :disabled="isLoading" class="!text-xs sm:!text-sm" />
         </div>
         <a href="#" @click.prevent="mode = 'reset'; error = ''" class="text-xs sm:text-sm text-brand-primary hover:text-brand-secondary transition-colors font-medium whitespace-nowrap flex-shrink-0" :class="{ 'opacity-50 pointer-events-none': isLoading }">忘记密码?</a>
       </div>
 
       <div class="min-w-0 w-full pt-2">
-        <BaseButton type="submit" variant="primary" class="w-full shadow-xl shadow-brand-primary/20" :loading="isLoading" :disabled="isLoading">
+        <BaseButton type="submit" variant="primary" class="w-full shadow-xl shadow-brand-primary/20 !py-2.5 sm:!py-3" :loading="isLoading" :disabled="isLoading">
           登录
         </BaseButton>
       </div>
 
-      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-500 light:text-slate-400 text-center pt-4 min-w-0 break-words font-medium">
+      <div class="text-xs sm:text-sm text-slate-500 dark:text-slate-500 text-center pt-2 sm:pt-4 min-w-0 break-words font-medium">
         还没有账号？
-        <a href="#" @click.prevent="$emit('switch-to-register')" class="text-brand-primary hover:text-brand-secondary transition-colors" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即注册</a>
+        <a href="#" @click.prevent="$emit('switch-to-register')" class="text-brand-primary hover:text-brand-secondary transition-colors inline-block" :class="{ 'opacity-50 pointer-events-none': isLoading }">立即注册</a>
       </div>
     </form>
 

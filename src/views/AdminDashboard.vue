@@ -522,7 +522,7 @@ onMounted(() => {
         class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50"
       >
         <header
-          class="h-auto py-4 md:h-28 shrink-0 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-12 gap-4 overflow-hidden relative z-10 border-b border-white/5 dark:bg-surface-900/40 dark:backdrop-blur-md light:bg-white light:border-slate-200"
+          class="h-auto py-3 md:h-28 shrink-0 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-12 gap-3 sm:gap-4 overflow-hidden relative z-10 border-b border-white/5 dark:bg-surface-900/40 dark:backdrop-blur-md light:bg-white light:border-slate-200"
         >
           <div class="flex flex-col min-w-0">
             <h1
@@ -531,20 +531,20 @@ onMounted(() => {
               {{ pageTitle }}
             </h1>
             <p
-              class="text-[10px] text-slate-500 font-mono uppercase tracking-[0.2em] truncate"
+              class="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono uppercase tracking-[0.2em] truncate"
             >
               Management System / {{ activeTab }}
             </p>
           </div>
-          <div class="flex items-center gap-4 shrink-0 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+          <div class="flex items-center gap-3 shrink-0 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
             <BaseButton
               v-if="activeTab === 'users'"
               variant="primary"
               @click="openCreateUser"
-              class="shadow-xl shadow-brand-primary/20 !px-4"
+              class="shadow-xl shadow-brand-primary/20 !px-3 sm:!px-4 !py-1.5 sm:!py-2 !text-xs sm:!text-sm"
             >
               <svg
-                class="w-4 h-4 mr-2"
+                class="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -785,12 +785,12 @@ onMounted(() => {
         />
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-2"
+            <label class="block text-sm font-medium text-slate-300 dark:text-slate-300 light:text-slate-600 mb-2"
               >角色</label
             >
             <select
               v-model="userForm.role"
-              class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full bg-slate-800 dark:bg-slate-800 light:bg-slate-100 border border-slate-600 dark:border-slate-600 light:border-slate-300 rounded-lg px-4 py-2 text-white dark:text-white light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="user">普通用户</option>
               <option value="admin">管理员</option>
@@ -806,12 +806,12 @@ onMounted(() => {
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2"
+          <label class="block text-sm font-medium text-slate-300 dark:text-slate-300 light:text-slate-600 mb-2"
             >用户组</label
           >
           <select
             v-model="userForm.groupId"
-            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full bg-slate-800 dark:bg-slate-800 light:bg-slate-100 border border-slate-600 dark:border-slate-600 light:border-slate-300 rounded-lg px-4 py-2 text-white dark:text-white light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">未分组</option>
             <option

@@ -54,19 +54,16 @@ const handleInput = () => {
         placeholder="输入提取码"
         maxlength="8"
         @input="handleInput"
-        class="flex-1 bg-transparent border-none py-4 px-3 text-lg font-bold tracking-widest text-white dark:text-white light:text-slate-900 placeholder:text-slate-600 dark:placeholder:text-slate-600 light:placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal outline-none"
+        class="flex-1 bg-transparent border-none py-3 sm:py-4 px-2 sm:px-3 text-base sm:text-lg font-bold tracking-widest text-white dark:text-white light:text-slate-900 placeholder:text-slate-600 dark:placeholder:text-slate-600 light:placeholder:text-slate-400 placeholder:font-normal placeholder:tracking-normal outline-none min-w-0"
       />
       <BaseButton
         type="submit"
         variant="primary"
         :loading="isLoading"
         :disabled="!isValid || isLoading"
-        class="!rounded-xl shadow-lg !px-4 sm:!px-8"
+        class="!rounded-xl shadow-lg !px-3 sm:!px-8 !py-2 sm:!py-2.5 flex-shrink-0"
       >
-        <span class="hidden sm:inline">立即提取</span>
-        <svg class="sm:hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
+        <span class="text-xs sm:text-base">立即提取</span>
       </BaseButton>
     </div>
     <div class="h-6 mt-2 overflow-hidden text-center">

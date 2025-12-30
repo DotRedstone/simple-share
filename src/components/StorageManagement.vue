@@ -304,7 +304,7 @@ onMounted(() => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </div>
-        <p class="text-2xl font-mono text-purple-400">{{ formatSize(stats.usedStorage) }}</p>
+        <p class="text-2xl font-mono text-purple-400 dark:text-purple-400 light:text-purple-600">{{ formatSize(stats.usedStorage) }}</p>
       </div>
 
       <div class="bg-white/5 dark:bg-white/5 light:bg-white border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-4 shadow-sm">
@@ -314,7 +314,7 @@ onMounted(() => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <p class="text-2xl font-mono text-green-400">{{ formatSize(stats.availableStorage) }}</p>
+        <p class="text-2xl font-mono text-green-400 dark:text-green-400 light:text-green-600">{{ formatSize(stats.availableStorage) }}</p>
       </div>
     </div>
 
@@ -361,31 +361,31 @@ onMounted(() => {
           class="bg-white/5 dark:bg-white/5 light:bg-slate-50/50 border border-white/10 dark:border-white/10 light:border-slate-200 rounded-xl p-4 md:p-6 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-100/50 transition-all duration-300"
         >
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="flex-1 min-w-0">
-              <div class="flex flex-wrap items-center gap-2 mb-3">
-                <span :class="['font-black text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-md bg-white/5 dark:bg-white/5 light:bg-slate-200/50', getTypeColor(backend.type)]">
+            <div class="flex-1 min-w-0 w-full">
+              <div class="flex flex-wrap items-center gap-2 mb-2 sm:mb-3">
+                <span :class="['font-black text-[9px] sm:text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 rounded-md bg-white/5 dark:bg-white/5 light:bg-slate-200/50', getTypeColor(backend.type)]">
                   {{ getTypeLabel(backend.type) }}
                 </span>
-                <span class="text-white dark:text-white light:text-slate-900 font-bold text-base truncate">{{ backend.name }}</span>
-                <div class="flex gap-1.5">
+                <span class="text-white dark:text-white light:text-slate-900 font-bold text-sm sm:text-base truncate">{{ backend.name }}</span>
+                <div class="flex flex-wrap gap-1.5">
                   <span
                     v-if="backend.isDefault"
-                    class="text-[10px] font-black uppercase tracking-widest bg-brand-primary/20 text-brand-primary px-2 py-0.5 rounded-full border border-brand-primary/20"
+                    class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-brand-primary/20 text-brand-primary px-2 py-0.5 rounded-full border border-brand-primary/20"
                   >
                     默认
                   </span>
                   <span
                     v-if="!backend.enabled"
-                    class="text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20"
+                    class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/20"
                   >
                     已禁用
                   </span>
                 </div>
               </div>
-              <p v-if="backend.description" class="text-sm text-slate-400 dark:text-slate-400 light:text-slate-500 mb-3 font-medium">
+              <p v-if="backend.description" class="text-xs sm:text-sm text-slate-400 dark:text-slate-400 light:text-slate-500 mb-2 sm:mb-3 font-medium">
                 {{ backend.description }}
               </p>
-              <div class="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono">
+              <div class="flex items-center gap-3 text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono">
                 <span>{{ new Date(backend.createdAt * 1000).toLocaleDateString() }}</span>
                 <template v-if="backend.config.quotaGb">
                   <span class="w-1 h-1 rounded-full bg-slate-700 dark:bg-slate-700 light:bg-slate-300"></span>
@@ -393,24 +393,24 @@ onMounted(() => {
                 </template>
               </div>
             </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+            <div class="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
               <BaseButton
                 variant="glass"
-                class="flex-1 sm:flex-none !py-2 !px-3 !text-xs whitespace-nowrap"
+                class="flex-1 sm:flex-none !py-1.5 sm:!py-2 !px-3 !text-xs whitespace-nowrap"
                 @click="toggleEnabled(backend)"
               >
                 {{ backend.enabled ? '禁用' : '启用' }}
               </BaseButton>
               <BaseButton
                 variant="glass"
-                class="flex-1 sm:flex-none !py-2 !px-3 !text-xs whitespace-nowrap"
+                class="flex-1 sm:flex-none !py-1.5 sm:!py-2 !px-3 !text-xs whitespace-nowrap"
                 @click="openEditModal(backend)"
               >
                 编辑
               </BaseButton>
               <BaseButton
                 variant="glass"
-                class="flex-1 sm:flex-none !py-2 !px-3 !text-xs text-red-400 dark:text-red-400 light:text-red-500 whitespace-nowrap"
+                class="flex-1 sm:flex-none !py-1.5 sm:!py-2 !px-3 !text-xs text-red-400 dark:text-red-400 light:text-red-500 whitespace-nowrap"
                 @click="handleDelete(backend)"
                 :disabled="backend.isDefault || backend.id === 'system_r2'"
               >
@@ -438,10 +438,10 @@ onMounted(() => {
         />
         
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-2">类型</label>
+          <label class="block text-sm font-medium text-slate-300 dark:text-slate-300 light:text-slate-600 mb-2">类型</label>
           <select
             v-model="formData.type"
-            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full bg-slate-800 dark:bg-slate-800 light:bg-slate-100 border border-slate-600 dark:border-slate-600 light:border-slate-300 rounded-lg px-4 py-2 text-white dark:text-white light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             :disabled="!!editingBackend"
           >
             <option value="r2">Cloudflare R2</option>

@@ -20,8 +20,11 @@
 
 /* === 3. 全局基础设置与主题变量 === */
 :root {
+    /* 默认：夜间模式 */
     --bg-main: #030712;
     --bg-surface: rgba(17, 24, 39, 0.7);
+    --bg-surface-solid: #111827;
+    --bg-surface-hover: rgba(255, 255, 255, 0.05);
     --text-main: #f9fafb;
     --text-muted: #94a3b8;
     --border-color: rgba(255, 255, 255, 0.05);
@@ -39,9 +42,12 @@
 :root.light {
     --bg-main: #f8fafc;
     --bg-surface: rgba(255, 255, 255, 0.8);
+    --bg-surface-solid: #ffffff;
+    --bg-surface-hover: rgba(0, 0, 0, 0.05);
     --text-main: #0f172a;
     --text-muted: #64748b;
     --border-color: rgba(0, 0, 0, 0.05);
+    
     --color-surface-950: #f8fafc;
     --color-surface-900: #ffffff;
     --color-surface-800: #f1f5f9;
@@ -93,12 +99,12 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface-hover);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--text-muted);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -106,11 +112,11 @@ body::before {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--border-color);
 }
 
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--bg-surface-hover);
 }
 
 /* === 5. 玻璃拟态卡片 === */

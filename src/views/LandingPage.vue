@@ -92,16 +92,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen w-full flex items-center justify-center p-6 md:p-12 bg-slate-950 dark:bg-slate-950 light:bg-slate-50 relative overflow-hidden">
+  <div class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-12 bg-slate-950 dark:bg-slate-950 light:bg-slate-50 relative overflow-hidden">
     <!-- 装饰背景 -->
-    <div class="absolute inset-0 z-0 opacity-20 pointer-events-none">
+    <div class="absolute inset-0 z-0 opacity-20 dark:opacity-20 light:opacity-10 pointer-events-none">
       <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-primary blur-[120px]"></div>
       <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-brand-secondary blur-[120px]"></div>
     </div>
 
-    <div class="w-full max-w-4xl relative z-10">
+    <div class="w-full max-w-4xl relative z-10 px-2 sm:px-0">
       <PageFrame>
-        <div class="flex flex-col gap-8">
+        <div class="flex flex-col gap-6 sm:gap-8">
           <NavBar
             :on-login-click="() => showLogin = true"
             :on-register-click="() => showRegister = true"
@@ -112,23 +112,23 @@ onMounted(() => {
       </PageFrame>
     </div>
     
-    <div class="pb-24"></div>
+    <div class="pb-16 sm:pb-24"></div>
 
     <!-- 提取加载状态 -->
-    <BaseModal v-if="isExtracting" :show="isExtracting" title="正在查找文件..." width="max-w-sm" :close-on-click-outside="false">
+    <BaseModal v-if="isExtracting" :show="isExtracting" title="正在查找文件..." width="max-w-xs sm:max-w-sm" :close-on-click-outside="false">
       <LoadingSpinner size="lg" text="正在验证提取码..." />
     </BaseModal>
 
     <!-- 提取错误提示 -->
-    <BaseModal v-if="extractionError" :show="!!extractionError" title="提取失败" width="max-w-sm" @close="extractionError = ''">
+    <BaseModal v-if="extractionError" :show="!!extractionError" title="提取失败" width="max-w-xs sm:max-w-sm" @close="extractionError = ''">
       <div class="text-center py-4">
-        <p class="text-red-400 dark:text-red-400 light:text-red-600 mb-4">{{ extractionError }}</p>
+        <p class="text-red-400 dark:text-red-400 mb-4">{{ extractionError }}</p>
         <BaseButton variant="primary" @click="extractionError = ''">确定</BaseButton>
       </div>
     </BaseModal>
 
-    <BaseModal :show="showLogin" title="欢迎回来" width="max-w-sm" @close="showLogin = false">
-      <div v-if="loginError" class="mb-4 bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
+    <BaseModal :show="showLogin" title="欢迎回来" width="max-w-xs sm:max-w-sm" @close="showLogin = false">
+      <div v-if="loginError" class="mb-4 bg-red-500/10 dark:bg-red-500/10 border border-red-500/30 dark:border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 break-words min-w-0">
         {{ loginError }}
       </div>
       <LoginForm 
@@ -137,8 +137,8 @@ onMounted(() => {
       />
     </BaseModal>
 
-    <BaseModal :show="showRegister" title="创建账号" width="max-w-sm" @close="showRegister = false">
-      <div v-if="registerError" class="mb-4 bg-red-500/10 dark:bg-red-500/10 light:bg-red-50 border border-red-500/30 dark:border-red-500/30 light:border-red-200 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 light:text-red-600 break-words min-w-0">
+    <BaseModal :show="showRegister" title="创建账号" width="max-w-xs sm:max-w-sm" @close="showRegister = false">
+      <div v-if="registerError" class="mb-4 bg-red-500/10 dark:bg-red-500/10 border border-red-500/30 dark:border-red-500/30 rounded-lg p-3 text-sm text-red-400 dark:text-red-400 break-words min-w-0">
         {{ registerError }}
       </div>
       <RegisterForm @register="onRegisterSuccess" @switch-to-login="switchToLogin" />

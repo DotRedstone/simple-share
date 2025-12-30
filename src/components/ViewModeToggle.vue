@@ -9,11 +9,11 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="hidden md:flex bg-slate-800/50 rounded-lg p-1 border border-white/5">
+  <div class="hidden md:flex bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-200/50 rounded-lg p-1 border border-white/5 dark:border-white/5 light:border-slate-300">
     <button
       @click="emit('update:modelValue', 'grid')"
-      class="p-1.5 rounded"
-      :class="modelValue === 'grid' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'"
+      class="p-1.5 rounded transition-colors"
+      :class="modelValue === 'grid' ? 'bg-slate-600 dark:bg-slate-600 light:bg-white text-white dark:text-white light:text-slate-900 shadow-sm' : 'text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900'"
     >
       <svg class="w-4 h-4" viewBox="0 0 24 24">
         <path fill="currentColor" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -21,8 +21,8 @@ const emit = defineEmits<{
     </button>
     <button
       @click="emit('update:modelValue', 'list')"
-      class="p-1.5 rounded"
-      :class="modelValue === 'list' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'"
+      class="p-1.5 rounded transition-colors"
+      :class="modelValue === 'list' ? 'bg-slate-600 dark:bg-slate-600 light:bg-white text-white dark:text-white light:text-slate-900 shadow-sm' : 'text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900'"
     >
       <svg class="w-4 h-4" viewBox="0 0 24 24">
         <path fill="currentColor" d="M4 6h16M4 12h16M4 18h16" />
