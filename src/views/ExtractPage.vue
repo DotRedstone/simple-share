@@ -166,7 +166,7 @@ const goHome = () => {
       <PageFrame>
         <div class="text-center mb-8">
           <h1 class="text-3xl font-black text-white dark:text-white light:text-slate-900 mb-2 tracking-tight uppercase italic">文件提取</h1>
-          <p class="text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">提取码：<span class="font-mono text-white dark:text-white light:text-brand-primary font-bold">{{ shareCode }}</span></p>
+          <p class="text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">提取码：<span class="font-mono text-white dark:text-white light:text-slate-900 font-bold">{{ shareCode }}</span></p>
         </div>
 
         <!-- 加载状态 -->
@@ -191,11 +191,11 @@ const goHome = () => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getFileIcon(fileInfo.type)" />
               </svg>
             </div>
-            <h2 class="text-xl font-black text-white dark:text-white light:text-slate-900 mb-1 truncate px-2">{{ fileInfo.name }}</h2>
+            <h2 class="text-xl font-black text-white dark:text-white light:text-slate-900 mb-1 truncate px-2" :title="fileInfo.name">{{ fileInfo.name }}</h2>
             <p class="text-[10px] text-slate-500 dark:text-slate-500 light:text-slate-400 font-mono uppercase tracking-widest">{{ fileInfo.type }} DOCUMENT</p>
           </div>
 
-          <div class="space-y-4 mb-8 bg-black/20 dark:bg-black/20 light:bg-slate-50 rounded-2xl p-4 border border-white/5 dark:border-white/5 light:border-slate-100">
+          <div class="space-y-4 mb-8 bg-black/20 dark:bg-black/20 light:bg-slate-100/50 rounded-2xl p-4 border border-white/5 dark:border-white/5 light:border-slate-200">
             <div class="flex justify-between items-center text-sm">
               <span class="text-slate-400 dark:text-slate-400 light:text-slate-500 font-medium">文件大小</span>
               <span class="text-white dark:text-white light:text-slate-900 font-mono font-bold">{{ fileInfo.size }}</span>

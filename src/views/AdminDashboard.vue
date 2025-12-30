@@ -468,27 +468,15 @@ const generateUserToken = async () => {
 
   isGenerating.value = true;
   try {
-    const email = securityEmail.value.trim().toLowerCase();
-    const dateStr = new Date().toISOString().split("T")[0];
+    const res = await api.post("/admin/users/generate-reset-token", {
+      email: securityEmail.value.trim()
+    });
     
-    // 获取目标用户的版本号（updatedAt）
-    const version = targetUser ? (targetUser.updatedAt || 0) : 0;
-    
-    // 使用浏览器原生的 Crypto API 实现与后端一致的算法
-    const encoder = new TextEncoder();
-    const data = encoder.encode(`${email}:${dateStr}:${version}`);
-    const key = await window.crypto.subtle.importKey(
-      "raw",
-      encoder.encode(authStore.token || "simpleshare_secret"), 
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-    const signature = await window.crypto.subtle.sign("HMAC", key, data);
-    const hashArray = Array.from(new Uint8Array(signature));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    generatedToken.value = hashHex.substring(0, 16).toUpperCase();
+    if (res.success && res.token) {
+      generatedToken.value = res.token;
+    } else {
+      alert(res.error || "生成令牌失败");
+    }
   } catch (error) {
     alert("生成令牌失败");
   } finally {
@@ -507,19 +495,8 @@ onMounted(() => {
     <div
       class="flex flex-col md:flex-row h-full w-full overflow-hidden relative"
     >
-        <Sidebar
-          :menu-items="menuItems"
-          :active-tab="activeTab"
-          username="管理员"
-          user-role="超级权限"
-          logo="S"
-          logo-color="blue"
-          @tab-change="handleTabChange"
-          @logout="handleLogout"
-        />
-
       <main
-        class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50"
+        class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50 order-1"
       >
         <header
           class="h-auto py-3 md:h-28 shrink-0 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-12 gap-3 sm:gap-4 overflow-hidden relative z-10 border-b border-white/5 dark:bg-surface-900/40 dark:backdrop-blur-md light:bg-white light:border-slate-200"
@@ -571,7 +548,7 @@ onMounted(() => {
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <div class="min-h-full p-4 md:p-12 pb-24 md:pb-32">
+          <div class="min-h-full p-4 md:p-12 pb-4 md:pb-32">
             <!-- 仪表盘视图 -->
             <div v-if="activeTab === 'dashboard'" class="space-y-8">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -740,10 +717,10 @@ onMounted(() => {
 
                 <div v-if="generatedToken" class="mt-8 p-6 bg-brand-primary/10 border border-brand-primary/20 rounded-2xl flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-300">
                   <span class="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em]">今日唯一令牌</span>
-                  <div class="text-3xl md:text-4xl font-mono font-black text-white tracking-widest select-all">
+                  <div class="text-2xl sm:text-3xl md:text-4xl font-mono font-black text-white tracking-widest select-all break-all text-center">
                     {{ generatedToken }}
                   </div>
-                  <p class="text-[10px] text-slate-500 text-center max-w-xs">
+                  <p class="text-[10px] text-slate-500 text-center max-w-xs px-2">
                     该令牌基于当前日期与系统密钥计算得出，<br/>
                     将在北京时间今日 24:00 自动失效。
                   </p>
@@ -753,6 +730,29 @@ onMounted(() => {
           </div>
         </div>
       </main>
+
+      <Sidebar
+        :menu-items="menuItems"
+        :active-tab="activeTab"
+        username="管理员"
+        user-role="超级权限"
+        logo="S"
+        logo-color="blue"
+        @tab-change="handleTabChange"
+        @logout="handleLogout"
+        class="order-2 md:order-first"
+      />
+      <Sidebar
+        :menu-items="menuItems"
+        :active-tab="activeTab"
+        username="管理员"
+        user-role="超级权限"
+        logo="S"
+        logo-color="blue"
+        @tab-change="handleTabChange"
+        @logout="handleLogout"
+        class="order-2 md:order-first"
+      />
     </div>
 
     <!-- 添加/编辑用户模态框 -->

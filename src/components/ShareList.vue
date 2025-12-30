@@ -110,16 +110,16 @@ const handleManage = (share: ShareRecord) => {
           <div class="flex items-start justify-between">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-3 mb-2">
-                <h4 class="text-white font-medium truncate">{{ getFileName(share.fileId) }}</h4>
+                <h4 class="text-white dark:text-white light:text-slate-900 font-medium truncate">{{ getFileName(share.fileId) }}</h4>
                 <span
                   v-if="isExpired(share.expiresAt)"
-                  class="px-2 py-0.5 rounded-full text-xs bg-red-500/20 text-red-300"
+                  class="px-2 py-0.5 rounded-full text-xs bg-red-500/20 text-red-300 whitespace-nowrap"
                 >
                   已过期
                 </span>
                 <span
                   v-else
-                  class="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-300"
+                  class="px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-300 whitespace-nowrap"
                 >
                   有效
                 </span>
@@ -129,7 +129,7 @@ const handleManage = (share: ShareRecord) => {
                 <div>
                   <span class="text-slate-400">分享码：</span>
                   <div class="flex items-center gap-2 mt-1">
-                    <span class="font-mono text-white">{{ share.shareCode }}</span>
+                    <span class="font-mono text-white dark:text-white light:text-slate-900 font-bold">{{ share.shareCode }}</span>
                     <button
                       @click="copyToClipboard(share.shareCode)"
                       class="p-1 text-slate-400 hover:text-white transition-colors"
@@ -148,7 +148,7 @@ const handleManage = (share: ShareRecord) => {
                     <input
                       :value="shareUrl(share.shareCode)"
                       readonly
-                      class="flex-1 bg-white/5 border border-white/10 rounded px-2 py-1 text-xs text-slate-300 truncate"
+                      class="flex-1 bg-white/5 dark:bg-white/5 light:bg-slate-100 border border-white/10 dark:border-white/10 light:border-slate-200 rounded px-2 py-1 text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 truncate"
                     />
                     <button
                       @click="copyToClipboard(shareUrl(share.shareCode))"
@@ -164,17 +164,17 @@ const handleManage = (share: ShareRecord) => {
                 
                 <div>
                   <span class="text-slate-400">创建时间：</span>
-                  <span class="text-white">{{ formatDate(share.createdAt) }}</span>
+                  <span class="text-white dark:text-white light:text-slate-900">{{ formatDate(share.createdAt) }}</span>
                 </div>
                 
                 <div>
                   <span class="text-slate-400">过期时间：</span>
-                  <span class="text-white">{{ formatDate(share.expiresAt) }}</span>
+                  <span class="text-white dark:text-white light:text-slate-900">{{ formatDate(share.expiresAt) }}</span>
                 </div>
                 
                 <div>
                   <span class="text-slate-400">访问次数：</span>
-                  <span class="text-white">{{ share.accessCount }}</span>
+                  <span class="text-white dark:text-white light:text-slate-900">{{ share.accessCount }}</span>
                 </div>
               </div>
             </div>

@@ -100,13 +100,13 @@ const handleGenerate = () => {
     <div class="space-y-6">
       <div>
         <p class="text-sm text-slate-400 mb-2">文件名：</p>
-        <p class="text-white font-medium">{{ fileName }}</p>
+        <p class="text-white dark:text-white light:text-slate-900 font-medium">{{ fileName }}</p>
       </div>
 
       <div v-if="currentShareCode">
         <p class="text-sm text-slate-400 mb-2">分享码：</p>
         <div class="flex items-center gap-2">
-          <div class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 font-mono text-lg text-center text-white">
+          <div class="flex-1 bg-white/5 dark:bg-white/5 light:bg-slate-100 border border-white/10 dark:border-white/10 light:border-slate-200 rounded-lg px-4 py-3 font-mono text-lg text-center text-white dark:text-white light:text-slate-900">
             {{ currentShareCode }}
           </div>
           <BaseButton variant="glass" @click="copyToClipboard(currentShareCode)">
@@ -123,7 +123,7 @@ const handleGenerate = () => {
           <input
             :value="shareUrl"
             readonly
-            class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm text-slate-300"
+            class="flex-1 bg-white/5 dark:bg-white/5 light:bg-slate-100 border border-white/10 dark:border-white/10 light:border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-300 dark:text-slate-300 light:text-slate-700"
           />
           <BaseButton variant="glass" @click="copyToClipboard(shareUrl)">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,7 +172,7 @@ const handleGenerate = () => {
             placeholder="输入天数"
         />
         </div>
-        <p class="text-xs text-slate-500 mt-2">
+        <p class="text-xs text-slate-500 mt-2 whitespace-nowrap overflow-hidden text-ellipsis">
           <span v-if="expirationPreset === 'infinity'">链接永久有效</span>
           <span v-else-if="expirationPreset === '1h'">链接将在 1 小时后过期</span>
           <span v-else>链接将在 {{ getExpirationDays() }} 天后过期</span>

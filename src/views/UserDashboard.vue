@@ -362,18 +362,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
 <template>
   <PageFrame no-padding :allow-overflow="false" :full-screen="true">
     <div class="flex flex-col md:flex-row h-full w-full overflow-hidden relative">
-      <Sidebar
-        :menu-items="menuItems"
-        :active-tab="activeTab"
-        :username="username"
-        user-role="高级账户"
-        logo="S"
-        logo-color="blue"
-        @tab-change="handleTabChange"
-        @logout="handleLogout"
-      />
-
-      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50">
+      <main class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full bg-slate-950 dark:bg-slate-950 light:bg-slate-50 order-1">
         <header class="h-auto py-3 md:h-28 shrink-0 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-12 gap-3 sm:gap-4 overflow-hidden relative z-10 border-b border-white/5 dark:bg-surface-900/40 dark:backdrop-blur-md light:bg-white light:border-slate-200">
           <div class="flex-1 min-w-0 w-full md:w-auto">
             <SearchBar v-model="searchQuery" />
@@ -488,7 +477,7 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
             <LoadingSpinner size="lg" text="处理中..." />
           </div>
 
-          <div class="min-h-full flex flex-col p-4 md:p-12 space-y-4 md:space-y-6 pb-24 md:pb-32">
+          <div class="min-h-full flex flex-col p-4 md:p-12 space-y-4 md:space-y-6 pb-4 md:pb-32">
             <!-- 在全部文件标签页显示面包屑（包括根目录） -->
             <div v-if="activeTab === 'all'" class="shrink-0">
               <Breadcrumb
@@ -552,6 +541,29 @@ const handleFileAction = async (action: string | FileAction, file: FileItem) => 
           </div>
         </div>
       </main>
+
+      <Sidebar
+        :menu-items="menuItems"
+        :active-tab="activeTab"
+        :username="username"
+        user-role="高级账户"
+        logo="S"
+        logo-color="blue"
+        @tab-change="handleTabChange"
+        @logout="handleLogout"
+        class="order-2 md:order-first"
+      />
+      <Sidebar
+        :menu-items="menuItems"
+        :active-tab="activeTab"
+        :username="username"
+        user-role="高级账户"
+        logo="S"
+        logo-color="blue"
+        @tab-change="handleTabChange"
+        @logout="handleLogout"
+        class="order-2 md:order-first"
+      />
     </div>
     <UploadModal
       :show="showUpload"

@@ -24,6 +24,7 @@ import { onRequestPost as sharesCreateHandler } from './functions/api/shares/cre
 import { onRequestGet as sharesListHandler } from './functions/api/shares/list'
 import { onRequestDelete as sharesDeleteHandler } from './functions/api/shares/[id]'
 import { onRequestGet as adminUsersHandler, onRequestPost as adminUsersCreateHandler } from './functions/api/admin/users'
+import { onRequestPost as adminUsersGenerateTokenHandler } from './functions/api/admin/users/generate-token'
 import { onRequestPut as adminUsersUpdateHandler, onRequestDelete as adminUsersDeleteHandler } from './functions/api/admin/users/[id]'
 import { onRequestGet as adminGroupsHandler, onRequestPost as adminGroupsCreateHandler } from './functions/api/admin/groups'
 import { onRequestPut as adminGroupsUpdateHandler, onRequestDelete as adminGroupsDeleteHandler } from './functions/api/admin/groups/[id]'
@@ -58,6 +59,7 @@ const apiRoutes: Record<string, Record<string, (context: any) => Promise<Respons
   'admin/users': { 'GET': adminUsersHandler, 'POST': adminUsersCreateHandler },
   'admin/groups': { 'GET': adminGroupsHandler, 'POST': adminGroupsCreateHandler },
   'admin/groups/storage': { 'GET': adminGroupStorageHandler, 'POST': adminGroupStorageCreateHandler },
+  'admin/users/generate-reset-token': { 'POST': adminUsersGenerateTokenHandler },
   'admin/files': { 'GET': adminFilesHandler },
   'admin/files/takedown': { 'POST': adminFilesTakedownHandler },
   'admin/stats': { 'GET': adminStatsHandler },
