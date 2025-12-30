@@ -47,6 +47,20 @@ export async function onRequestGet(context: { env: Env; request: Request }): Pro
       )
     }
 
+    // 检查文件状态
+    if (file.status === '违规' || file.name.includes('[违规已下架]')) {
+      return new Response(
+        JSON.stringify({ success: false, error: '该文件因违规已被管理员下架，无法下载。' }),
+        { 
+          status: 403, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders(origin)
+          } 
+        }
+      )
+    }
+
     // 检查权限（文件所有者、管理员或通过分享码）
     let hasAccess = false
     

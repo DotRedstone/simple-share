@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS files (
   parent_id INTEGER,
   path TEXT NOT NULL,
   type TEXT NOT NULL CHECK(type IN ('folder', 'pdf', 'image', 'video', 'zip', 'code')),
+  status TEXT NOT NULL DEFAULT '正常' CHECK(status IN ('正常', '违规')),
   starred INTEGER DEFAULT 0,
   download_count INTEGER DEFAULT 0,
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),

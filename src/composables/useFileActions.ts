@@ -7,6 +7,16 @@ export function useFileActions() {
   const isLoading = ref(false)
 
   const downloadFile = async (file: FileItem) => {
+    // 检查是否违规下架
+    const isViolated = file.size_bytes === 0 && 
+                      file.type !== 'folder' && 
+                      (file.name.includes('[违规已下架]') || (file as any).status === '违规');
+    
+    if (isViolated) {
+      alert('该文件因违规已被管理员下架，无法下载。');
+      return;
+    }
+
     isLoading.value = true
     try {
       const result = await fileStore.downloadFile(file.id)

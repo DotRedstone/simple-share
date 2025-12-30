@@ -47,7 +47,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     // 2. 更新数据库记录为“违规下架”状态（占位符）
     const originalName = file.name
     await db.db.prepare(
-      'UPDATE files SET name = ?, size_bytes = 0, updated_at = ? WHERE id = ?'
+      'UPDATE files SET name = ?, size_bytes = 0, status = "违规", updated_at = ? WHERE id = ?'
     ).bind(
       `[违规已下架] ${originalName}`,
       Date.now(),

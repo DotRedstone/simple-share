@@ -218,9 +218,12 @@ const goHome = () => {
           </div>
 
           <div class="flex flex-col gap-3">
-            <BaseButton v-if="fileInfo.type !== 'folder'" variant="primary" class="w-full !py-3 shadow-lg shadow-brand-primary/20" @click="handleDownload">
+            <BaseButton v-if="fileInfo.type !== 'folder' && fileInfo.downloadUrl" variant="primary" class="w-full !py-3 shadow-lg shadow-brand-primary/20" @click="handleDownload">
               立即下载
             </BaseButton>
+            <div v-else-if="fileInfo.type !== 'folder'" class="w-full py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm font-bold text-center">
+              此文件已被管理员下架，无法下载
+            </div>
             <div class="flex gap-3">
               <BaseButton variant="glass" class="flex-1 !py-2.5 !text-xs" @click="goHome">返回首页</BaseButton>
               <BaseButton 
@@ -277,18 +280,25 @@ const goHome = () => {
                   <svg v-if="child.type === 'folder'" class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path d="M9 5l7 7-7 7" stroke-width="2" />
                   </svg>
-                  <a
-                    v-else
-                    :href="child.downloadUrl"
-                    download
-                    @click.stop
-                    class="p-2 text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-200 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
-                    title="下载"
-                  >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                  </a>
+                  <template v-else>
+                    <a
+                      v-if="child.downloadUrl"
+                      :href="child.downloadUrl"
+                      download
+                      @click.stop
+                      class="p-2 text-slate-400 dark:text-slate-400 light:text-slate-500 hover:text-white dark:hover:text-white light:hover:text-slate-900 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-200 rounded-lg transition-all md:opacity-0 group-hover:opacity-100"
+                      title="下载"
+                    >
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </a>
+                    <span v-else class="p-2 text-red-500/50" title="已下架">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                    </span>
+                  </template>
                 </div>
               </div>
             </div>

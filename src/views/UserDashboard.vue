@@ -283,6 +283,7 @@ const handleBatchDownload = async () => {
   for (const id of selectedFiles.value) {
     const file = currentFiles.value.find(f => f.id === id)
     if (file && file.type !== 'folder') {
+      // downloadFile 内部已经增加了违规校验
       await downloadFile(file)
     }
   }

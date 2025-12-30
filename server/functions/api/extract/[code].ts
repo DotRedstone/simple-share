@@ -97,7 +97,10 @@ export async function onRequestGet(context: { env: Env; request: Request; params
         name: cf.name,
         size: cf.type === 'folder' ? '-' : formatFileSize(cf.size_bytes),
         type: cf.type,
-        downloadUrl: cf.type === 'folder' ? null : `/api/files/download?id=${cf.id}&shareCode=${shareCode}`
+        status: cf.status || '正常',
+        downloadUrl: (cf.type === 'folder' || cf.status === '违规' || cf.name.includes('[违规已下架]')) 
+          ? null 
+          : `/api/files/download?id=${cf.id}&shareCode=${shareCode}`
       }))
     }
 
@@ -121,7 +124,10 @@ export async function onRequestGet(context: { env: Env; request: Request; params
           size: currentFile.type === 'folder' ? '-' : formatFileSize(currentFile.size_bytes),
           uploadTime: new Date(currentFile.created_at).toISOString(),
           type: currentFile.type,
-          downloadUrl: currentFile.type === 'folder' ? null : `/api/files/download?id=${currentFile.id}&shareCode=${shareCode}`,
+          status: currentFile.status || '正常',
+          downloadUrl: (currentFile.type === 'folder' || currentFile.status === '违规' || currentFile.name.includes('[违规已下架]'))
+            ? null 
+            : `/api/files/download?id=${currentFile.id}&shareCode=${shareCode}`,
           children: children.length > 0 ? children : undefined,
           isRoot: currentFile.id === rootFile.id,
           rootName: rootFile.name
