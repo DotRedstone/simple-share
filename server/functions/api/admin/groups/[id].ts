@@ -37,9 +37,24 @@ export async function onRequestDelete(context: { env: Env; request: Request; par
   const db = new Database(env.DB)
 
   try {
-    await requireAdmin(request, env)
+    const admin = await requireAdmin(request, env)
+
+    // 获取组名用于日志
+    const groups = await db.getUserGroups()
+    const targetGroup = groups.find(g => g.id === params.id)
+    const targetGroupName = targetGroup ? targetGroup.name : params.id
 
     await db.deleteUserGroup(params.id)
+
+    // 记录日志
+    await db.createLog({
+      action: '删除用户组',
+      userId: admin.userId,
+      userName: admin.name,
+      status: '成功',
+      details: `已删除用户组: ${targetGroupName} (ID: ${params.id})`,
+      ip: request.headers.get('CF-Connecting-IP') || undefined
+    })
 
     return new Response(
       JSON.stringify({ success: true, message: '删除成功' }),

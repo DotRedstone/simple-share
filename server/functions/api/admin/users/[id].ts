@@ -37,15 +37,22 @@ export async function onRequestDelete(context: { env: Env; request: Request; par
   const db = new Database(env.DB)
 
   try {
-    await requireAdmin(request, env)
+    const admin = await requireAdmin(request, env)
 
+    // 先获取用户信息用于日志（因为删除后就查不到了）
+    const targetUser = await db.getUserById(params.id)
+    const targetUserName = targetUser ? targetUser.name : params.id
+
+    // 物理删除用户
     await db.deleteUser(params.id)
 
-    // 记录日志
+    // 记录日志，使用管理员身份
     await db.createLog({
       action: '删除用户',
-      userId: params.id,
+      userId: admin.userId,
+      userName: admin.name,
       status: '成功',
+      details: `已删除用户: ${targetUserName} (ID: ${params.id})`,
       ip: request.headers.get('CF-Connecting-IP') || undefined
     })
 
@@ -56,8 +63,9 @@ export async function onRequestDelete(context: { env: Env; request: Request; par
   } catch (error: any) {
     if (error instanceof Response) return error
     
+    console.error('Delete user error:', error)
     return new Response(
-      JSON.stringify({ success: false, error: '删除失败' }),
+      JSON.stringify({ success: false, error: '删除失败: ' + (error.message || '未知错误') }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }

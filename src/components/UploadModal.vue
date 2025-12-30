@@ -13,13 +13,15 @@ const uploadProgress = ref(0)
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
-  if (target.files) {
+  if (target.files && target.files.length > 0) {
     const newFiles = Array.from(target.files)
-    // 过滤掉已经在列表中的完全相同的文件（根据名字和大小简单判断）
+    // 过滤掉已经在列表中的完全相同的文件
     const uniqueNewFiles = newFiles.filter(nf => 
-      !files.value.some(f => f.name === nf.name && f.size === nf.size)
+      !files.value.some(f => f.name === nf.name && f.size === nf.size && f.lastModified === nf.lastModified)
     )
-    files.value = [...files.value, ...uniqueNewFiles]
+    // 使用 push 确保追加，而不是替换整个数组引用（虽然 ref 赋值也可以，但 push 更明确）
+    files.value.push(...uniqueNewFiles)
+    
     // 重置 input 的 value，确保同名文件可以再次触发 change
     target.value = ''
   }
@@ -27,12 +29,12 @@ const handleFileChange = (event: Event) => {
 
 const handleDrop = (event: DragEvent) => {
   isDragging.value = false
-  if (event.dataTransfer?.files) {
+  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
     const newFiles = Array.from(event.dataTransfer.files)
     const uniqueNewFiles = newFiles.filter(nf => 
-      !files.value.some(f => f.name === nf.name && f.size === nf.size)
+      !files.value.some(f => f.name === nf.name && f.size === nf.size && f.lastModified === nf.lastModified)
     )
-    files.value = [...files.value, ...uniqueNewFiles]
+    files.value.push(...uniqueNewFiles)
   }
 }
 
