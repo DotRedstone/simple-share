@@ -3,7 +3,7 @@
 -- 用户表
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
+  name TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE,
   phone TEXT UNIQUE,
   password_hash TEXT,

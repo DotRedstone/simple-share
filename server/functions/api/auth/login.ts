@@ -18,10 +18,7 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
     }
 
     // 查找用户（支持用户名或邮箱登录）
-    let user = await db.getUserByEmail(username)
-    if (!user) {
-      user = await db.getUserByEmail(`${username}@simpleshare.com`)
-    }
+    const user = await db.getUserByNameOrEmail(username)
 
     if (!user) {
       return new Response(

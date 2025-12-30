@@ -58,7 +58,7 @@
 -- 用户表
 CREATE TABLE users (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE,
     password_hash TEXT,
     role TEXT NOT NULL DEFAULT 'user',
@@ -104,6 +104,9 @@ CREATE TABLE system_logs (
 
 ### 3.3 逻辑示例
 - **多维动态排序**：后端利用 SQL `ORDER BY ${sortBy} ${order}` 实现对千万级元数据的极速检索排序。
+- **用户名/邮箱双渠道登录**：
+  - 逻辑：`SELECT * FROM users WHERE name = ? OR email = ?`
+  - 特点：通过 `UNIQUE` 约束保障用户名唯一性，提升用户交互体验。
 - **违规文件下架逻辑**：
   1. 调用 R2 API 删除物理文件。
   2. `UPDATE files SET name = '[违规已下架] ' || name, size_bytes = 0, status = '违规' WHERE id = ?`。
@@ -121,9 +124,9 @@ CREATE TABLE system_logs (
 ### 4.2 独立文档系统
 构建了基于 **VitePress** 的独立文档站点（[ss-doc.dotres.cn](https://ss-doc.dotres.cn/)），实现了项目说明、API 手册与部署指南的专业化呈现，支持全站全文检索。
 
-### 4.3 法律合规与审计
-- **备案标识**：项目文档站点已底部悬挂 ICP 备案号（湘ICP备2025111357号），满足国内互联网合规要求。
-- **审计链路**：通过 `system_logs` 实现全量操作可追溯，确保每一笔文件流向与配置变更均有据可查。
+### 4.3 法律审计
+- **操作审计**：系统在敏感操作（如下架文件、修改配额）时均会触发审计钩子，确保所有管理行为有据可查。
+- **审计链路**：通过 `system_logs` 实现全量操作可追溯，确保每一笔文件流向与配置变更均有记录。
 
 ## 5. 团队分工
 - **明航宇 (队长)**：全栈开发、系统架构、UI/UX 工业化设计、VitePress 独立文档系统构建、运维部署。负责录制**系统部署演示视频**。
@@ -135,5 +138,5 @@ CREATE TABLE system_logs (
 ## 6. 心得体会
 - **极致白嫖**：通过 Serverless 架构实现了真正的物理资源零占用部署。
 - **存算分离**：深刻理解了元数据管理与对象存储解耦的高扩展性优势。
-- **工业化标准**：不仅完成了功能，更在 UI 适配、文档系统、合规备案等方面达到了准商用标准。
+- **工业化标准**：不仅完成了功能，更在 UI 适配、文档系统、合规审计等方面达到了准商用标准。
 

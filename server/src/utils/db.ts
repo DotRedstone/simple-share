@@ -32,6 +32,15 @@ export class Database {
     return result as any
   }
 
+  async getUserByNameOrEmail(identifier: string) {
+    // 同时也查询 name 和 email
+    const result = await this.db.prepare(
+      'SELECT id, name, email, password_hash, phone, role, status, storage_quota, storage_used, group_id, avatar_url, created_at, updated_at FROM users WHERE name = ? OR email = ?'
+    ).bind(identifier, identifier).first()
+    
+    return result as any
+  }
+
   async createUser(user: {
     id: string
     name: string

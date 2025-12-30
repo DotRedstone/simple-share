@@ -25,9 +25,18 @@ export async function onRequestPost(context: { env: Env; request: Request }): Pr
 
     const userEmail = email || `${username}@simpleshare.com`
 
-    // 检查用户是否已存在
-    const existingUser = await db.getUserByEmail(userEmail)
-    if (existingUser) {
+    // 检查用户名是否已存在
+    const existingName = await db.getUserByNameOrEmail(username)
+    if (existingName) {
+      return new Response(
+        JSON.stringify({ success: false, error: '该用户名已被使用' }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 检查邮箱是否已存在
+    const existingEmail = await db.getUserByEmail(userEmail)
+    if (existingEmail) {
       return new Response(
         JSON.stringify({ success: false, error: '该邮箱已被注册' }),
         { status: 409, headers: { 'Content-Type': 'application/json' } }
